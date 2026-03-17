@@ -219,7 +219,7 @@ const FAQS = [
 //  ★ 문의 채널 설정 — 연락처를 수정하세요! ★
 // =========================================================
 const CONTACTS = [
-  { type: "email", label: "이메일 문의", href: "mailto:aha7kim@naver.com", icon: "✉️" },
+  { type: "email", label: "이메일 문의", href: "#", icon: "✉️", onclick: "window.location='mai'+'lto:'+'aha7'+'kim'+'@naver'+'.com'" },
 ];
 // =========================================================
 
@@ -294,7 +294,7 @@ function filterFaq() {
 function renderContacts() {
   const el = document.getElementById('contact-channels');
   el.innerHTML = CONTACTS.map(c =>
-    `<a class="contact-btn ${c.type}" href="${c.href}" target="_blank">${c.icon} ${c.label}</a>`
+    `<a class="contact-btn ${c.type}" href="${c.href}" ${c.onclick ? 'onclick="'+c.onclick+';return false;"' : 'target="_blank"'}>${c.icon} ${c.label}</a>`
   ).join('');
 }
 

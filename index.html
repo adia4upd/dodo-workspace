@@ -1324,7 +1324,7 @@
     </div>
     <div class="lock-footer">
       Powered by DODO · SHA-256 Encrypted<br>
-      <a href="/cdn-cgi/l/email-protection#4b2a232a7c2022260b252a3d2e3965282426" style="color:var(--gold-dim);text-decoration:none;font-size:11px;margin-top:6px;display:inline-block;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)'">✉️ 문의: <span class="__cf_email__" data-cfemail="593831386e3230341937382f3c2b773a3634">[email&#160;protected]</span></a>
+      <a id="lockEmail" href="#" onclick="window.location='mai'+'lto:'+'aha7'+'kim'+'@naver'+'.com';return false;" style="color:var(--gold-dim);text-decoration:none;font-size:11px;margin-top:6px;display:inline-block;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)'">✉️ 문의하기</a>
     </div>
   </div>
 </div>
@@ -1530,7 +1530,7 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // =========================================================
 //  ★ 설정 영역 — 이 배열만 수정하면 됩니다! ★
 //
@@ -2247,4 +2247,15 @@ document.getElementById('lockInput').addEventListener('keydown', (e) => {
     if (saved) {
       const expected = await hashStr(PW_HASH + navigator.userAgent + 'dodo-salt');
       if (saved === expected) {
-        document.getEl
+        document.getElementById('lockOverlay').classList.add('hidden');
+        document.getElementById('mainApp').style.display = 'block';
+      } else {
+        localStorage.removeItem(LOCK_KEY);
+      }
+    }
+  } catch(e) {}
+})();
+</script>
+
+</body>
+</html>
