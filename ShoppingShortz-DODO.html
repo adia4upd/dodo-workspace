@@ -547,7 +547,6 @@ function renderGuide(a){
           <div style="color:var(--t3);font-size:11px">국가별 트렌딩 영상 수집 → 바이럴 스코어 분석 → AI 패턴 분석</div>
         </div>
       </div>
-      <button onclick="window.open('tiktok-trend-DODO.html','_blank')" style="width:100%;padding:10px;border-radius:8px;background:linear-gradient(135deg,rgba(255,0,80,.15),rgba(0,242,234,.1));border:1px solid rgba(255,0,80,.25);color:#ff0050;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--ff);display:flex;align-items:center;justify-content:center;gap:6px">🔥 트렌드 수집기 열기 (새 탭) ↗</button>
     </div>
     <div style="color:var(--t2);font-size:12px;line-height:1.7">
       <p><b style="color:var(--white)">활용법:</b></p>
@@ -750,7 +749,6 @@ function renderInput(a){
     <span style="font-size:12px;color:var(--t2);font-family:var(--mono)">${maskKey(S.apiKey)}</span>
     <span class="tag" style="color:var(--green);background:var(--green-d);font-size:10px">✓</span>
     <div style="margin-left:auto;display:flex;gap:6px">
-      <button class="btn-amber sm" id="trendBtn" onclick="window.open('tiktok-trend-DODO.html','_blank')" style="background:rgba(255,0,80,.08);border-color:rgba(255,0,80,.2);color:#ff0050">🔥 트렌드</button>
       <button class="btn-amber sm" id="guideBtn" style="background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.2);color:var(--cyan)">📖 가이드</button>
       <button class="btn-amber sm" id="historyBtn" style="background:rgba(192,132,252,.08);border-color:rgba(192,132,252,.2);color:var(--purple)">📂 히스토리${(()=>{const c=getHistory().length;return c?' ('+c+')':''})()}</button>
       <button class="btn-amber sm" id="apiChangeBtn">변경</button>
