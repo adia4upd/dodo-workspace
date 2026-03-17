@@ -523,7 +523,11 @@ async function coreSearch(q, timeISO, catId, subRange, sortBy){
   let en=vd.items.map(v=>{
     const c=cm[v.snippet.channelId]||{};const vw=parseInt(v.statistics.viewCount)||0,lk=parseInt(v.statistics.likeCount)||0,co=parseInt(v.statistics.commentCount)||0,sb=c.subs||1;
     const durMin=parseDur(v.contentDetails?.duration||'');
-    return{videoId:v.id,channelId:v.snippet.channelId,title:v.snippet.title,thumb:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url,channel:c.name||v.snippet.channelTitle,publishedAt:v.snippet.publishedAt,views:vw,likes:lk,comments:co,subs:sb,viral:vw/sb,vpd:vw/da(v.snippet.publishedAt),engagement:(lk+co)>0?((lk+co)/vw*100):0,durMin,isShort:durMin<=1}
+    const titleLower=(v.snippet.title||'').toLowerCase();
+    const descLower=(v.snippet.description||'').toLowerCase();
+    const hasShortTag=titleLower.includes('#shorts')||titleLower.includes('#short')||titleLower.includes('#숏츠')||descLower.includes('#shorts')||descLower.includes('#short');
+    const isShort=hasShortTag||(durMin>0&&durMin<1);
+    return{videoId:v.id,channelId:v.snippet.channelId,title:v.snippet.title,thumb:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url,channel:c.name||v.snippet.channelTitle,publishedAt:v.snippet.publishedAt,views:vw,likes:lk,comments:co,subs:sb,viral:vw/sb,vpd:vw/da(v.snippet.publishedAt),engagement:(lk+co)>0?((lk+co)/vw*100):0,durMin,isShort}
   }).filter(v=>v.subs>=subRange.min&&v.subs<subRange.max);
   en.sort((a,b)=>{if(sortBy==='viral')return b.viral-a.viral;if(sortBy==='velocity')return b.vpd-a.vpd;if(sortBy==='views')return b.views-a.views;return new Date(b.publishedAt)-new Date(a.publishedAt)});
   return en;
