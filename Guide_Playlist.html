@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 플레이리스트 AI 스튜디오 사용법 - DODO</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d0f;--bg-card:#18181e;--bg-step:#1a1a22;--bg-input:#20202a;--border:#2a2a32;--text:#f0ece4;--text-dim:#8a8680;--text-muted:#5a5650;--gold:#d4a01e;--gold-light:#e8b330;--gold-dim:#a07a15;--gold-glow:rgba(212,160,30,0.12);--gold-border:rgba(212,160,30,0.25);--gold-border-dim:rgba(212,160,30,0.10);--green:#4ecca3;--red:#e07050;--purple:#a78bfa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding-bottom:80px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 10%,rgba(212,160,30,.04) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(212,160,30,.03) 0%,transparent 50%);pointer-events:none}
+.header{text-align:center;padding:60px 20px 40px;position:relative}
+.header-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--gold-border);border-radius:100px;font-size:.75rem;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+.header h1{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.header p{color:var(--text-dim);font-size:1rem;max-width:600px;margin:0 auto}
+.container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--gold-dim);text-decoration:none;font-size:.85rem;font-weight:500;margin-bottom:20px;transition:color .2s}.back-link:hover{color:var(--gold)}
+.toc{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:40px}
+.toc h2{font-size:1rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;font-weight:600}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toc-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-step);border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text);font-size:.9rem;font-weight:600;transition:all .2s}
+.toc-item:hover{border-color:var(--gold);transform:translateX(4px)}
+.toc-num{background:var(--gold);color:#0d0d0f;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.section{margin-bottom:48px}
+.section-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.section-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;background:var(--gold-glow)}
+.section-header h2{font-size:1.35rem;font-weight:800}
+.step{background:var(--bg-step);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:16px;transition:all .2s}
+.step:hover{border-color:rgba(255,255,255,.1)}
+.step-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.step-number{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;flex-shrink:0;background:rgba(212,160,30,.15);color:var(--gold)}
+.step-title{font-size:1.05rem;font-weight:700}
+.step-content{color:var(--text-dim);font-size:.9rem;padding-left:50px}
+.step-content p{margin-bottom:10px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.feat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:all .25s}
+.feat-card:hover{border-color:var(--gold-border-dim);transform:translateY(-2px)}
+.feat-emoji{font-size:1.5rem;margin-bottom:8px}
+.feat-title{font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.feat-desc{font-size:.82rem;color:var(--text-dim);line-height:1.6}
+.info-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:20px;font-size:.9rem}
+.info-box.tip{border-left:3px solid var(--green)}.info-box.warning{border-left:3px solid var(--red)}.info-box.gold{border-left:3px solid var(--gold)}.info-box.purple{border-left:3px solid var(--purple)}
+.info-box .label{font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.info-box.tip .label{color:var(--green)}.info-box.warning .label{color:var(--red)}.info-box.gold .label{color:var(--gold)}.info-box.purple .label{color:var(--purple)}
+.checklist{list-style:none;margin:12px 0}
+.checklist li{padding:8px 0;padding-left:28px;position:relative;font-size:.88rem;color:var(--text-dim)}
+.checklist li::before{content:'✓';position:absolute;left:0;color:var(--gold);font-weight:800}
+.guide-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.85rem}
+.guide-table th{background:var(--bg-input);padding:12px 16px;text-align:left;font-weight:700;color:var(--text-dim);text-transform:uppercase;font-size:.72rem;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.guide-table td{padding:12px 16px;border-bottom:1px solid rgba(42,42,50,.5);color:var(--text-dim)}
+.guide-table td:first-child{font-weight:600;color:var(--text)}
+.flow-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:14px 0}
+.flow-step{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:600;color:var(--text);text-align:center}
+.flow-arrow{color:var(--gold-dim);font-size:1.1rem}
+.divider{height:1px;background:var(--border);margin:48px 0}
+.final-section{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center}
+.final-section h2{font-size:1.4rem;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.faq-item{background:var(--bg-step);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:14px 20px;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .2s}.faq-q:hover{background:var(--bg-card)}
+.faq-q::after{content:'▼';font-size:.6rem;color:var(--text-muted);transition:transform .2s}.faq-item.open .faq-q::after{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--text-dim);font-size:.85rem}.faq-item.open .faq-a{max-height:400px}
+.faq-a-inner{padding:0 20px 16px}
+@media(max-width:640px){.header h1{font-size:1.8rem}.toc-grid{grid-template-columns:1fr}.feat-grid{grid-template-columns:1fr}.step-content{padding-left:0}.container{padding:0 16px}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">DODO · Guide</div>
+  <h1>📖 플레이리스트 AI 스튜디오 사용법 가이드</h1>
+  <p>채널 프리셋 기반 AI 플레이리스트 음악을 자동 생성하는 도구의 사용법을 안내합니다.</p>
+</div>
+<div class="container">
+  <a class="back-link" href="DODO_WORKSPACE_index.html">← ⚡ DODO WORKSPACE 홈으로 돌아가기</a>
+  <div class="toc"><h2>📋 목차</h2><div class="toc-grid">
+    <a class="toc-item" href="#overview"><span class="toc-num">1</span> 기능 개요</a>
+    <a class="toc-item" href="#start"><span class="toc-num">2</span> 시작하기 (잠금 & API)</a>
+    <a class="toc-item" href="#preset"><span class="toc-num">3</span> 프리셋 & 9단계 선택</a>
+    <a class="toc-item" href="#result"><span class="toc-num">4</span> 생성 & 결과 활용</a>
+    <a class="toc-item" href="#tips"><span class="toc-num">5</span> 고급 설정 & 팁</a>
+  </div></div>
+  <div class="info-box gold"><div class="label">⚡ 전체 워크플로우</div><div class="flow-row">
+    <div class="flow-step">🔑 잠금 해제</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🔐 API 키 입력</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">⭐ 프리셋 선택</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🎵 9단계 옵션</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">⚡ AI 생성</div>
+  </div></div>
+  <div class="divider"></div>
+  <div class="section" id="overview">
+    <div class="section-header"><div class="section-icon">⭐</div><div><h2>1. 기능 개요</h2></div></div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-emoji">⭐</div><div class="feat-title">채널 프리셋</div><div class="feat-desc">채널별 설정을 프리셋으로 저장. 다음에 원클릭으로 불러오기.</div></div>
+      <div class="feat-card"><div class="feat-emoji">🎵</div><div class="feat-title">9단계 복수 선택</div><div class="feat-desc">장르·분위기·템포·악기·보컬 등 9가지를 각각 최대 3개까지 선택.</div></div>
+      <div class="feat-card"><div class="feat-emoji">🧠</div><div class="feat-title">Claude AI 생성</div><div class="feat-desc">선택한 조합으로 맞춤 플레이리스트 & 음악 프롬프트 생성.</div></div>
+      <div class="feat-card"><div class="feat-emoji">🌐</div><div class="feat-title">다국어 비율 설정</div><div class="feat-desc">한국어/영어/일본어 등 언어 비율을 직접 조절 가능.</div></div>
+      <div class="feat-card"><div class="feat-emoji">📝</div><div class="feat-title">메모 기능</div><div class="feat-desc">프리셋별 설명·메모를 저장하여 팀원과 공유 시 활용.</div></div>
+      <div class="feat-card"><div class="feat-emoji">📂</div><div class="feat-title">생성 히스토리</div><div class="feat-desc">과거 생성 결과를 로컬에 저장. 프롬프트 재사용 가능.</div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section" id="start">
+    <div class="section-header"><div class="section-icon">🔑</div><div><h2>2. 시작하기</h2><p style="color:var(--text-dim);font-size:.85rem">잠금 해제 & Claude API 키</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">1</div><div class="step-title">비밀번호 입력 → 잠금 해제</div></div><div class="step-content"><p>공유받은 비밀번호를 입력합니다. "기억하기"를 체크하면 다음에 자동 잠금 해제.</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">2</div><div class="step-title">Claude API 키 설정</div></div><div class="step-content"><p>🔑 Claude API 키 영역에서 <strong>"설정"</strong> 클릭 → 키 입력 → <strong>"저장 & 테스트"</strong>.</p><p>연결 성공 시 "✓ 등록됨" 배지가 표시됩니다.</p></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section" id="preset">
+    <div class="section-header"><div class="section-icon">⭐</div><div><h2>3. 프리셋 & 9단계 선택</h2><p style="color:var(--text-dim);font-size:.85rem">채널별 프리셋 저장 + 세밀한 음악 설정</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">1</div><div class="step-title">채널 프리셋 생성/선택</div></div><div class="step-content"><ul class="checklist"><li><strong>"+ 새 프리셋"</strong>으로 채널별 프리셋 생성 (이름 + 이모지 + 태그)</li><li>기존 프리셋 클릭으로 즉시 불러오기</li><li>프리셋별 설정이 모두 개별 저장됨</li></ul></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">2</div><div class="step-title">9단계 음악 옵션 선택</div></div><div class="step-content"><p>각 단계에서 <strong>최대 3개</strong>까지 복수 선택 가능합니다. 커스텀 옵션 추가도 지원.</p><table class="guide-table"><thead><tr><th>#</th><th>단계</th><th>예시</th></tr></thead><tbody><tr><td>1</td><td>장르</td><td>Lo-Fi, 재즈, 클래식, K-Pop...</td></tr><tr><td>2</td><td>분위기</td><td>편안한, 에너지, 우울한, 몽환적...</td></tr><tr><td>3</td><td>템포</td><td>느린, 보통, 빠른, 가변적</td></tr><tr><td>4</td><td>악기</td><td>피아노, 기타, 신디사이저...</td></tr><tr><td>5~9</td><td>보컬·용도·시간대·계절·특수</td><td>다양한 세부 옵션</td></tr></tbody></table></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">3</div><div class="step-title">언어 비율 설정</div></div><div class="step-content"><p>한국어/영어/일본어 등 음악의 언어 비율을 슬라이더로 조절할 수 있습니다.</p></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section" id="result">
+    <div class="section-header"><div class="section-icon">🎵</div><div><h2>4. 생성 & 결과 활용</h2></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">1</div><div class="step-title">생성 모드 선택</div></div><div class="step-content"><ul class="checklist"><li><strong>심플 모드</strong> — 핵심 옵션만으로 빠르게 생성</li><li><strong>풀 모드</strong> — 9단계 전체 옵션을 반영하여 상세 생성</li></ul><p>하단의 <strong>"생성"</strong> 버튼을 클릭하면 Claude AI가 맞춤 플레이리스트를 만들어줍니다.</p></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section" id="tips">
+    <div class="section-header"><div class="section-icon">💡</div><div><h2>5. 고급 설정 & 팁</h2></div></div>
+    <div class="info-box gold"><div class="label">⭐ 프리셋 활용 팁</div>채널별로 프리셋을 만들어두면 매번 설정할 필요 없이 원클릭으로 불러올 수 있어요. 태그를 잘 설정해두면 관리가 편합니다.</div>
+    <div class="info-box tip"><div class="label">💡 커스텀 옵션</div>각 단계에서 원하는 옵션이 없으면 <strong>"+ 추가"</strong> 버튼으로 직접 옵션을 만들 수 있습니다.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="final-section">
+    <h2>🎉 준비 완료!</h2>
+    <p style="color:var(--text-dim);margin-bottom:20px">이제 도구를 활용하여 콘텐츠를 제작하세요!<br>추가 질문이 있으면 Claude에게 언제든 문의하세요 😊</p>
+  </div>
+</div>
+</body>
+</html>

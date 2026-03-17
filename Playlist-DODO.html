@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎵 [플레이리스트] AI 스튜디오-DODO</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--amber:#fbbf24;--amber-dk:#f59e0b;--bg:#0a0a0f;--card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.06);--text:rgba(255,255,255,0.95);--dim:rgba(255,255,255,0.5);--dimmer:rgba(255,255,255,0.3)}
+body{min-height:100vh;background:var(--bg);color:#fff;font-family:'Pretendard','Noto Sans KR',-apple-system,sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px;position:relative;z-index:1}
+header{text-align:center;padding:40px 20px 32px}
+.badge{display:inline-flex;align-items:center;gap:10px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.12);border-radius:40px;padding:6px 18px;margin-bottom:16px}
+.badge span:first-child{font-size:13px;color:var(--amber);font-weight:600}
+.badge .dot{width:3px;height:3px;border-radius:50%;background:var(--amber)}
+.badge span:last-child{font-size:12px;color:var(--dim)}
+h1{font-size:clamp(26px,5vw,38px);font-weight:900;background:linear-gradient(135deg,var(--amber),var(--amber-dk),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.03em;line-height:1.2;margin-bottom:10px}
+header p{color:var(--dimmer);font-size:14px;max-width:420px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px 28px;margin-bottom:16px;backdrop-filter:blur(10px)}
+.pill{padding:7px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.65);cursor:pointer;font-size:13px;font-weight:400;transition:all 0.2s;font-family:inherit;line-height:1.3}
+.pill:hover{border-color:rgba(251,191,36,0.4);color:rgba(255,255,255,0.85)}
+.pill.sel{border-color:var(--amber);background:rgba(251,191,36,0.15);color:var(--amber);font-weight:600;box-shadow:0 0 16px rgba(251,191,36,0.12)}
+.pill.maxed{opacity:0.35;cursor:not-allowed;pointer-events:none}
+.pill.sel.maxed{opacity:1;pointer-events:auto}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--amber-dk));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#0f172a;flex-shrink:0}
+.step-icon{font-size:18px}.step-label{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.step-count{font-size:10px;color:rgba(251,191,36,0.6);background:rgba(251,191,36,0.06);padding:2px 7px;border-radius:8px;margin-left:auto}
+.sel-counter{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;transition:all 0.3s}
+.sel-counter.empty{color:var(--dimmer);background:rgba(255,255,255,0.03)}
+.sel-counter.has{color:var(--amber);background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
+.sel-counter.full{color:#0f172a;background:linear-gradient(135deg,var(--amber),var(--amber-dk));border:none}
+.multi-hint{font-size:10px;color:var(--dimmer);margin-bottom:12px;display:flex;align-items:center;gap:5px}
+.multi-hint span{color:var(--amber);font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:7px}
+.sel-preview{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.sel-preview:empty{margin-top:0}
+.sel-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.15);border-radius:12px;font-size:11px;color:var(--amber);font-weight:500;animation:fadeIn .2s}
+.sel-tag .x{cursor:pointer;opacity:0.6;font-size:13px;margin-left:2px}.sel-tag .x:hover{opacity:1}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+.custom-row{display:flex;gap:8px;margin-top:12px}
+.custom-row input{flex:1;padding:9px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;font-size:13px;outline:none;font-family:inherit}
+.custom-row input:focus{border-color:rgba(251,191,36,0.3)}
+.btn-add{padding:9px 16px;background:linear-gradient(135deg,var(--amber),var(--amber-dk));border:none;border-radius:10px;color:#0f172a;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit}
+#preset-panel{border-color:rgba(251,191,36,0.12);background:rgba(251,191,36,0.02);padding:20px 24px}
+.preset-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.preset-title{display:flex;align-items:center;gap:10px}
+.preset-title span:first-child{font-size:20px}
+.preset-title strong{font-size:16px;font-weight:800;color:var(--amber)}
+.cnt-badge{font-size:11px;color:var(--dim);background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:8px}
+.btn-new{padding:7px 14px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.25);border-radius:8px;color:var(--amber);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.btn-new.cancel{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);color:#fca5a5}
+.new-form{background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;margin-bottom:14px;border:1px solid rgba(251,191,36,0.1);display:none}
+.new-form.show{display:block}
+.new-form-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px}
+.new-form-row{display:flex;gap:8px}
+.emoji-btn{width:42px;height:42px;border-radius:10px;font-size:20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+.emoji-picker{position:absolute;top:48px;left:0;z-index:50;background:#1a1a2e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px;display:none;flex-wrap:wrap;gap:4px;width:220px;box-shadow:0 10px 40px rgba(0,0,0,0.5)}
+.emoji-picker.show{display:flex}
+.emoji-picker button{width:36px;height:36px;border-radius:8px;font-size:18px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.emoji-picker button.esel{background:rgba(251,191,36,0.2)}
+.new-form input{flex:1;padding:9px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:13px;outline:none;font-family:inherit}
+.btn-create{padding:9px 18px;background:linear-gradient(135deg,var(--amber),var(--amber-dk));border:none;border-radius:10px;color:#0f172a;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit}
+.preset-list{display:flex;flex-direction:column;gap:6px}
+.preset-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);transition:all 0.2s}
+.preset-item.active{background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2)}
+.p-emoji{width:36px;height:36px;border-radius:8px;font-size:18px;background:rgba(255,255,255,0.05);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+.p-info{flex:1;min-width:0}.p-name{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-item.active .p-name{color:var(--amber)}
+.p-meta{font-size:11px;color:var(--dimmer);margin-top:1px}
+.p-actions{display:flex;gap:4px}
+.p-actions button{width:30px;height:30px;border-radius:6px;font-size:13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.p-actions button.del-confirm{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.4)}
+.p-rename-input{width:100%;padding:4px 8px;background:rgba(255,255,255,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:6px;color:#fff;font-size:13px;outline:none;font-family:inherit}
+.empty-msg{text-align:center;padding:24px 0;color:var(--dim);font-size:13px}
+#memo-card{padding:18px 24px}
+.memo-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.memo-head span:first-child{font-size:16px}.memo-head strong{font-size:14px;font-weight:700;color:var(--text)}
+.memo-head .auto{font-size:11px;color:var(--dimmer);margin-left:auto}
+#memo-text{width:100%;padding:12px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;font-size:13px;outline:none;font-family:inherit;resize:vertical;line-height:1.6}
+#memo-text:focus{border-color:rgba(251,191,36,0.3)}
+#history-panel{border-color:rgba(139,92,246,0.15);background:rgba(139,92,246,0.02)}
+.hist-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.hist-title{display:flex;align-items:center;gap:10px}.hist-title strong{font-size:15px;font-weight:700;color:#a78bfa}
+.btn-hist-toggle{padding:5px 12px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:6px;color:#a78bfa;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit}
+.hist-item{background:rgba(0,0,0,0.25);border-radius:10px;padding:12px 16px;border:1px solid rgba(255,255,255,0.04);margin-bottom:8px}
+.hist-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hist-item-head span{font-size:11px;color:var(--dim)}
+.hist-btns{display:flex;gap:6px}
+.btn-hist-restore{padding:2px 8px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);border-radius:5px;color:#a78bfa;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit}
+.hist-prompt{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#onboarding{text-align:center;padding:32px 20px;border-color:rgba(251,191,36,0.15);border-style:dashed}
+#onboarding .big{font-size:32px;margin-bottom:12px}
+#onboarding p{font-size:14px;color:var(--dim);line-height:1.7}
+#onboarding strong{color:var(--amber)}
+#summary{padding:14px 20px;display:none;flex-wrap:wrap;gap:7px;align-items:center;border-color:rgba(251,191,36,0.08)}
+#summary.show{display:flex}
+.sum-label{font-size:12px;font-weight:700;color:var(--amber);margin-right:6px}
+.sum-tag{padding:3px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;font-size:11px;color:rgba(255,255,255,0.65)}
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.mode-btn{padding:22px;border-radius:12px;text-align:center;cursor:pointer;border:2px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.015);transition:all 0.2s;font-family:inherit}
+.mode-btn.sel{border-color:var(--amber);background:rgba(251,191,36,0.05)}
+.m-icon{font-size:28px;margin-bottom:10px}.m-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.mode-btn.sel .m-title{color:var(--amber)}.m-desc{font-size:11px;color:var(--dim)}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:11px 16px;margin-bottom:14px;color:#fca5a5;font-size:13px;display:none}
+.error.show{display:block}
+#gen-btn{width:100%;padding:18px;background:linear-gradient(135deg,var(--amber),var(--amber-dk));color:#0f172a;border:none;border-radius:12px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.3s;margin-bottom:20px;letter-spacing:-0.02em;box-shadow:0 0 30px rgba(251,191,36,0.15)}
+#gen-btn:disabled{background:rgba(251,191,36,0.15);color:var(--amber);cursor:not-allowed;box-shadow:none}
+#loader{display:none;flex-direction:column;align-items:center;padding:50px 20px}
+#loader.show{display:flex}
+.bars{position:relative;width:70px;height:70px;margin-bottom:20px}
+.bars div{position:absolute;width:10px;border-radius:5px;bottom:16px}
+@keyframes bb{0%,100%{transform:scaleY(1);opacity:.5}50%{transform:scaleY(2.2);opacity:1}}
+#loader p{color:var(--dim);font-size:14px}
+#results{display:none}#results.show{display:block}
+.res-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.res-title{font-size:15px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:8px}
+.res-content{background:rgba(0,0,0,0.25);border-radius:10px;padding:18px;font-size:13px;line-height:1.8;color:rgba(255,255,255,0.8);white-space:pre-wrap;border:1px solid rgba(255,255,255,0.04)}
+.collapse-head{cursor:pointer;user-select:none}
+.collapse-arrow{color:var(--dimmer);font-size:16px;transition:transform 0.3s}.collapse-arrow.open{transform:rotate(180deg)}
+.lyrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px}
+.lyric-card{background:rgba(0,0,0,0.25);border-radius:10px;padding:18px;border:1px solid rgba(255,255,255,0.04);border-left:3px solid var(--amber)}
+.lyric-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.track-badge{background:linear-gradient(135deg,var(--amber),var(--amber-dk));color:#0f172a;padding:3px 12px;border-radius:10px;font-weight:700;font-size:11px}
+.lyric-body{font-size:12px;line-height:1.7;color:rgba(255,255,255,0.65);white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.titles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px}
+.title-card{background:rgba(0,0,0,0.25);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:6px;border:1px solid rgba(255,255,255,0.04)}
+.t-info{min-width:0;flex:1}.t-lang{font-size:10px;font-weight:700;color:var(--amber);margin-bottom:1px}
+.t-text{font-size:12px;color:rgba(255,255,255,0.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy-btn{padding:7px 14px;background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.25);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.2s;white-space:nowrap;font-family:inherit}
+.copy-btn.sm{padding:3px 9px;font-size:11px}
+.copy-btn.copied{background:#2dd4bf;color:#0f172a;border-color:#2dd4bf}
+footer{text-align:center;padding:36px 20px 24px;color:var(--dimmer);font-size:12px}
+
+/* Thumbnail upload */
+#thumb-card{border-color:rgba(168,85,247,0.15);background:rgba(168,85,247,0.02);padding:20px 24px}
+.thumb-zone{border:2px dashed rgba(168,85,247,0.25);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.thumb-zone:hover{border-color:rgba(168,85,247,0.5);background:rgba(168,85,247,0.03)}
+.thumb-zone.has-img{border-style:solid;border-color:rgba(168,85,247,0.3);padding:12px}
+.thumb-zone img{max-width:100%;max-height:200px;border-radius:8px;display:block;margin:0 auto 10px}
+.thumb-zone .placeholder{color:var(--dim);font-size:13px}
+.thumb-zone .placeholder span{color:#a78bfa;font-weight:600}
+.btn-thumb{padding:10px 20px;background:linear-gradient(135deg,#a78bfa,#7c3aed);border:none;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit;margin-top:12px;transition:all 0.2s}
+.btn-thumb:hover{box-shadow:0 0 20px rgba(139,92,246,0.3)}
+.btn-thumb:disabled{opacity:0.5;cursor:not-allowed}
+.thumb-result{margin-top:14px;background:rgba(0,0,0,0.25);border-radius:10px;padding:16px;border:1px solid rgba(168,85,247,0.15);font-size:13px;line-height:1.7;color:rgba(255,255,255,0.8);white-space:pre-wrap;display:none}
+.thumb-result.show{display:block}
+
+/* Thumb style selector */
+.thumb-styles{margin:14px 0;display:flex;flex-direction:column;gap:8px}
+.thumb-styles-label{font-size:12px;font-weight:600;color:#a78bfa;display:flex;align-items:center;gap:6px}
+.thumb-styles-grid{display:flex;flex-wrap:wrap;gap:6px}
+.ts-btn{padding:6px 14px;border-radius:18px;border:1.5px solid rgba(168,85,247,0.12);background:rgba(168,85,247,0.03);color:rgba(255,255,255,0.55);cursor:pointer;font-size:12px;font-weight:400;transition:all 0.2s;font-family:inherit;position:relative}
+.ts-btn:hover{border-color:rgba(168,85,247,0.35);color:rgba(255,255,255,0.8)}
+.ts-btn.sel{border-color:#a78bfa;background:rgba(168,85,247,0.15);color:#a78bfa;font-weight:600;box-shadow:0 0 14px rgba(139,92,246,0.12)}
+.ts-btn .rec{position:absolute;top:-6px;right:-4px;font-size:8px;background:linear-gradient(135deg,var(--amber),var(--amber-dk));color:#0f172a;padding:1px 5px;border-radius:6px;font-weight:800;letter-spacing:0.03em}
+.ts-desc{font-size:10px;color:var(--dimmer);padding-left:2px}
+
+/* History enhanced */
+.hist-item .hi-actions{display:flex;gap:4px;align-items:center}
+.hi-star{background:none;border:none;cursor:pointer;font-size:16px;opacity:0.4;transition:all 0.2s;padding:2px}
+.hi-star.fav{opacity:1}
+.hi-star:hover{opacity:0.8}
+.hi-del{width:24px;height:24px;border-radius:5px;font-size:11px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);color:#fca5a5;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.hi-del:hover{background:rgba(239,68,68,0.2)}
+.hi-memo{margin-top:6px;padding:4px 8px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.12);border-radius:6px;font-size:11px;color:var(--amber);display:inline-block}
+.hi-memo-input{margin-top:6px;padding:4px 8px;background:rgba(255,255,255,0.05);border:1px solid rgba(251,191,36,0.2);border-radius:6px;color:#fff;font-size:11px;outline:none;font-family:inherit;width:100%}
+
+/* Export & Reset */
+.btn-export{padding:10px 20px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:10px;color:#4ade80;font-weight:600;cursor:pointer;font-size:13px;font-family:inherit;transition:all 0.2s}
+.btn-export:hover{background:rgba(34,197,94,0.2)}
+.btn-reset{padding:10px 20px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;color:#fca5a5;font-weight:600;cursor:pointer;font-size:13px;font-family:inherit;transition:all 0.2s}
+.btn-reset:hover{background:rgba(239,68,68,0.15)}
+.action-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+
+/* Language ratio panel */
+#lang-ratio{display:none;margin-top:14px;padding:16px;background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.12);border-radius:12px}
+#lang-ratio.show{display:block}
+.ratio-label{font-size:13px;font-weight:700;color:#a78bfa;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ratio-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ratio-btn{padding:8px 16px;border-radius:20px;border:1.5px solid rgba(139,92,246,0.15);background:rgba(139,92,246,0.04);color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:500;transition:all 0.2s;font-family:inherit}
+.ratio-btn:hover{border-color:rgba(139,92,246,0.4);color:rgba(255,255,255,0.85)}
+.ratio-btn.sel{border-color:#a78bfa;background:rgba(139,92,246,0.15);color:#a78bfa;font-weight:700;box-shadow:0 0 14px rgba(139,92,246,0.12)}
+.ratio-preview{font-size:11px;color:var(--dim);line-height:1.6;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:8px}
+.ratio-preview strong{color:#a78bfa}
+@media(max-width:600px){.card{padding:18px 16px}.lyrics-grid,.titles-grid{grid-template-columns:1fr}}
+/* Lock Screen — Premium Studio */
+#lock-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column}
+#lock-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(251,191,36,0.04) 0%,transparent 60%);pointer-events:none}
+#lock-screen.hidden{display:none}
+.lock-box{text-align:center;max-width:420px;width:90%;padding:48px 36px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:24px;backdrop-filter:blur(20px);position:relative;box-shadow:0 25px 60px rgba(0,0,0,0.4)}
+.lock-orb{width:80px;height:80px;margin:0 auto 28px;border-radius:50%;background:radial-gradient(circle at 40% 35%,var(--amber),#b45309 70%,#0a0a0f);box-shadow:0 0 40px rgba(251,191,36,0.25),inset 0 -8px 20px rgba(0,0,0,0.5),inset 0 4px 12px rgba(255,255,255,0.15);position:relative}
+.lock-orb::after{content:'';position:absolute;top:12px;left:18px;width:18px;height:12px;background:radial-gradient(ellipse,rgba(255,255,255,0.5),transparent);border-radius:50%;transform:rotate(-20deg)}
+.lock-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.15);border-radius:30px;padding:6px 18px;margin-bottom:16px}
+.lock-badge span:first-child{font-size:12px;color:var(--amber);font-weight:700;letter-spacing:0.05em}
+.lock-badge .ldot{width:3px;height:3px;border-radius:50%;background:var(--amber)}
+.lock-badge span:last-child{font-size:11px;color:var(--dim)}
+.lock-title{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-0.02em;margin-bottom:8px}
+.lock-sub{font-size:13px;color:var(--dim);margin-bottom:32px}
+.lock-input{width:100%;padding:16px 20px;background:rgba(255,255,255,0.04);border:2px solid rgba(251,191,36,0.2);border-radius:14px;color:#fff;font-size:20px;text-align:center;letter-spacing:10px;outline:none;font-family:inherit;font-weight:700;margin-bottom:16px;transition:all 0.3s}
+.lock-input::placeholder{letter-spacing:6px;font-size:16px;color:rgba(255,255,255,0.2)}
+.lock-input:focus{border-color:var(--amber);box-shadow:0 0 20px rgba(251,191,36,0.12)}
+.lock-input.shake{animation:shake 0.4s ease}
+.lock-input.wrong{border-color:#ef4444;box-shadow:0 0 20px rgba(239,68,68,0.15)}
+.lock-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--amber),var(--amber-dk));color:#0f172a;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.3s;box-shadow:0 4px 20px rgba(251,191,36,0.2);letter-spacing:0.02em}
+.lock-btn:hover{box-shadow:0 6px 30px rgba(251,191,36,0.35);transform:translateY(-1px)}
+.lock-btn:active{transform:translateY(0)}
+.lock-error{font-size:12px;color:#fca5a5;margin-top:12px;min-height:18px}
+.lock-remember{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:18px;font-size:12px;color:var(--dimmer)}
+.lock-remember input{accent-color:var(--amber);width:14px;height:14px}
+.lock-footer{margin-top:28px;font-size:10px;color:rgba(255,255,255,0.15);letter-spacing:0.03em}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+@keyframes orbPulse{0%,100%{box-shadow:0 0 40px rgba(251,191,36,0.25),inset 0 -8px 20px rgba(0,0,0,0.5),inset 0 4px 12px rgba(255,255,255,0.15)}50%{box-shadow:0 0 55px rgba(251,191,36,0.35),inset 0 -8px 20px rgba(0,0,0,0.5),inset 0 4px 12px rgba(255,255,255,0.15)}}
+.lock-orb{animation:orbPulse 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+<!-- Lock Screen -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-orb"></div>
+    <div class="lock-badge">
+      <span>DODO</span><span class="ldot"></span><span>AI Studio</span>
+    </div>
+    <div class="lock-title">🎵 [플레이리스트] AI 스튜디오-DODO</div>
+    <div class="lock-sub">비밀번호를 입력하세요</div>
+    <input class="lock-input" id="lock-pw" type="password" maxlength="20" placeholder="• • • •" onkeydown="if(event.key==='Enter')tryUnlock()">
+    <button class="lock-btn" onclick="tryUnlock()">잠금 해제</button>
+    <div class="lock-error" id="lock-error"></div>
+    <label class="lock-remember">
+      <input type="checkbox" id="lock-remember" checked> 이 브라우저에서 기억하기
+    </label>
+    <div class="lock-footer">Powered by Claude AI · AES-256 Encrypted</div>
+  </div>
+</div>
+<!-- Main App (hidden until unlocked) -->
+<div class="wrap" id="main-app" style="display:none">
+  <header>
+    <div class="badge"><span>DODO</span><span class="dot"></span><span>AI Studio</span></div>
+    <h1>🎵 [플레이리스트] AI 스튜디오-DODO</h1>
+    <p>채널 프리셋 저장 → 9단계 복수 선택(최대 3개) → Claude AI 자동 생성</p>
+  </header>
+  <!-- API Key -->
+  <div class="card" id="api-card" style="border-color:rgba(34,197,94,0.15);background:rgba(34,197,94,0.02);padding:18px 24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0" id="api-head">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🔑</span>
+        <strong style="font-size:14px;font-weight:700;color:var(--text)">Claude API 키</strong>
+        <span id="api-status" style="font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600"></span>
+      </div>
+      <button onclick="toggleApiForm()" id="btn-api-toggle" style="padding:5px 12px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:6px;color:#4ade80;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit">설정</button>
+    </div>
+    <div id="api-form" style="display:none;margin-top:14px">
+      <div style="font-size:11px;color:var(--dim);margin-bottom:8px;line-height:1.6">
+        풀 패키지 및 단일 모드(언어별 가사 생성)에 필요합니다.<br>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#4ade80;text-decoration:underline">console.anthropic.com</a>에서 발급 → 여기에 입력 (🔐 AES-256 암호화 저장)
+      </div>
+      <div style="display:flex;gap:8px">
+        <input id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:9px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:13px;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')saveApiKey()">
+        <button onclick="saveApiKey()" style="padding:9px 18px;background:linear-gradient(135deg,#4ade80,#22c55e);border:none;border-radius:10px;color:#0f172a;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit">저장</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="testApiKey()" id="btn-api-test" style="padding:6px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:8px;color:#4ade80;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit">연결 테스트</button>
+        <button onclick="clearApiKey()" style="padding:6px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:#fca5a5;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit">키 삭제</button>
+        <span id="api-test-result" style="font-size:11px;color:var(--dim);display:flex;align-items:center"></span>
+      </div>
+    </div>
+    <!-- Re-auth for auto-login sessions -->
+    <div id="api-reauth" style="display:none;margin-top:14px;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.15);border-radius:10px;padding:12px 16px">
+      <div style="font-size:11px;color:var(--amber);margin-bottom:8px;font-weight:600">🔐 API 키가 암호화 저장되어 있습니다. 복호화를 위해 비밀번호를 입력해주세요.</div>
+      <div style="display:flex;gap:8px">
+        <input id="reauth-input" type="password" placeholder="비밀번호 입력" style="flex:1;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:13px;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')reauthPw()">
+        <button onclick="reauthPw()" style="padding:8px 16px;background:linear-gradient(135deg,var(--amber),var(--amber-dk));border:none;border-radius:8px;color:#0f172a;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit">확인</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="preset-panel">
+    <div class="preset-head">
+      <div class="preset-title"><span>⭐</span><strong>채널 프리셋</strong><span class="cnt-badge" id="preset-count">0개</span></div>
+      <button class="btn-new" id="btn-toggle-new" onclick="toggleNewForm()">+ 새 프리셋</button>
+    </div>
+    <div class="new-form" id="new-form">
+      <div class="new-form-title">새 프리셋 만들기</div>
+      <div class="new-form-row">
+        <button class="emoji-btn" id="new-emoji-btn" onclick="toggleEP('new-emoji-picker')">🎵</button>
+        <div class="emoji-picker" id="new-emoji-picker"></div>
+        <input id="new-name" placeholder="채널명 또는 프리셋 이름" onkeydown="if(event.key==='Enter')createPreset()">
+        <button class="btn-create" onclick="createPreset()">생성</button>
+      </div>
+    </div>
+    <div id="preset-list"></div>
+  </div>
+  <div class="card" id="memo-card" style="display:none">
+    <div class="memo-head"><span>📝</span><strong>채널 메모</strong><span class="auto">자동 저장</span></div>
+    <textarea id="memo-text" rows="3" placeholder="채널 컨셉, 타겟, 참고 사항 메모..." oninput="autoSave()"></textarea>
+  </div>
+  <div class="card" id="history-panel" style="display:none">
+    <div class="hist-head"><div class="hist-title"><span>📜</span><strong>생성 히스토리</strong><span class="cnt-badge" id="hist-count"></span></div>
+    <button class="btn-hist-toggle" id="btn-hist-toggle" onclick="toggleHist()" style="display:none"></button></div>
+    <div id="hist-list"></div>
+  </div>
+  <div class="card" id="onboarding"><div class="big">👆</div><p>먼저 <strong>채널 프리셋</strong>을 만들면 설정이 자동 저장됩니다.</p></div>
+  <div id="steps-container"></div>
+
+  <!-- Thumbnail Prompt Generator -->
+  <div class="card" id="thumb-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🖼️</span>
+        <strong style="font-size:15px;font-weight:700;color:#a78bfa">썸네일 프롬프트 생성</strong>
+      </div>
+      <span style="font-size:10px;color:var(--dim);background:rgba(168,85,247,0.08);padding:2px 8px;border-radius:8px">Vision AI</span>
+    </div>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:12px">참고 이미지를 업로드하면 Claude Vision이 분석하여 선택한 스타일로 Suno 커버/유튜브 썸네일용 프롬프트를 생성합니다.</div>
+    <!-- Style selector -->
+    <div class="thumb-styles">
+      <div class="thumb-styles-label">🎨 이미지 스타일 선택</div>
+      <div class="thumb-styles-grid" id="thumb-style-btns"></div>
+      <div class="ts-desc" id="thumb-style-desc">스타일을 선택하면 해당 화풍으로 프롬프트가 생성됩니다.</div>
+    </div>
+    <div class="thumb-zone" id="thumb-zone" onclick="document.getElementById('thumb-input').click()">
+      <input type="file" id="thumb-input" accept="image/*" style="display:none" onchange="handleThumbUpload(this)">
+      <div class="placeholder" id="thumb-placeholder">📁 이미지를 클릭하여 업로드<br><span>JPG, PNG, WebP 지원</span></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
+      <button class="btn-thumb" id="btn-thumb-gen" onclick="genThumbPrompt()" disabled>🎨 썸네일 프롬프트 생성</button>
+      <button class="btn-thumb" id="btn-thumb-clear" onclick="clearThumb()" style="background:rgba(239,68,68,0.15);display:none">✕ 이미지 제거</button>
+    </div>
+    <div class="thumb-result" id="thumb-result"></div>
+  </div>
+
+  <!-- Action Bar -->
+  <div class="action-bar" id="action-bar">
+    <button class="btn-reset" onclick="resetSelections()">🔄 선택 초기화</button>
+    <button class="btn-export" id="btn-export" onclick="exportTxt()" style="display:none">📥 결과 .txt 다운로드</button>
+  </div>
+
+  <div class="card" id="summary"><span class="sum-label">선택 요약</span><div id="summary-tags"></div></div>
+  <div class="card">
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🪄</span> 생성 모드</div>
+    <div class="mode-grid">
+      <div class="mode-btn" id="mode-simple" onclick="selMode('simple')"><div class="m-icon">⚡</div><div class="m-title">단일 스타일 프롬프트</div><div class="m-desc">Suno AI 태그 + 선택 언어별 가사 1곡씩</div></div>
+      <div class="mode-btn" id="mode-full" onclick="selMode('full')"><div class="m-icon">📦</div><div class="m-title">풀 패키지</div><div class="m-desc">프롬프트 + 언어별 가사 10곡 + 19개국어 제목</div></div>
+    </div>
+  </div>
+  <div class="error" id="error-box"></div>
+  <button id="gen-btn" onclick="generate()">🎵 생성하기</button>
+  <div id="loader"><div class="bars" id="bars"></div><p id="load-msg"></p></div>
+  <div id="results">
+    <div class="card"><div class="res-header"><span class="res-title">🏷️ Suno AI 스타일 태그</span><button class="copy-btn" onclick="cp(document.getElementById('res-prompt').textContent,this)">복사</button></div><div class="res-content" id="res-prompt"></div></div>
+    <div class="card" id="res-lyrics-card" style="display:none"><div class="res-header collapse-head" onclick="togCol('lyrics')"><span class="res-title" id="res-lyrics-title">📝 AI 생성 가사</span><span class="collapse-arrow open" id="lyrics-arrow">▼</span></div><div id="res-lyrics"></div></div>
+    <div class="card" id="res-titles-card" style="display:none"><div class="res-header collapse-head" onclick="togCol('titles')"><span class="res-title">🌍 19개국어 제목</span><span class="collapse-arrow open" id="titles-arrow">▼</span></div><div id="res-titles"></div></div>
+  </div>
+  <footer>Powered by Claude AI — [플레이리스트] AI 스튜디오-DODO</footer>
+</div>
+<script>
+const MX=3;
+const STEPS=[
+{key:"genre",icon:"🎸",label:"장르",options:[{v:"City Pop",l:"🌃 시티팝"},{v:"Lo-fi",l:"🎧 로파이"},{v:"K-pop",l:"🇰🇷 K-pop"},{v:"Jazz",l:"🎷 재즈"},{v:"Hip Hop",l:"🎤 힙합"},{v:"Rock",l:"🎸 록"},{v:"Ballad",l:"💕 발라드"},{v:"CCM",l:"✝️ CCM"},{v:"EDM",l:"🎛️ EDM"},{v:"R&B",l:"🎵 R&B"},{v:"Classical",l:"🎻 클래식"},{v:"Acoustic",l:"🪕 어쿠스틱"},{v:"Folk",l:"🏕️ 포크"},{v:"Country",l:"🤠 컨트리"},{v:"Blues",l:"🎺 블루스"},{v:"Soul",l:"💜 소울"},{v:"Funk",l:"🕺 펑크"},{v:"Disco",l:"🪩 디스코"},{v:"Reggae",l:"🌴 레게"},{v:"Latin",l:"💃 라틴"},{v:"Bossa Nova",l:"☕ 보사노바"},{v:"Trot",l:"🎤 트로트"},{v:"Indie",l:"🌟 인디"},{v:"Metal",l:"🤘 메탈"},{v:"Punk",l:"⚡ 펑크록"},{v:"Electronic",l:"💻 일렉트로닉"},{v:"Ambient",l:"🌌 앰비언트"},{v:"New Age",l:"🧘 뉴에이지"},{v:"Cinematic",l:"🎬 시네마틱"},{v:"Orchestral",l:"🎼 오케스트라"},{v:"Chillwave",l:"🌊 칠웨이브"},{v:"Synthwave",l:"🌆 신스웨이브"},{v:"J-pop",l:"🇯🇵 J-pop"},{v:"C-pop",l:"🇨🇳 C-pop"}],custom:true},
+{key:"mood",icon:"💫",label:"분위기",options:[{v:"Calm, Peaceful",l:"🌿 잔잔한"},{v:"Energetic, Upbeat",l:"⚡ 에너지 폭발"},{v:"Romantic, Dreamy",l:"💕 로맨틱"},{v:"Melancholic, Sad",l:"🌧️ 우울한"},{v:"Epic, Majestic",l:"🏔️ 웅장한"},{v:"Happy, Cheerful",l:"😊 행복한"},{v:"Dark, Mysterious",l:"🌑 어두운"},{v:"Nostalgic, Retro",l:"📼 향수적인"},{v:"Hopeful, Inspiring",l:"🌅 희망찬"},{v:"Chill, Relaxed",l:"😌 편안한"},{v:"Intense, Powerful",l:"🔥 강렬한"},{v:"Playful, Fun",l:"🎈 발랄한"},{v:"Sentimental, Emotional",l:"💔 감성적인"},{v:"Confident, Bold",l:"💪 자신감"},{v:"Ethereal, Floating",l:"✨ 몽환적인"},{v:"Groovy, Funky",l:"🕺 그루비"},{v:"Dramatic, Cinematic",l:"🎭 드라마틱"}],custom:true},
+{key:"vocal",icon:"🎙️",label:"보컬 스타일",options:[{v:"Female Vocal",l:"👩 여성 보컬"},{v:"Male Vocal",l:"👨 남성 보컬"},{v:"Female and Male Duet",l:"👫 듀엣"},{v:"Choir",l:"🎼 합창단"},{v:"Rap, Hip Hop Flow",l:"🎤 랩"},{v:"Instrumental Only",l:"🎹 연주곡"},{v:"Soft Whisper Vocal",l:"🤫 속삭이는"},{v:"Powerful Belt Vocal",l:"💥 파워 보컬"},{v:"Falsetto",l:"🎵 팔세토"},{v:"Breathy Vocal",l:"💨 브레시"},{v:"Soulful Vocal",l:"💜 소울풀"},{v:"Child Voice",l:"👶 어린이"},{v:"Opera Style",l:"🎭 오페라"},{v:"Vocal Harmony",l:"🎶 하모니"},{v:"Lo-fi Vocal",l:"📻 로파이"},{v:"Auto-tune Vocal",l:"🤖 오토튠"},{v:"Gospel Vocal",l:"⛪ 가스펠"},{v:"Humming",l:"🎵 허밍"}],custom:true},
+{key:"purpose",icon:"🎯",label:"사용 용도",options:[{v:"YouTube BGM",l:"📺 유튜브 BGM"},{v:"Study Music",l:"📚 공부/집중"},{v:"Workout Music",l:"🏋️ 운동"},{v:"Meditation Music",l:"🧘 명상/휴식"},{v:"Sleep Music",l:"😴 수면"},{v:"Party Music",l:"🎉 파티"},{v:"Cafe Music",l:"☕ 카페/매장"},{v:"Game Music",l:"🎮 게임/스트리밍"}],custom:true},
+{key:"instrument",icon:"🥁",label:"주요 악기",options:[{v:"Piano",l:"🎹 피아노"},{v:"Acoustic Guitar",l:"🎸 어쿠스틱 기타"},{v:"Electric Guitar",l:"⚡ 일렉 기타"},{v:"Saxophone",l:"🎷 색소폰"},{v:"Violin",l:"🎻 바이올린"},{v:"Drums",l:"🥁 드럼"},{v:"Bass",l:"🎸 베이스"},{v:"Synthesizer",l:"🎛️ 신디사이저"},{v:"Orchestra",l:"🎼 오케스트라"}],custom:true},
+{key:"bpm",icon:"💓",label:"BPM",options:[{v:"40-50 BPM, Very Slow",l:"🐢 40-50"},{v:"60-70 BPM, Slow",l:"🚶 60-70"},{v:"80-90 BPM, Moderate Slow",l:"🧘 80-90"},{v:"100-110 BPM, Moderate",l:"🚴 100-110"},{v:"120-130 BPM, Moderate Fast",l:"🏃 120-130"},{v:"140-150 BPM, Fast",l:"⚡ 140-150"},{v:"160-170 BPM, Very Fast",l:"🚀 160-170"},{v:"170+ BPM, Extreme",l:"💨 170+"}],custom:false},
+{key:"age",icon:"👥",label:"타겟 연령대",options:[{v:"Children",l:"👶 유아/어린이"},{v:"Teenagers",l:"🎒 청소년"},{v:"Young Adults",l:"🎓 20대"},{v:"Adults",l:"💼 30-40대"},{v:"Middle Age",l:"🏠 50대"},{v:"Seniors",l:"👴 시니어"}],custom:false},
+{key:"language",icon:"🌐",label:"가사 언어",options:[{v:"Korean",l:"🇰🇷 한국어 (47M)"},{v:"English",l:"🇺🇸 영어 (254M)"},{v:"Korean and English Mix",l:"🌐 한영 혼합"},{v:"Hindi",l:"🇮🇳 힌디어 (500M)"},{v:"Portuguese",l:"🇧🇷 포르투갈어 (147M)"},{v:"Indonesian",l:"🇮🇩 인도네시아어 (151M)"},{v:"Spanish",l:"🇲🇽 스페인어 (83M)"},{v:"Japanese",l:"🇯🇵 일본어 (78M)"},{v:"German",l:"🇩🇪 독일어 (72M)"},{v:"Vietnamese",l:"🇻🇳 베트남어 (63M)"},{v:"Tagalog",l:"🇵🇭 타갈로그어 (58M)"},{v:"Turkish",l:"🇹🇷 터키어 (57M)"},{v:"French",l:"🇫🇷 프랑스어 (45M)"},{v:"Thai",l:"🇹🇭 태국어 (43M)"},{v:"Arabic",l:"🇸🇦 아랍어 (66M)"},{v:"Russian",l:"🇷🇺 러시아어 (35M)"},{v:"Italian",l:"🇮🇹 이탈리아어 (34M)"},{v:"Urdu",l:"🇵🇰 우르두어 (33M)"},{v:"Polish",l:"🇵🇱 폴란드어 (27M)"}],custom:true},
+{key:"theme",icon:"💡",label:"주제/테마",options:[{v:"First Love",l:"💕 첫사랑"},{v:"Breakup",l:"💔 이별"},{v:"Courage",l:"💪 용기"},{v:"Travel",l:"✈️ 여행"},{v:"Dreams",l:"⭐ 꿈"},{v:"Memories",l:"📷 추억"},{v:"Friendship",l:"🤝 우정"},{v:"Family",l:"👨‍👩‍👧 가족"},{v:"Nature",l:"🌳 자연"},{v:"Night City",l:"🌃 밤/도시"},{v:"Summer",l:"☀️ 여름"},{v:"Winter",l:"❄️ 겨울"},{v:"Hope",l:"🌈 희망"},{v:"Self Love",l:"💜 자기애"},{v:"Party",l:"🎉 파티"},{v:"Growth",l:"🌱 성장"},{v:"Freedom",l:"🦅 자유"},{v:"Faith",l:"🙏 믿음"}],custom:true}
+];
+const EMOJIS=["📺","🎵","🎧","🎤","🎬","📻","🌟","🔥","💎","🎭","🌈","🦋","🎪","🎯","🚀","💜","🌊","☀️","🌙","🍀"];
+const SK="suno-presets-v3";
+let store,sel={},cust={},mode=null,histExp=false,stimer=null,langRatio=null;
+
+// Ratio presets: [primary%, secondary%, tertiary%]
+const RATIO_PRESETS=[
+  {label:'9:1',values:[90,10]},
+  {label:'7:3',values:[70,30]},
+  {label:'5:5',values:[50,50]},
+  {label:'3:7',values:[30,70]},
+  {label:'1:9',values:[10,90]},
+];
+const RATIO_3=[
+  {label:'6:3:1',values:[60,30,10]},
+  {label:'5:3:2',values:[50,30,20]},
+  {label:'4:4:2',values:[40,40,20]},
+  {label:'3:3:4',values:[30,30,40]},
+];
+
+function renderRatioPanel(){
+  const langs=ga('language');
+  const panel=document.getElementById('lang-ratio');
+  if(!panel)return;
+  // Also handle "Korean and English Mix" as a multi-lang trigger
+  const hasMix=langs.includes('Korean and English Mix');
+  if(langs.length<2&&!hasMix){panel.classList.remove('show');langRatio=null;return}
+  panel.classList.add('show');
+  
+  const btnsEl=document.getElementById('ratio-btns');
+  const prevEl=document.getElementById('ratio-preview');
+  
+  // Determine which presets to show
+  const realLangs=[];
+  if(hasMix){realLangs.push('Korean','English');langs.forEach(l=>{if(l!=='Korean and English Mix'&&l!=='Korean'&&l!=='English')realLangs.push(l)})}
+  else{langs.forEach(l=>realLangs.push(l))}
+  
+  const presets=realLangs.length>=3?RATIO_3:RATIO_PRESETS;
+  
+  btnsEl.innerHTML=presets.map((p,i)=>{
+    const isSel=langRatio===p.label;
+    return `<button class="ratio-btn${isSel?' sel':''}" onclick="selectRatio('${p.label}')">${p.label}</button>`;
+  }).join('')+`<button class="ratio-btn${langRatio==='custom'?' sel':''}" onclick="selectRatio('custom')">직접 지정</button>`;
+  
+  // Preview
+  if(langRatio){
+    const preset=presets.find(p=>p.label===langRatio);
+    if(preset){
+      const desc=realLangs.map((l,i)=>`<strong>${l} ${preset.values[i]||0}%</strong>`).join(' · ');
+      let hint='';
+      if(preset.values[0]>=70)hint='→ Verse는 주 언어, Chorus 후크에 부 언어';
+      else if(preset.values[0]>=50)hint='→ 두 언어가 균등하게 번갈아 사용';
+      else hint='→ 부 언어가 메인, 주 언어는 포인트로 사용';
+      prevEl.innerHTML=desc+'<br>'+hint;
+    }else if(langRatio==='custom'){
+      prevEl.innerHTML='AI 프롬프트에 직접 지정한 비율이 전달됩니다.';
+    }
+  }else{
+    prevEl.innerHTML='비율을 선택하면 가사에 반영됩니다. 미선택 시 균등 비율로 생성됩니다.';
+  }
+  autoSave();
+}
+
+function selectRatio(label){
+  langRatio=langRatio===label?null:label;
+  renderRatioPanel();
+}
+function ls(){try{const d=localStorage.getItem(SK);return d?JSON.parse(d):{presets:[],activeId:null}}catch{return{presets:[],activeId:null}}}
+function ss(){try{localStorage.setItem(SK,JSON.stringify(store))}catch(e){console.error(e)}}
+function autoSave(){clearTimeout(stimer);stimer=setTimeout(()=>{if(!store.activeId)return;const p=store.presets.find(x=>x.id===store.activeId);if(p){p.selections=JSON.parse(JSON.stringify(sel));p.customOptions=JSON.parse(JSON.stringify(cust));p.description=document.getElementById('memo-text').value;p.langRatio=langRatio;p.updatedAt=new Date().toISOString()}ss()},600)}
+function ga(k){return Array.isArray(sel[k])?sel[k]:[]}
+// ── API Key ──
+const AK_KEY='suno-api-enc';
+let _apiKeyCache=null; // decrypted key in memory only
+
+// ── AES-GCM Encrypt/Decrypt using password ──
+async function deriveKey(pw){
+  const enc=new TextEncoder().encode(pw);
+  const hash=await crypto.subtle.digest('SHA-256',enc);
+  return crypto.subtle.importKey('raw',hash,{name:'AES-GCM'},false,['encrypt','decrypt']);
+}
+async function encryptText(text,pw){
+  const key=await deriveKey(pw);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const encoded=new TextEncoder().encode(text);
+  const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoded);
+  const buf=new Uint8Array(iv.length+encrypted.byteLength);
+  buf.set(iv);buf.set(new Uint8Array(encrypted),iv.length);
+  return btoa(String.fromCharCode(...buf));
+}
+async function decryptText(b64,pw){
+  try{
+    const key=await deriveKey(pw);
+    const buf=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    const iv=buf.slice(0,12);
+    const data=buf.slice(12);
+    const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,data);
+    return new TextDecoder().decode(decrypted);
+  }catch{return '';}
+}
+
+// Password stored in memory after unlock
+let _unlockPw='';
+
+function getApiKey(){return _apiKeyCache||''}
+async function saveApiKey(){
+  const v=document.getElementById('api-key-input').value.trim();
+  if(!v){alert('API 키를 입력해주세요.');return}
+  // If pw not in memory, ask inline
+  if(!_unlockPw){
+    const pw=prompt('API 키 암호화를 위해 비밀번호를 입력해주세요:');
+    if(!pw)return;
+    const hash=await sha256(pw);
+    if(hash!==LOCK_HASH){alert('비밀번호가 올바르지 않습니다.');return}
+    _unlockPw=pw;
+  }
+  const encrypted=await encryptText(v,_unlockPw);
+  localStorage.setItem(AK_KEY,encrypted);
+  _apiKeyCache=v;
+  document.getElementById('api-key-input').value='';
+  updateApiStatus();
+  document.getElementById('api-form').style.display='none';
+  document.getElementById('api-reauth').style.display='none';
+}
+async function loadApiKey(){
+  const stored=localStorage.getItem(AK_KEY);
+  if(!stored||!_unlockPw){_apiKeyCache=null;return}
+  _apiKeyCache=await decryptText(stored,_unlockPw);
+}
+function clearApiKey(){localStorage.removeItem(AK_KEY);_apiKeyCache=null;updateApiStatus();document.getElementById('api-key-input').value=''}
+function toggleApiForm(){const f=document.getElementById('api-form');f.style.display=f.style.display==='none'?'block':'none'}
+// helper: ensure password is available, prompt if needed
+async function ensurePw(){
+  if(_unlockPw)return true;
+  const pw=prompt('암호화된 데이터 접근을 위해 비밀번호를 입력해주세요:');
+  if(!pw)return false;
+  const hash=await sha256(pw);
+  if(hash!==LOCK_HASH){alert('비밀번호가 올바르지 않습니다.');return false}
+  _unlockPw=pw;
+  await loadApiKey();
+  updateApiStatus();
+  document.getElementById('api-reauth').style.display='none';
+  return true;
+}
+function updateApiStatus(){
+  // ★ 홈 API 키 관리에서 불러오기
+  if(!_apiKeyCache){try{const central=JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}');if(central.claude){_apiKeyCache=central.claude}}catch(e){}}
+  const s=document.getElementById('api-status');
+  const hasEnc=!!localStorage.getItem(AK_KEY);
+  const k=getApiKey();
+  if(k){s.textContent='✓ 등록됨';s.style.color='#4ade80';s.style.background='rgba(34,197,94,0.1)'}
+  else if(hasEnc){s.textContent='🔐 잠김';s.style.color='var(--amber)';s.style.background='rgba(251,191,36,0.08)'}
+  else{s.textContent='미등록';s.style.color='#fca5a5';s.style.background='rgba(239,68,68,0.08)'}
+}
+async function testApiKey(){
+  if(!getApiKey()){
+    if(localStorage.getItem(AK_KEY)){
+      if(!await ensurePw())return;
+    }
+  }
+  const k=getApiKey();const res=document.getElementById('api-test-result');const btn=document.getElementById('btn-api-test');
+  if(!k){res.textContent='⚠️ API 키를 먼저 저장해주세요.';res.style.color='#fca5a5';return}
+  btn.textContent='테스트 중...';btn.disabled=true;res.textContent='';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'Hi'}]})});
+    const d=await r.json();
+    if(d.error){res.textContent='❌ '+d.error.message;res.style.color='#fca5a5'}
+    else{res.textContent='✅ 연결 성공!';res.style.color='#4ade80'}
+  }catch(e){res.textContent='❌ 네트워크 오류';res.style.color='#fca5a5'}
+  finally{btn.textContent='연결 테스트';btn.disabled=false}
+}
+function init(){
+  store=ls();
+  store.presets.forEach(p=>{if(p.selections)Object.keys(p.selections).forEach(k=>{if(p.selections[k]&&!Array.isArray(p.selections[k]))p.selections[k]=[p.selections[k]]})});ss();
+  buildSteps();buildBars();buildEP('new-emoji-picker','new-emoji-btn');renderPresets();renderThumbStyles();
+  if(store.activeId)applyPreset(store.activeId);else updateVis();
+  updateApiStatus();
+}
+function buildSteps(){
+  const c=document.getElementById('steps-container');c.innerHTML='';
+  STEPS.forEach((st,i)=>{
+    const card=document.createElement('div');card.className='card';card.id='step-'+st.key;
+    const cnt=ga(st.key).length;
+    let h=`<div class="step-head"><span class="step-num">${i+1}</span><span class="step-icon">${st.icon}</span><span class="step-label">${st.label}</span><span class="sel-counter ${cnt===0?'empty':cnt>=MX?'full':'has'}" id="sc-${st.key}">${cnt}/${MX}</span><span class="step-count" id="ct-${st.key}">${st.options.length}</span></div>`;
+    h+=`<div class="multi-hint">💡 <span>최대 ${MX}개</span> 복수 선택 가능 · 클릭으로 추가/해제</div>`;
+    h+=`<div class="opts" id="opts-${st.key}">`;
+    const seld=ga(st.key),mx=seld.length>=MX;
+    st.options.forEach(o=>{const is=seld.includes(o.v);h+=`<button class="pill${is?' sel':''}${mx&&!is?' maxed':''}" data-key="${st.key}" data-val="${o.v}" onclick="tog(this)">${o.l}</button>`});
+    h+='</div>';
+    h+=`<div class="sel-preview" id="pv-${st.key}"></div>`;
+    // Add language ratio panel
+    if(st.key==='language'){
+      h+=`<div id="lang-ratio">
+        <div class="ratio-label">🎚️ 언어 비율 조절</div>
+        <div class="ratio-btns" id="ratio-btns"></div>
+        <div class="ratio-preview" id="ratio-preview"></div>
+      </div>`;
+    }
+    if(st.custom)h+=`<div class="custom-row"><input id="in-${st.key}" placeholder="직접 입력..." onkeydown="if(event.key==='Enter')addC('${st.key}')"><button class="btn-add" onclick="addC('${st.key}')">+</button></div>`;
+    card.innerHTML=h;c.appendChild(card);
+    renderPV(st.key);
+  });
+}
+function buildBars(){const b=document.getElementById('bars');for(let i=0;i<5;i++){const d=document.createElement('div');d.style.cssText=`height:${10+i*5}px;background:linear-gradient(180deg,var(--amber) ${100-i*15}%,transparent);left:${8+i*12}px;animation:bb 1s ease-in-out ${i*0.12}s infinite`;b.appendChild(d)}}
+function tog(btn){
+  const k=btn.dataset.key,v=btn.dataset.val;if(!sel[k])sel[k]=[];
+  const a=sel[k],idx=a.indexOf(v);
+  if(idx>=0)a.splice(idx,1);else{if(a.length>=MX)return;a.push(v)}
+  rfr(k);updateSum();autoSave();
+}
+function removeOpt(k,v){if(!sel[k])return;const i=sel[k].indexOf(v);if(i>=0)sel[k].splice(i,1);rfr(k);updateSum();autoSave()}
+function rfr(k){
+  const seld=ga(k),mx=seld.length>=MX;
+  document.querySelectorAll('#opts-'+k+' .pill').forEach(b=>{const is=seld.includes(b.dataset.val);b.classList.toggle('sel',is);b.classList.toggle('maxed',mx&&!is)});
+  const sc=document.getElementById('sc-'+k);sc.textContent=seld.length+'/'+MX;sc.className='sel-counter '+(seld.length===0?'empty':seld.length>=MX?'full':'has');
+  renderPV(k);updCt(k);
+  if(k==='language')renderRatioPanel();
+  if(k==='genre'||k==='mood')renderThumbStyles();
+}
+function renderPV(k){
+  const pv=document.getElementById('pv-'+k);if(!pv)return;
+  const seld=ga(k),st=STEPS.find(s=>s.key===k);
+  pv.innerHTML=seld.map(v=>{
+    const opt=st.options.find(o=>o.v===v);
+    const lbl=opt?opt.l:(cust[k]||[]).includes(v)?'✨ '+v:v;
+    return `<span class="sel-tag">${lbl}<span class="x" onclick="removeOpt('${k}','${v.replace(/'/g,"\\'")}')">✕</span></span>`;
+  }).join('');
+}
+function addC(k){
+  const inp=document.getElementById('in-'+k);const v=inp.value.trim();if(!v)return;
+  if(!cust[k])cust[k]=[];if(!cust[k].includes(v))cust[k].push(v);
+  if(!sel[k])sel[k]=[];if(sel[k].length>=MX){inp.value='';return}
+  if(!sel[k].includes(v))sel[k].push(v);
+  const g=document.getElementById('opts-'+k);
+  if(!g.querySelector('[data-val="'+CSS.escape(v)+'"]')){const b=document.createElement('button');b.className='pill sel';b.dataset.key=k;b.dataset.val=v;b.textContent='✨ '+v;b.onclick=function(){tog(this)};g.appendChild(b)}
+  inp.value='';rfr(k);updateSum();autoSave();
+}
+function updCt(k){const st=STEPS.find(s=>s.key===k);document.getElementById('ct-'+k).textContent=st.options.length+((cust[k]||[]).length)}
+function updateSum(){
+  const entries=Object.entries(sel).filter(([,a])=>Array.isArray(a)&&a.length>0);
+  const el=document.getElementById('summary'),tg=document.getElementById('summary-tags');
+  if(!entries.length){el.classList.remove('show');return}
+  el.classList.add('show');
+  tg.innerHTML=entries.map(([k,a])=>{const nm=STEPS.find(s=>s.key===k)?.label||k;const txt=a.length===1?a[0]:a[0]+' 외 '+(a.length-1)+'개';return `<span class="sum-tag">${nm}: ${txt.length>22?txt.slice(0,22)+'…':txt}</span>`}).join('');
+}
+function selMode(m){mode=m;document.getElementById('mode-simple').classList.toggle('sel',m==='simple');document.getElementById('mode-full').classList.toggle('sel',m==='full')}
+// ── Presets ──
+function toggleNewForm(){const f=document.getElementById('new-form'),b=document.getElementById('btn-toggle-new');const sh=!f.classList.contains('show');f.classList.toggle('show',sh);b.textContent=sh?'✕ 취소':'+ 새 프리셋';b.classList.toggle('cancel',sh)}
+function buildEP(pid,bid){const pk=document.getElementById(pid);pk.innerHTML='';EMOJIS.forEach(e=>{const b=document.createElement('button');b.textContent=e;b.onclick=ev=>{ev.stopPropagation();document.getElementById(bid).textContent=e;pk.classList.remove('show')};pk.appendChild(b)})}
+function toggleEP(id){const p=document.getElementById(id);p.classList.toggle('show');setTimeout(()=>{const h=()=>{p.classList.remove('show');document.removeEventListener('click',h)};document.addEventListener('click',h)},10)}
+function createPreset(){
+  const nm=document.getElementById('new-name').value.trim(),em=document.getElementById('new-emoji-btn').textContent;if(!nm)return;
+  const p={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:nm,emoji:em,description:'',selections:{},customOptions:{},history:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  store.presets.push(p);store.activeId=p.id;ss();
+  document.getElementById('new-name').value='';document.getElementById('new-emoji-btn').textContent='🎵';document.getElementById('new-form').classList.remove('show');document.getElementById('btn-toggle-new').textContent='+ 새 프리셋';document.getElementById('btn-toggle-new').classList.remove('cancel');
+  renderPresets();applyPreset(p.id);
+}
+function renderPresets(){
+  document.getElementById('preset-count').textContent=store.presets.length+'개';
+  const list=document.getElementById('preset-list');
+  if(!store.presets.length){list.innerHTML='<div class="empty-msg">아직 저장된 프리셋이 없습니다.</div>';return}
+  list.innerHTML='';
+  store.presets.forEach(p=>{
+    const act=store.activeId===p.id;
+    const totSel=Object.values(p.selections||{}).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0);
+    const hc=(p.history||[]).length;
+    const d=document.createElement('div');d.className='preset-item'+(act?' active':'');
+    d.onclick=()=>{store.activeId=p.id;ss();renderPresets();applyPreset(p.id)};
+    d.innerHTML=`<button class="p-emoji" onclick="event.stopPropagation();openPE('${p.id}')">${p.emoji}<div class="emoji-picker" id="ep-${p.id}"></div></button>
+      <div class="p-info"><div class="p-name" id="pn-${p.id}">${p.name}</div><div class="p-meta">${totSel}개 태그${hc>0?' · '+hc+'회 생성':''}</div></div>
+      ${act?`<div class="p-actions"><button onclick="event.stopPropagation();startRen('${p.id}')">✏️</button><button onclick="event.stopPropagation();dupP('${p.id}')">📋</button><button id="dl-${p.id}" onclick="event.stopPropagation();delP('${p.id}',this)">🗑️</button></div>`:''}`;
+    list.appendChild(d);
+    const pk=d.querySelector('#ep-'+p.id);
+    EMOJIS.forEach(e=>{const b=document.createElement('button');b.textContent=e;if(p.emoji===e)b.classList.add('esel');b.onclick=ev=>{ev.stopPropagation();p.emoji=e;ss();renderPresets()};pk.appendChild(b)});
+  });
+}
+function openPE(id){const p=document.getElementById('ep-'+id);p.classList.toggle('show');setTimeout(()=>{const h=()=>{p.classList.remove('show');document.removeEventListener('click',h)};document.addEventListener('click',h)},10)}
+function startRen(id){const el=document.getElementById('pn-'+id),p=store.presets.find(x=>x.id===id);el.outerHTML=`<input class="p-rename-input" id="rn-${id}" value="${p.name}" onblur="finRen('${id}')" onkeydown="if(event.key==='Enter')finRen('${id}');if(event.key==='Escape')renderPresets()">`;document.getElementById('rn-'+id).focus()}
+function finRen(id){const inp=document.getElementById('rn-'+id);if(!inp)return;const v=inp.value.trim();if(v){const p=store.presets.find(x=>x.id===id);if(p)p.name=v;ss()}renderPresets()}
+function dupP(id){const o=store.presets.find(x=>x.id===id);if(!o)return;const d=JSON.parse(JSON.stringify(o));d.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);d.name=o.name+' (복사)';store.presets.push(d);store.activeId=d.id;ss();renderPresets();applyPreset(d.id)}
+let dc=null;
+function delP(id,btn){if(dc===id){store.presets=store.presets.filter(p=>p.id!==id);if(store.activeId===id)store.activeId=store.presets[0]?.id||null;ss();renderPresets();if(store.activeId)applyPreset(store.activeId);else{sel={};cust={};updateVis();buildSteps();updateSum()}dc=null}else{dc=id;btn.classList.add('del-confirm');setTimeout(()=>{dc=null;btn&&btn.classList.remove('del-confirm')},3000)}}
+function applyPreset(id){
+  const p=store.presets.find(x=>x.id===id);if(!p)return;
+  sel=p.selections?JSON.parse(JSON.stringify(p.selections)):{};
+  cust=p.customOptions?JSON.parse(JSON.stringify(p.customOptions)):{};
+  Object.keys(sel).forEach(k=>{if(!Array.isArray(sel[k]))sel[k]=sel[k]?[sel[k]]:[]});
+  buildSteps();
+  Object.entries(cust).forEach(([k,arr])=>{const g=document.getElementById('opts-'+k);if(!g)return;arr.forEach(v=>{if(!g.querySelector('[data-val="'+CSS.escape(v)+'"]')){const b=document.createElement('button');b.className='pill';b.dataset.key=k;b.dataset.val=v;b.textContent='✨ '+v;b.onclick=function(){tog(this)};g.appendChild(b)}});rfr(k)});
+  STEPS.forEach(s=>rfr(s.key));
+  langRatio=p.langRatio||null;
+  renderRatioPanel();
+  document.getElementById('memo-text').value=p.description||'';
+  document.getElementById('results').classList.remove('show');
+  updateSum();renderHist(p);updateVis();renderThumbStyles();
+}
+function updateVis(){document.getElementById('onboarding').style.display=(!store.presets.length&&!store.activeId)?'block':'none';document.getElementById('memo-card').style.display=store.activeId?'block':'none'}
+// ── History (Enhanced) ──
+function renderHist(p){
+  const panel=document.getElementById('history-panel'),list=document.getElementById('hist-list'),hist=p?.history||[];
+  if(!hist.length){panel.style.display='none';return}panel.style.display='block';
+  const favCount=hist.filter(h=>h.fav).length;
+  document.getElementById('hist-count').textContent=hist.length+'회'+(favCount?' · ⭐'+favCount:'');
+  const btn=document.getElementById('btn-hist-toggle');
+  if(hist.length>5){btn.style.display='inline-block';btn.textContent=histExp?'접기':`+${hist.length-5}개 더보기`}else btn.style.display='none';
+  const shown=histExp?hist:hist.slice(-5);list.innerHTML='';
+  // show favorites first, then recent
+  const sorted=[...shown].reverse();
+  sorted.forEach((h,si)=>{
+    const realIdx=hist.indexOf(h);
+    const d=document.createElement('div');d.className='hist-item';
+    if(h.fav)d.style.borderColor='rgba(251,191,36,0.15)';
+    const dt=new Date(h.date).toLocaleString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const esc=h.prompt.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    d.innerHTML=`<div class="hist-item-head">
+      <span>${dt} · ${h.mode==='full'?'풀 패키지':'단일'}</span>
+      <div class="hi-actions">
+        <button class="hi-star ${h.fav?'fav':''}" onclick="event.stopPropagation();togFav(${realIdx})" title="즐겨찾기">${h.fav?'⭐':'☆'}</button>
+        <button class="copy-btn sm" onclick="cp('${esc}',this)">복사</button>
+        <button class="btn-hist-restore" onclick="restH('${esc}')">불러오기</button>
+        <button class="hi-del" onclick="event.stopPropagation();delHist(${realIdx})" title="삭제">✕</button>
+      </div>
+    </div>
+    <div class="hist-prompt">${h.prompt}</div>
+    ${h.fav&&h.memo?`<div class="hi-memo">📌 ${h.memo}</div>`:''}
+    ${h.fav&&!h.memo?`<input class="hi-memo-input" placeholder="메모 추가 (Enter로 저장)" onkeydown="if(event.key==='Enter'){saveMemo(${realIdx},this.value);}" onblur="saveMemo(${realIdx},this.value)">`:''}`; 
+    list.appendChild(d);
+  });
+}
+function togFav(idx){
+  const p=store.presets.find(x=>x.id===store.activeId);if(!p||!p.history[idx])return;
+  p.history[idx].fav=!p.history[idx].fav;
+  if(!p.history[idx].fav)delete p.history[idx].memo;
+  ss();renderHist(p);
+}
+function saveMemo(idx,val){
+  const p=store.presets.find(x=>x.id===store.activeId);if(!p||!p.history[idx])return;
+  p.history[idx].memo=val.trim();ss();renderHist(p);
+}
+function delHist(idx){
+  const p=store.presets.find(x=>x.id===store.activeId);if(!p)return;
+  p.history.splice(idx,1);ss();renderHist(p);renderPresets();
+}
+// ── Thumbnail Prompt ──
+// ── Thumbnail Styles ──
+const THUMB_STYLES=[
+  {id:'ghibli',label:'🌿 Ghibli 감성',prompt:'Studio Ghibli style, warm watercolor illustration, soft diffused lighting, nostalgic pastoral atmosphere, hand-painted texture',genres:['Ballad','Acoustic','Folk','New Age','CCM'],moods:['Calm, Peaceful','Romantic, Dreamy','Nostalgic, Retro','Sentimental, Emotional','Hopeful, Inspiring']},
+  {id:'shinkai',label:'✨ Shinkai 시네마틱',prompt:'Makoto Shinkai style, volumetric god rays, dramatic sky with detailed clouds, cinematic lens flare, vibrant blue and amber tones, photorealistic backgrounds with anime characters',genres:['Cinematic','J-pop','Orchestral','K-pop'],moods:['Epic, Majestic','Romantic, Dreamy','Dramatic, Cinematic','Hopeful, Inspiring']},
+  {id:'lofi',label:'🎧 Lo-fi 감성',prompt:'Lo-fi aesthetic, retro anime cel-shaded style, muted pastel color palette, cozy indoor scene, warm ambient lighting, VHS noise grain overlay, 90s Japanese animation feel',genres:['Lo-fi','Jazz','Chillwave','Bossa Nova'],moods:['Calm, Peaceful','Chill, Relaxed','Nostalgic, Retro','Sentimental, Emotional']},
+  {id:'neon',label:'🌆 네온 사이버펑크',prompt:'Cyberpunk neon aesthetic, rain-soaked city night, holographic glitch effects, electric blue and hot pink neon signs, futuristic dystopian atmosphere, chrome reflections',genres:['EDM','Synthwave','Electronic','Hip Hop'],moods:['Dark, Mysterious','Energetic, Upbeat','Intense, Powerful','Confident, Bold']},
+  {id:'minimal',label:'📐 미니멀 타이포',prompt:'Minimalist typographic design, clean sans-serif typography, generous whitespace, monochrome with single accent color, Swiss design grid system, editorial layout',genres:['Ambient','Indie','Electronic'],moods:['Calm, Peaceful','Chill, Relaxed','Ethereal, Floating']},
+  {id:'3d',label:'🧊 3D 렌더',prompt:'3D clay render style, soft matte material, smooth rounded forms, isometric perspective, pastel studio lighting, Blender/Cinema4D aesthetic, playful toy-like proportions',genres:['K-pop','EDM','Funk','Disco'],moods:['Happy, Cheerful','Playful, Fun','Energetic, Upbeat','Groovy, Funky']},
+  {id:'vintage',label:'📼 빈티지 필름',prompt:'Vintage 35mm film photography style, warm analog color grading, heavy film grain, light leaks and lens flares, 1970s-80s nostalgic atmosphere, faded Kodachrome palette',genres:['Soul','Disco','City Pop','R&B','Blues','Country'],moods:['Nostalgic, Retro','Groovy, Funky','Romantic, Dreamy','Sentimental, Emotional']},
+  {id:'ink',label:'🖌️ 수묵화/동양화',prompt:'Traditional East Asian ink wash painting (sumi-e), black ink on rice paper texture, zen minimalism, controlled ink bleeding and splatter, calligraphic brushstrokes, mountain and water landscape',genres:['Trot','New Age','Classical','Orchestral'],moods:['Calm, Peaceful','Epic, Majestic','Ethereal, Floating','Dramatic, Cinematic']},
+  {id:'pop',label:'🎨 팝아트',prompt:'Pop art style, bold primary colors, thick black outlines, Ben-Day dots halftone pattern, Andy Warhol inspired, comic book aesthetic, high contrast flat design',genres:['Rock','Punk','Metal','Funk'],moods:['Energetic, Upbeat','Intense, Powerful','Confident, Bold','Playful, Fun']},
+  {id:'photo',label:'📷 포토리얼리즘',prompt:'Photorealistic AI-generated, cinematic depth of field, dramatic studio lighting, 8K ultra detail, professional fashion photography style, moody color grading',genres:['Hip Hop','R&B','Ballad','Latin'],moods:['Dark, Mysterious','Confident, Bold','Romantic, Dreamy','Melancholic, Sad']},
+];
+let thumbStyle=null;
+
+function renderThumbStyles(){
+  const btns=document.getElementById('thumb-style-btns');
+  if(!btns)return;
+  // Get current genre/mood selections for recommendations
+  const selGenres=ga('genre');
+  const selMoods=ga('mood');
+  // Score each style
+  const scored=THUMB_STYLES.map(st=>{
+    let score=0;
+    selGenres.forEach(g=>{if(st.genres.includes(g))score+=2});
+    selMoods.forEach(m=>{if(st.moods.includes(m))score+=1});
+    return {...st,score};
+  });
+  const maxScore=Math.max(...scored.map(s=>s.score));
+  
+  btns.innerHTML=scored.map(st=>{
+    const isSel=thumbStyle===st.id;
+    const isRec=st.score>0&&st.score===maxScore;
+    return `<button class="ts-btn${isSel?' sel':''}" onclick="selectThumbStyle('${st.id}')">${st.label}${isRec?'<span class="rec">추천</span>':''}</button>`;
+  }).join('');
+  
+  // Update description
+  const desc=document.getElementById('thumb-style-desc');
+  if(thumbStyle){
+    const st=THUMB_STYLES.find(s=>s.id===thumbStyle);
+    desc.textContent=st?'선택: '+st.label.replace(/^[^\s]+\s/,''):'';
+    desc.style.color='#a78bfa';
+  }else{
+    desc.textContent='스타일을 선택하면 해당 화풍으로 프롬프트가 생성됩니다.';
+    desc.style.color='';
+  }
+}
+
+function selectThumbStyle(id){
+  thumbStyle=thumbStyle===id?null:id;
+  renderThumbStyles();
+}
+
+let thumbB64=null,thumbType=null;
+function handleThumbUpload(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=e.target.result;
+    thumbB64=data.split(',')[1];
+    thumbType=file.type||'image/jpeg';
+    const zone=document.getElementById('thumb-zone');
+    zone.classList.add('has-img');
+    zone.innerHTML=`<img src="${data}" alt="uploaded"><input type="file" id="thumb-input" accept="image/*" style="display:none" onchange="handleThumbUpload(this)">`;
+    document.getElementById('btn-thumb-gen').disabled=false;
+    document.getElementById('btn-thumb-clear').style.display='inline-block';
+    document.getElementById('thumb-result').classList.remove('show');
+  };
+  reader.readAsDataURL(file);
+}
+function clearThumb(){
+  thumbB64=null;thumbType=null;
+  const zone=document.getElementById('thumb-zone');
+  zone.classList.remove('has-img');
+  zone.innerHTML=`<input type="file" id="thumb-input" accept="image/*" style="display:none" onchange="handleThumbUpload(this)"><div class="placeholder" id="thumb-placeholder">📁 이미지를 클릭하여 업로드<br><span>JPG, PNG, WebP 지원</span></div>`;
+  document.getElementById('btn-thumb-gen').disabled=true;
+  document.getElementById('btn-thumb-clear').style.display='none';
+  document.getElementById('thumb-result').classList.remove('show');
+}
+async function genThumbPrompt(){
+  if(!getApiKey()){
+    if(localStorage.getItem(AK_KEY)){if(!await ensurePw()){alert('비밀번호가 필요합니다.');return}}
+    else{alert('API 키를 먼저 등록해주세요.');return}
+  }
+  if(!thumbB64){alert('이미지를 먼저 업로드해주세요.');return}
+  const ak=getApiKey();
+  const btn=document.getElementById('btn-thumb-gen');
+  btn.disabled=true;btn.textContent='🎨 분석 중...';
+  const tags=buildTags();
+  const styleObj=thumbStyle?THUMB_STYLES.find(s=>s.id===thumbStyle):null;
+  const styleInstr=styleObj?`\n\n🎨 적용할 이미지 스타일: ${styleObj.label}\nStyle prompt base: "${styleObj.prompt}"\n이 스타일을 기반으로 프롬프트를 생성하되, 업로드된 이미지의 구도/색감/분위기를 융합해줘.`:`\n\n(스타일 미선택 — 이미지 분위기에 맞는 스타일을 자동 판단해줘)`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,
+        system:'You are an expert at creating image generation prompts for YouTube music thumbnails and Suno AI cover art. Analyze the uploaded image and generate detailed prompts in the specified art style. Always respond in Korean first, then English translation.',
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:thumbType,data:thumbB64}},
+          {type:'text',text:`이 이미지를 분석해서 다음 3가지를 생성해줘:\n\n1. **Suno AI 커버 이미지 프롬프트** (영문, 1:1 정사각형, 이 이미지의 구도와 분위기를 참고한 음악 커버 아트)\n2. **유튜브 썸네일 프롬프트** (영문, 16:9 비율, 텍스트 배치 영역 확보, 클릭 유도 구도)\n3. **스타일 키워드** (5-8개, 이미지에서 추출한 핵심 미학 요소)${styleInstr}\n\n현재 음악 스타일: ${tags||'미설정'}\n\n각 항목을 명확히 구분해서 작성해줘. 프롬프트는 Midjourney/DALL-E에서 바로 사용 가능한 형태로.`}
+        ]}]})
+    });
+    const d=await r.json();
+    if(d.error)throw new Error(d.error.message);
+    const text=d.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    const res=document.getElementById('thumb-result');
+    res.textContent=text;
+    res.classList.add('show');
+    // add copy button
+    res.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:13px;font-weight:700;color:#a78bfa">🎨 생성된 프롬프트</span><button class="copy-btn sm" onclick="cp(document.getElementById('thumb-text').textContent,this)">전체 복사</button></div><div id="thumb-text" style="white-space:pre-wrap">${text}</div>`;
+  }catch(e){
+    document.getElementById('thumb-result').innerHTML=`<span style="color:#fca5a5">⚠️ 오류: ${e.message}</span>`;
+    document.getElementById('thumb-result').classList.add('show');
+  }finally{btn.disabled=false;btn.textContent='🎨 썸네일 프롬프트 생성'}
+}
+// ── Reset Selections ──
+function resetSelections(){
+  if(!confirm('현재 9단계 선택값을 모두 초기화할까요?'))return;
+  sel={};STEPS.forEach(s=>rfr(s.key));updateSum();autoSave();
+}
+// ── Export .txt ──
+function exportTxt(){
+  const prompt=document.getElementById('res-prompt')?.textContent||'';
+  if(!prompt){alert('먼저 생성하기를 실행해주세요.');return}
+  let txt='═══════════════════════════════════════\n';
+  txt+='  🎵 [플레이리스트] AI 스튜디오-DODO 생성 결과\n';
+  txt+='  '+new Date().toLocaleString('ko-KR')+'\n';
+  txt+='═══════════════════════════════════════\n\n';
+  txt+='▶ Suno AI 스타일 태그\n'+'-'.repeat(40)+'\n'+prompt+'\n\n';
+  // lyrics
+  const lyricEls=document.querySelectorAll('.lyric-body');
+  if(lyricEls.length){
+    txt+='▶ AI 생성 가사 ('+lyricEls.length+'곡)\n'+'='.repeat(40)+'\n\n';
+    lyricEls.forEach((el,i)=>{txt+='--- Track '+(i+1)+' ---\n'+el.textContent+'\n\n';});
+  }
+  // titles
+  const titleEls=document.querySelectorAll('.title-card');
+  if(titleEls.length){
+    txt+='▶ 19개국어 제목\n'+'='.repeat(40)+'\n';
+    titleEls.forEach(el=>{
+      const lang=el.querySelector('.t-lang')?.textContent||'';
+      const title=el.querySelector('.t-text')?.textContent||'';
+      txt+=lang+': '+title+'\n';
+    });
+  }
+  // thumbnail prompt
+  const thumbText=document.getElementById('thumb-text')?.textContent;
+  if(thumbText){txt+='\n▶ 썸네일 프롬프트\n'+'='.repeat(40)+'\n'+thumbText+'\n';}
+  txt+='\n═══════════════════════════════════════\n';
+  txt+='Powered by Claude AI — [플레이리스트] AI 스튜디오-DODO\n';
+  // download
+  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='suno-result-'+new Date().toISOString().slice(0,10)+'.txt';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function toggleHist(){histExp=!histExp;const p=store.presets.find(x=>x.id===store.activeId);renderHist(p)}
+function restH(pr){document.getElementById('res-prompt').textContent=pr;document.getElementById('res-lyrics-card').style.display='none';document.getElementById('res-titles-card').style.display='none';document.getElementById('results').classList.add('show');document.getElementById('results').scrollIntoView({behavior:'smooth'})}
+// ── Copy ──
+function cp(text,btn){navigator.clipboard.writeText(text).then(()=>{btn.classList.add('copied');btn.textContent='✓';setTimeout(()=>{btn.classList.remove('copied');btn.textContent='복사'},1800)}).catch(()=>{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);btn.classList.add('copied');btn.textContent='✓';setTimeout(()=>{btn.classList.remove('copied');btn.textContent='복사'},1800)})}
+function togCol(s){const c=document.getElementById('res-'+s),a=document.getElementById(s+'-arrow');const v=c.style.display!=='none';c.style.display=v?'none':'';a.classList.toggle('open',!v)}
+// ── Generate ──
+function buildTags(){
+  const t=[],j=k=>{const a=ga(k);return a.length?a.join(', '):null};
+  const g=j('genre');if(g)t.push(g);const m=j('mood');if(m)t.push(m);const v=j('vocal');if(v)t.push(v);const ins=j('instrument');if(ins)t.push(ins);const bpm=j('bpm');if(bpm)t.push(bpm);
+  const pur=j('purpose');if(pur)t.push('suitable for '+pur);const age=j('age');if(age)t.push('for '+age);const th=j('theme');if(th)t.push('about '+th);const lang=j('language');if(lang)t.push(lang+' lyrics');
+  return t.join(', ');
+}
+function totalSel(){return Object.values(sel).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0)}
+async function callAI(sys,usr){
+  const ak=getApiKey();
+  if(!ak)throw new Error('API 키가 등록되지 않았습니다. 상단 🔑 설정에서 Anthropic API 키를 입력해주세요.');
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8192,system:sys,messages:[{role:'user',content:usr}]})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);
+  return d.content.filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+async function generate(){
+  const tot=totalSel(),eb=document.getElementById('error-box');
+  if(tot<3){eb.textContent='⚠️ 전체 태그를 최소 3개 이상 선택해주세요. (현재 '+tot+'개)';eb.classList.add('show');return}
+  if(!mode){eb.textContent='⚠️ 생성 모드를 선택해주세요.';eb.classList.add('show');return}
+  if(!getApiKey()){
+    if(localStorage.getItem(AK_KEY)){
+      if(!await ensurePw()){eb.textContent='⚠️ API 키 복호화를 위해 비밀번호가 필요합니다.';eb.classList.add('show');return}
+    }else{
+      eb.textContent='⚠️ Claude API 키가 필요합니다. 상단 🔑 설정에서 키를 등록해주세요.';eb.classList.add('show');document.getElementById('api-form').style.display='block';document.getElementById('api-card').scrollIntoView({behavior:'smooth'});return
+    }
+  }
+  eb.classList.remove('show');const btn=document.getElementById('gen-btn');btn.disabled=true;btn.textContent='생성 중...';
+  document.getElementById('loader').classList.add('show');document.getElementById('results').classList.remove('show');
+  const tags=buildTags();
+  const langs=ga('language');
+  const langList=langs.length?langs:['Korean'];
+  const thV=ga('theme').join(', ')||'Dreams';
+  
+  // Build ratio instruction
+  let ratioInstr='';
+  if(langRatio&&langRatio!=='custom'&&langList.length>=2){
+    const realLangs=[];
+    const hasMix=langList.includes('Korean and English Mix');
+    if(hasMix){realLangs.push('Korean','English');langList.forEach(l=>{if(l!=='Korean and English Mix'&&l!=='Korean'&&l!=='English')realLangs.push(l)})}
+    else langList.forEach(l=>realLangs.push(l));
+    const presets=realLangs.length>=3?RATIO_3:RATIO_PRESETS;
+    const preset=presets.find(p=>p.label===langRatio);
+    if(preset){
+      const parts=realLangs.map((l,i)=>`${l} ${preset.values[i]||0}%`).join(', ');
+      ratioInstr=`\nIMPORTANT LANGUAGE RATIO: Write the lyrics with approximately ${parts}. `;
+      if(preset.values[0]>=70)ratioInstr+=`${realLangs[0]} should be the dominant language throughout Verse and Bridge sections. Use ${realLangs.slice(1).join('/')} primarily for Chorus hooks and key emotional phrases only.`;
+      else if(preset.values[0]>=50)ratioInstr+=`Alternate between ${realLangs.join(' and ')} roughly equally. Mix both languages within each section.`;
+      else ratioInstr+=`${realLangs.slice(1).join('/')} should be the dominant language. Use ${realLangs[0]} only for specific accent phrases and emotional highlights.`;
+    }
+  }
+  
+  try{
+    let lyrics=null,titles=null;
+    if(mode==='simple'){
+      document.getElementById('load-msg').textContent='🎵 언어별 가사 생성 중 ('+langList.length+'개 언어)...';
+      const lr=await callAI(
+        'You are a professional songwriter for Suno AI. Write ONLY JSON, no explanations.',
+        `Generate song lyrics for EACH of the following languages: ${langList.join(', ')}.\nMusic style: "${tags}". Theme: "${thV}".\nFor EACH language, write 1 complete song lyric with [Verse 1],[Chorus],[Verse 2],[Bridge],[Chorus].\nGive each a [Title: ...] and clearly mark the language with [Language: ...] at the top.${ratioInstr}\nReturn as a JSON array of strings, one per language. The lyrics MUST be written in each respective language (not translated English). No markdown, no backticks.`
+      );
+      try{lyrics=JSON.parse(lr.replace(/```json|```/g,'').trim())}catch{lyrics=lr.split('\n\n---\n\n').filter(Boolean).slice(0,langList.length)}
+    }else{
+      const totalLyrics=Math.min(langList.length*10,30);
+      const perLang=Math.floor(totalLyrics/langList.length);
+      document.getElementById('load-msg').textContent='🎵 AI가 '+langList.length+'개 언어 × '+perLang+'곡 작곡 중...';
+      const lr=await callAI(
+        'You are a professional songwriter for Suno AI. Write ONLY JSON, no explanations.',
+        `Generate song lyrics in multiple languages.\nLanguages: ${langList.join(', ')}\nFor EACH language, write ${perLang} unique songs.\nMusic style: "${tags}". Theme: "${thV}".\nEach song must have [Verse 1],[Chorus],[Verse 2],[Bridge],[Chorus].\nMark each with [Language: ...] and [Title: ...] at the top.\nThe lyrics MUST be written in each respective language natively.${ratioInstr}\nReturn as a JSON array of ${totalLyrics} strings total. No markdown, no backticks.`
+      );
+      try{lyrics=JSON.parse(lr.replace(/```json|```/g,'').trim())}catch{lyrics=lr.split('\n\n---\n\n').filter(Boolean).slice(0,totalLyrics)}
+
+      document.getElementById('load-msg').textContent='🌍 19개국어 제목 생성 중...';
+      const tr=await callAI('You are a music title translator. Return ONLY valid JSON.',`Create a creative song title for "${thV}" (style: ${tags}) in 19 languages. JSON {emoji+lang: title}: 🇰🇷 한국어, 🇺🇸 English, 🇯🇵 日本語, 🇨🇳 中文, 🇪🇸 Español, 🇫🇷 Français, 🇩🇪 Deutsch, 🇮🇹 Italiano, 🇵🇹 Português, 🇷🇺 Русский, 🇸🇦 العربية, 🇮🇳 हिंदी, 🇹🇭 ไทย, 🇻🇳 Tiếng Việt, 🇮🇩 Indonesia, 🇳🇱 Nederlands, 🇵🇱 Polski, 🇹🇷 Türkçe, 🇸🇪 Svenska. No markdown.`);
+      try{titles=JSON.parse(tr.replace(/```json|```/g,'').trim())}catch{titles=null}
+    }
+    document.getElementById('res-prompt').textContent=tags;
+    if(lyrics&&Array.isArray(lyrics)&&lyrics.length){
+      const lyricsTitle=mode==='simple'
+        ?'📝 언어별 가사 ('+langList.join(', ')+' · '+lyrics.length+'곡)'
+        :'📝 AI 생성 가사 ('+langList.join(', ')+' · '+lyrics.length+'곡)';
+      document.getElementById('res-lyrics-title').textContent=lyricsTitle;
+      document.getElementById('res-lyrics').innerHTML='<div class="lyrics-grid">'+lyrics.map((ly,i)=>{
+        const txt=typeof ly==='string'?ly:JSON.stringify(ly,null,2);
+        // try to extract language tag from lyric
+        const langMatch=txt.match(/\[Language:\s*([^\]]+)\]/i);
+        const langBadge=langMatch?langMatch[1]:'Track '+(i+1);
+        return '<div class="lyric-card"><div class="lyric-head"><span class="track-badge">'+langBadge+' #'+(i+1)+'</span><button class="copy-btn sm" onclick="cp(this.closest(\'.lyric-card\').querySelector(\'.lyric-body\').textContent,this)">복사</button></div><div class="lyric-body">'+txt+'</div></div>';
+      }).join('')+'</div>';
+      document.getElementById('res-lyrics-card').style.display='block';document.getElementById('res-lyrics').style.display='';document.getElementById('lyrics-arrow').classList.add('open');
+    }else document.getElementById('res-lyrics-card').style.display='none';
+    if(titles){
+      document.getElementById('res-titles').innerHTML='<div class="titles-grid">'+Object.entries(titles).map(([l,t])=>`<div class="title-card"><div class="t-info"><div class="t-lang">${l}</div><div class="t-text">${t}</div></div><button class="copy-btn sm" onclick="cp('${t.replace(/'/g,"\\'")}',this)">복사</button></div>`).join('')+'</div>';
+      document.getElementById('res-titles-card').style.display='block';document.getElementById('res-titles').style.display='';document.getElementById('titles-arrow').classList.add('open');
+    }else document.getElementById('res-titles-card').style.display='none';
+    document.getElementById('results').classList.add('show');
+    document.getElementById('btn-export').style.display='inline-block';
+    if(store.activeId){const p=store.presets.find(x=>x.id===store.activeId);if(p){if(!p.history)p.history=[];p.history.push({date:new Date().toISOString(),mode,prompt:tags});if(p.history.length>50)p.history=p.history.slice(-50);ss();renderHist(p);renderPresets()}}
+  }catch(e){eb.textContent='⚠️ 생성 오류: '+e.message;eb.classList.add('show')}
+  finally{btn.disabled=false;btn.textContent='🎵 생성하기';document.getElementById('loader').classList.remove('show');setTimeout(()=>document.getElementById('results').scrollIntoView({behavior:'smooth'}),200)}
+}
+// ── Lock Screen (SHA-256 + AES key derivation) ──
+const LOCK_KEY='dodo-unlocked';
+const LOCK_HASH='0a93e35bd80e112fb28157d3c43574ab534b4b6d667c096b6914663b32599ba9';
+async function sha256(text){
+  const data=new TextEncoder().encode(text);
+  const buf=await crypto.subtle.digest('SHA-256',data);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function tryUnlock(){
+  const input=document.getElementById('lock-pw');
+  const err=document.getElementById('lock-error');
+  const pw=input.value;
+  const hash=await sha256(pw);
+  if(hash===LOCK_HASH){
+    _unlockPw=pw;
+    document.getElementById('lock-screen').classList.add('hidden');
+    document.getElementById('main-app').style.display='';
+    if(document.getElementById('lock-remember').checked){
+      localStorage.setItem(LOCK_KEY,hash);
+    }
+    err.textContent='';
+    await loadApiKey();
+    updateApiStatus();
+  }else{
+    err.textContent='⚠️ 비밀번호가 올바르지 않습니다.';
+    input.classList.add('shake','wrong');
+    setTimeout(()=>{input.classList.remove('shake','wrong');input.value='';input.focus()},500);
+  }
+}
+async function checkLock(){
+  if(localStorage.getItem(LOCK_KEY)===LOCK_HASH){
+    document.getElementById('lock-screen').classList.add('hidden');
+    document.getElementById('main-app').style.display='';
+    // auto-login but need pw for API decryption
+    if(localStorage.getItem(AK_KEY)&&!_unlockPw){
+      document.getElementById('api-reauth').style.display='block';
+    }
+  }else{
+    localStorage.removeItem(LOCK_KEY);
+    setTimeout(()=>document.getElementById('lock-pw').focus(),300);
+  }
+}
+async function reauthPw(){
+  const input=document.getElementById('reauth-input');
+  const hash=await sha256(input.value);
+  if(hash===LOCK_HASH){
+    _unlockPw=input.value;
+    await loadApiKey();
+    updateApiStatus();
+    document.getElementById('api-reauth').style.display='none';
+    input.value='';
+  }else{
+    input.style.borderColor='#ef4444';
+    setTimeout(()=>{input.style.borderColor='';input.value=''},500);
+  }
+}
+document.addEventListener('DOMContentLoaded',async()=>{await checkLock();init();});
+document.addEventListener('click',()=>{document.querySelectorAll('.emoji-picker.show').forEach(p=>p.classList.remove('show'))});
+</script>
+</body>
+</html>

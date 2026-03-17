@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 서치 트렌드 사용법 가이드 - DODO</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0f;
+  --bg-card: #18181e;
+  --bg-step: #1a1a22;
+  --bg-input: #20202a;
+  --border: #2a2a32;
+  --text: #f0ece4;
+  --text-dim: #8a8680;
+  --text-muted: #5a5650;
+  --gold: #d4a01e;
+  --gold-light: #e8b330;
+  --gold-dim: #a07a15;
+  --gold-glow: rgba(212,160,30,0.12);
+  --gold-border: rgba(212,160,30,0.25);
+  --gold-border-dim: rgba(212,160,30,0.10);
+  --green: #4ecca3;
+  --red: #e07050;
+  --purple: #a78bfa;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); line-height:1.75; padding-bottom:80px; }
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 15% 10%,rgba(212,160,30,.04) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(212,160,30,.03) 0%,transparent 50%); pointer-events:none; }
+
+.header { text-align:center; padding:60px 20px 40px; position:relative; }
+.header-badge { display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border:1px solid var(--gold-border); border-radius:100px; font-size:.75rem; font-weight:600; color:var(--gold); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:20px; }
+.header h1 { font-size:2.2rem; font-weight:900; background:linear-gradient(135deg,var(--gold),var(--gold-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:12px; }
+.header p { color:var(--text-dim); font-size:1rem; max-width:600px; margin:0 auto; }
+
+.container { max-width:860px; margin:0 auto; padding:0 24px; position:relative; z-index:1; }
+
+.back-link { display:inline-flex; align-items:center; gap:8px; color:var(--gold-dim); text-decoration:none; font-size:.85rem; font-weight:500; margin-bottom:20px; transition:color .2s; }
+.back-link:hover { color:var(--gold); }
+
+/* TOC */
+.toc { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px 32px; margin-bottom:40px; }
+.toc h2 { font-size:1rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:2px; margin-bottom:16px; font-weight:600; }
+.toc-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.toc-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-step); border:1px solid var(--border); border-radius:10px; text-decoration:none; color:var(--text); font-size:.9rem; font-weight:600; transition:all .2s; }
+.toc-item:hover { border-color:var(--gold); transform:translateX(4px); }
+.toc-num { background:var(--gold); color:#0d0d0f; width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:800; font-family:'JetBrains Mono',monospace; flex-shrink:0; }
+
+/* Section */
+.section { margin-bottom:48px; }
+.section-header { display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+.section-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; background:var(--gold-glow); }
+.section-header h2 { font-size:1.35rem; font-weight:800; }
+
+/* Step */
+.step { background:var(--bg-step); border:1px solid var(--border); border-radius:14px; padding:24px 28px; margin-bottom:16px; transition:all .2s; }
+.step:hover { border-color:rgba(255,255,255,.1); }
+.step-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.step-number { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-weight:800; font-size:.9rem; flex-shrink:0; background:rgba(212,160,30,.15); color:var(--gold); }
+.step-title { font-size:1.05rem; font-weight:700; }
+.step-content { color:var(--text-dim); font-size:.9rem; padding-left:50px; }
+.step-content p { margin-bottom:10px; }
+
+/* Feature card */
+.feat-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0; }
+.feat-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; transition:all .25s; }
+.feat-card:hover { border-color:var(--gold-border-dim); transform:translateY(-2px); }
+.feat-emoji { font-size:1.5rem; margin-bottom:8px; }
+.feat-title { font-size:.92rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+.feat-desc { font-size:.82rem; color:var(--text-dim); line-height:1.6; }
+
+/* Info boxes */
+.info-box { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:20px; font-size:.9rem; }
+.info-box.tip { border-left:3px solid var(--green); }
+.info-box.warning { border-left:3px solid var(--red); }
+.info-box.gold { border-left:3px solid var(--gold); }
+.info-box.purple { border-left:3px solid var(--purple); }
+.info-box .label { font-weight:800; font-size:.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.info-box.tip .label { color:var(--green); }
+.info-box.warning .label { color:var(--red); }
+.info-box.gold .label { color:var(--gold); }
+.info-box.purple .label { color:var(--purple); }
+
+/* Checklist */
+.checklist { list-style:none; margin:12px 0; }
+.checklist li { padding:8px 0; padding-left:28px; position:relative; font-size:.88rem; color:var(--text-dim); }
+.checklist li::before { content:'✓'; position:absolute; left:0; color:var(--gold); font-weight:800; }
+
+/* Badge demo */
+.badge-row { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+.demo-badge { padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:700; white-space:nowrap; }
+
+/* Table */
+.guide-table { width:100%; border-collapse:collapse; margin:16px 0; font-size:.85rem; }
+.guide-table th { background:var(--bg-input); padding:12px 16px; text-align:left; font-weight:700; color:var(--text-dim); text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; border-bottom:1px solid var(--border); }
+.guide-table td { padding:12px 16px; border-bottom:1px solid rgba(42,42,50,.5); color:var(--text-dim); }
+.guide-table td:first-child { font-weight:600; color:var(--text); }
+
+/* Nav path */
+.nav-path { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:12px 0; }
+.nav-item { background:var(--bg-input); border:1px solid var(--border); padding:6px 14px; border-radius:8px; font-size:.82rem; font-weight:600; color:var(--text); }
+.nav-arrow { color:var(--text-muted); font-size:.8rem; }
+.nav-item.hl { background:rgba(212,160,30,.12); border-color:rgba(212,160,30,.3); color:var(--gold); }
+.nav-item.pp { background:rgba(167,139,250,.12); border-color:rgba(167,139,250,.3); color:var(--purple); }
+
+/* Divider */
+.divider { height:1px; background:var(--border); margin:48px 0; }
+
+/* Flow */
+.flow-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:14px 0; }
+.flow-step { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:10px 16px; font-size:.82rem; font-weight:600; color:var(--text); text-align:center; }
+.flow-arrow { color:var(--gold-dim); font-size:1.1rem; }
+
+/* Final */
+.final-section { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:32px; text-align:center; }
+.final-section h2 { font-size:1.4rem; font-weight:800; margin-bottom:16px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+/* FAQ */
+.faq-item { background:var(--bg-step); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; overflow:hidden; }
+.faq-q { padding:14px 20px; font-weight:700; font-size:.9rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:background .2s; }
+.faq-q:hover { background:var(--bg-card); }
+.faq-q::after { content:'▼'; font-size:.6rem; color:var(--text-muted); transition:transform .2s; }
+.faq-item.open .faq-q::after { transform:rotate(180deg); }
+.faq-a { max-height:0; overflow:hidden; transition:max-height .3s ease; color:var(--text-dim); font-size:.85rem; }
+.faq-item.open .faq-a { max-height:400px; }
+.faq-a-inner { padding:0 20px 16px; }
+
+@media (max-width:640px) {
+  .header h1 { font-size:1.8rem; }
+  .toc-grid { grid-template-columns:1fr; }
+  .feat-grid { grid-template-columns:1fr; }
+  .step-content { padding-left:0; }
+  .container { padding:0 16px; }
+}
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">DODO · Guide</div>
+  <h1>🎯 서치 트렌드 사용법 가이드</h1>
+  <p>뜨는 유튜브 채널과 바이럴 영상을 발견하는 트렌드 분석 도구의 사용법을 안내합니다.</p>
+</div>
+
+<div class="container">
+  <a class="back-link" href="DODO_WORKSPACE_index.html">← ⚡ DODO WORKSPACE 홈으로 돌아가기</a>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>📋 목차</h2>
+    <div class="toc-grid">
+      <a class="toc-item" href="#overview"><span class="toc-num">1</span> 기능 개요</a>
+      <a class="toc-item" href="#start"><span class="toc-num">2</span> 시작하기 (API 키 설정)</a>
+      <a class="toc-item" href="#search"><span class="toc-num">3</span> 검색 & 필터 사용법</a>
+      <a class="toc-item" href="#results"><span class="toc-num">4</span> 결과 보기 & 지표 해석</a>
+      <a class="toc-item" href="#analysis"><span class="toc-num">5</span> 채널·영상·패턴 분석</a>
+      <a class="toc-item" href="#advanced"><span class="toc-num">6</span> 고급 기능 & 팁</a>
+    </div>
+  </div>
+
+  <!-- 전체 워크플로우 -->
+  <div class="info-box gold">
+    <div class="label">⚡ 전체 워크플로우</div>
+    <div class="flow-row">
+      <div class="flow-step">🔑 API 키 입력</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🔍 키워드 검색</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">📊 바이럴 지수 확인</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">🧠 채널/영상 분석</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">📥 CSV 내보내기</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 1. 기능 개요 ===== -->
+  <div class="section" id="overview">
+    <div class="section-header">
+      <div class="section-icon">🎯</div>
+      <div><h2>1. 기능 개요</h2><p style="color:var(--text-dim);font-size:.85rem">서치 트렌드가 무엇을 할 수 있는지</p></div>
+    </div>
+
+    <p style="color:var(--text-dim);font-size:.92rem;margin-bottom:20px">
+      서치 트렌드는 <strong style="color:var(--text)">YouTube Data API</strong>를 활용하여 특정 키워드로 뜨고 있는 영상과 채널을 발견하고, 바이럴 지수·성장 속도 등의 지표로 분석하는 도구입니다. 구독자 대비 조회수가 높은 "숨은 보석" 영상을 찾아냅니다.
+    </p>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-emoji">🔍</div>
+        <div class="feat-title">글로벌 키워드 검색</div>
+        <div class="feat-desc">11개국 국가별 검색 + 키워드 자동 번역 지원. 한국어로 입력 후 현지 언어로 변환 가능.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-emoji">🔥</div>
+        <div class="feat-title">바이럴 지수 분석</div>
+        <div class="feat-desc">구독자 대비 조회수를 계산해 "초대박·대박·급상승·성장중" 등급으로 분류.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-emoji">📊</div>
+        <div class="feat-title">채널 심층 분석</div>
+        <div class="feat-desc">채널 통계, 업로드 패턴, 인기 영상 랭킹, 조회수 차트까지 원클릭 분석.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-emoji">🧠</div>
+        <div class="feat-title">뇌 훔치기 (경쟁 분석)</div>
+        <div class="feat-desc">경쟁 채널의 성공 공식, 제목 패턴, 수익 구조를 역분석하여 리포트 생성.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-emoji">🎬</div>
+        <div class="feat-title">영상 분석 & 재현 프롬프트</div>
+        <div class="feat-desc">개별 영상의 성과 지표를 분석하고, 유사 영상을 만들기 위한 AI 프롬프트까지 생성.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-emoji">📥</div>
+        <div class="feat-title">CSV 내보내기</div>
+        <div class="feat-desc">검색 결과를 CSV로 다운로드하여 스프레드시트에서 추가 분석 가능.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 2. 시작하기 ===== -->
+  <div class="section" id="start">
+    <div class="section-header">
+      <div class="section-icon">🔑</div>
+      <div><h2>2. 시작하기</h2><p style="color:var(--text-dim);font-size:.85rem">비밀번호 & API 키 설정</p></div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">비밀번호 입력 (잠금 해제)</div>
+      </div>
+      <div class="step-content">
+        <p>프로그램을 처음 열면 <strong>비밀번호 입력 화면</strong>이 나타납니다.</p>
+        <ul class="checklist">
+          <li>공유받은 비밀번호를 입력</li>
+          <li><strong>"잠금 해제"</strong> 클릭</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">YouTube API Key 입력</div>
+      </div>
+      <div class="step-content">
+        <p>잠금 해제 후 API 키 입력 화면이 나타납니다.</p>
+        <ul class="checklist">
+          <li>YouTube Data API v3 키를 입력 (AIzaSy... 형태)</li>
+          <li><strong>"시작하기"</strong> 클릭</li>
+          <li>API 키는 브라우저에 암호화되어 저장됨 (다음에 자동 입력)</li>
+        </ul>
+        <div class="info-box tip">
+          <div class="label">💡 API 키가 없다면?</div>
+          하단의 <strong>"API 키 만드는 법 ↓"</strong> 버튼을 클릭하면 간단한 가이드가 표시됩니다.<br>
+          또는 대시보드의 <strong>YouTube API 키 발급 가이드</strong>를 참고하세요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 3. 검색 & 필터 ===== -->
+  <div class="section" id="search">
+    <div class="section-header">
+      <div class="section-icon">🔍</div>
+      <div><h2>3. 검색 & 필터 사용법</h2><p style="color:var(--text-dim);font-size:.85rem">키워드 검색과 6가지 필터</p></div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">키워드 검색</div>
+      </div>
+      <div class="step-content">
+        <p>상단 검색창에 찾고 싶은 키워드를 입력하고 <strong>"검색"</strong> 버튼을 클릭하세요.</p>
+        <div class="info-box gold">
+          <div class="label">🌐 번역 기능</div>
+          <strong>"🌐 번역"</strong> 버튼을 클릭하면 선택한 국가의 언어로 키워드를 자동 번역합니다.<br>
+          예: 국가를 🇯🇵 일본으로 설정 → "다이어트" 검색 → "ダイエット"로 번역<br>
+          번역 결과는 수정 가능하며, <strong>"이 단어로 검색"</strong> 또는 <strong>"원문+번역 합쳐서"</strong> 선택 가능.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">6가지 필터 설정</div>
+      </div>
+      <div class="step-content">
+        <div style="overflow-x:auto">
+          <table class="guide-table">
+            <thead><tr><th>필터</th><th>옵션</th><th>설명</th></tr></thead>
+            <tbody>
+              <tr><td>🌍 국가</td><td>한국, 미국, 일본 등 11개국 + 글로벌</td><td>해당 국가에서 인기 있는 영상 검색</td></tr>
+              <tr><td>⏰ 기간</td><td>24시간 ~ 1년</td><td>영상 업로드 시점 기준 필터</td></tr>
+              <tr><td>📂 대분류</td><td>건강, 경제, 음식 등 20개</td><td>카테고리별 검색 범위 설정</td></tr>
+              <tr><td>📁 세분류</td><td>대분류에 따라 자동 변경</td><td>더 세밀한 카테고리 필터</td></tr>
+              <tr><td>👥 구독자</td><td>1K 이하 ~ 100만+</td><td>채널 규모별 필터링</td></tr>
+              <tr><td>📊 정렬</td><td>바이럴 지수, 성장 속도, 조회수, 최신순</td><td>결과 정렬 기준</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="info-box tip">
+          <div class="label">💡 필터 자동 완화</div>
+          결과가 없으면 시스템이 자동으로 필터를 단계적으로 완화하여 재검색합니다.<br>
+          세분류 해제 → 카테고리 해제 → 구독자 필터 해제 순으로 넓혀갑니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 4. 결과 보기 & 지표 ===== -->
+  <div class="section" id="results">
+    <div class="section-header">
+      <div class="section-icon">📊</div>
+      <div><h2>4. 결과 보기 & 지표 해석</h2><p style="color:var(--text-dim);font-size:.85rem">바이럴 지수, 성장 속도 의미 이해하기</p></div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">보기 모드 & 콘텐츠 탭</div>
+      </div>
+      <div class="step-content">
+        <p><strong>보기 모드:</strong> 상단 ☰(리스트) / ▦(갤러리) 버튼으로 전환</p>
+        <p><strong>콘텐츠 탭:</strong> 전체 / 🎬 롱폼 / 📱 숏폼으로 필터링</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">바이럴 지수 (핵심 지표)</div>
+      </div>
+      <div class="step-content">
+        <p><strong>바이럴 지수</strong>는 구독자 수 대비 조회수의 비율입니다. 높을수록 "구독자 규모에 비해 조회수가 폭발적"이라는 뜻이에요.</p>
+        <div class="badge-row">
+          <span class="demo-badge" style="background:rgba(232,93,74,.12);color:#e85d4a;border:1px solid rgba(232,93,74,.3)">🔥🔥🔥 초대박 ×100+</span>
+          <span class="demo-badge" style="background:rgba(255,150,50,.12);color:#ff9632;border:1px solid rgba(255,150,50,.3)">🔥🔥 대박 ×30+</span>
+          <span class="demo-badge" style="background:rgba(240,150,30,.12);color:#e89420;border:1px solid rgba(240,150,30,.3)">🔥 급상승 ×10+</span>
+          <span class="demo-badge" style="background:rgba(74,232,138,.1);color:#4ae88a;border:1px solid rgba(74,232,138,.3)">📈 성장중 ×3+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <div class="step-title">기타 지표</div>
+      </div>
+      <div class="step-content">
+        <div style="overflow-x:auto">
+          <table class="guide-table">
+            <thead><tr><th>지표</th><th>의미</th><th>활용법</th></tr></thead>
+            <tbody>
+              <tr><td>⚡ 성장 속도</td><td>일 평균 조회수 (조회수 ÷ 업로드 후 일수)</td><td>현재 진행형으로 뜨고 있는 영상 파악</td></tr>
+              <tr><td>🎬/📱 롱폼·숏폼</td><td>영상 길이 기준 자동 분류</td><td>내 채널에 맞는 콘텐츠 형태 파악</td></tr>
+              <tr><td>👥 구독자 수</td><td>채널 규모</td><td>소규모 채널의 히트작을 발견하는 데 활용</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <div class="step-title">수요 검증 카드</div>
+      </div>
+      <div class="step-content">
+        <p>검색 결과 상단에 <strong>수요 검증 카드</strong>가 자동으로 표시됩니다.</p>
+        <ul class="checklist">
+          <li><strong style="color:var(--green)">블루오션</strong> — 수요는 있지만 경쟁자가 적음 → 진입 적기!</li>
+          <li><strong style="color:var(--gold)">레드오션</strong> — 경쟁이 치열 → 차별화 전략 필요</li>
+          <li><strong style="color:var(--red)">수요 부족</strong> — 검색량 자체가 적음 → 다른 키워드 추천</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 5. 분석 기능 ===== -->
+  <div class="section" id="analysis">
+    <div class="section-header">
+      <div class="section-icon">🧠</div>
+      <div><h2>5. 채널·영상·패턴 분석</h2><p style="color:var(--text-dim);font-size:.85rem">3가지 심층 분석 도구</p></div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">📊 채널 분석</div>
+      </div>
+      <div class="step-content">
+        <p>검색 결과의 각 영상에서 <strong>"📊 채널"</strong> 버튼을 클릭하면 채널 분석 모달이 열립니다.</p>
+        <ul class="checklist">
+          <li><strong>채널 통계</strong> — 구독자, 총 조회수, 영상 수, 개설일</li>
+          <li><strong>업로드 패턴</strong> — 업로드 빈도, 요일별 분포, 시간대별 분포</li>
+          <li><strong>인기 영상 TOP</strong> — 최고 조회수 영상 순위</li>
+          <li><strong>조회수 차트</strong> — 최근 영상들의 조회수 추이</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">🎬 영상 분석</div>
+      </div>
+      <div class="step-content">
+        <p>채널 분석 모달의 <strong>"🎬 영상 분석"</strong> 탭으로 이동하거나, 결과에서 <strong>"🎬 영상"</strong> 버튼을 클릭합니다.</p>
+        <ul class="checklist">
+          <li><strong>성과 지표</strong> — 조회수, 좋아요, 댓글, 인게이지먼트율</li>
+          <li><strong>제목/설명 분석</strong> — 감성 분석, 키워드 추출</li>
+          <li><strong>재현 프롬프트</strong> — 이 영상 스타일로 만들기 위한 AI 프롬프트 자동 생성</li>
+          <li><strong>Claude에서 열기</strong> — 생성된 프롬프트를 Claude로 바로 전달</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <div class="step-title">🧠 뇌 훔치기 (경쟁 분석)</div>
+      </div>
+      <div class="step-content">
+        <p>채널 분석 모달의 <strong>"🧠 뇌 훔치기"</strong> 탭에서 경쟁 채널의 성공 공식을 역분석합니다.</p>
+        <ul class="checklist">
+          <li><strong>콘텐츠 전략 분석</strong> — 장르 비율, 시리즈 구성, 업로드 전략</li>
+          <li><strong>제목 공식</strong> — 자주 사용하는 패턴, 히트작의 공통점</li>
+          <li><strong>수익 구조 추정</strong> — 광고/멤버십/후원 등 수익원 분석</li>
+          <li><strong>실행 리포트</strong> — 복사 가능한 분석 리포트 + Claude 연동</li>
+        </ul>
+        <div class="info-box purple">
+          <div class="label">🧠 활용 팁</div>
+          뇌 훔치기 결과를 Claude에 붙여넣으면, 해당 채널 스타일의 영상 기획안을 자동으로 만들어줍니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <div class="step-title">✦ 패턴 분석 (제목 분석)</div>
+      </div>
+      <div class="step-content">
+        <p>결과 상단 툴바의 <strong>"✦ 패턴 분석"</strong> 버튼을 클릭하면, 검색 결과에 포함된 모든 영상의 <strong>제목 패턴</strong>을 분석합니다.</p>
+        <ul class="checklist">
+          <li>자주 사용되는 단어·구문 추출</li>
+          <li>히트작의 제목 공통 패턴 도출</li>
+          <li>내 영상 제목을 만들 때 참고 가능</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== 6. 고급 기능 ===== -->
+  <div class="section" id="advanced">
+    <div class="section-header">
+      <div class="section-icon">⚡</div>
+      <div><h2>6. 고급 기능 & 팁</h2><p style="color:var(--text-dim);font-size:.85rem">비교, 내보내기, 할당량 관리</p></div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">📊 채널 비교</div>
+      </div>
+      <div class="step-content">
+        <p>여러 채널을 비교하고 싶다면:</p>
+        <ul class="checklist">
+          <li>영상 분석 내 인기 영상에서 <strong>"+ 비교"</strong> 버튼으로 채널 추가</li>
+          <li>여러 채널을 추가한 뒤 <strong>"📊 비교"</strong>를 클릭</li>
+          <li>구독자, 조회수, 업로드 빈도 등을 한눈에 비교</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">📥 CSV 내보내기</div>
+      </div>
+      <div class="step-content">
+        <p>검색 결과 상단의 <strong>"📥 CSV"</strong> 버튼을 클릭하면 모든 검색 결과를 스프레드시트 형태로 다운로드합니다.</p>
+        <p>내보내기 항목: 제목, 채널명, 조회수, 바이럴 지수, 성장 속도, 구독자 수, 영상 링크 등</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <div class="step-title">API 키 변경</div>
+      </div>
+      <div class="step-content">
+        <p>상단 헤더의 <strong>"API 키 변경"</strong> 버튼으로 언제든 키를 교체할 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div class="info-box warning">
+      <div class="label">⚠️ 일일 할당량 관리</div>
+      YouTube API는 하루 <strong>10,000 단위</strong>까지 무료입니다.<br>
+      검색 1회 = 약 100단위 → <strong>하루 약 100회 검색</strong> 가능.<br>
+      채널/영상 분석은 추가 할당량을 소모하니, 필요한 것만 선택적으로 분석하세요.<br>
+      할당량은 매일 태평양 표준시 자정(한국 시간 오후 5시)에 리셋됩니다.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FAQ -->
+  <div class="section">
+    <h2 style="margin-bottom:20px;font-size:1.2rem">❓ 자주 묻는 질문</h2>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">검색 결과가 "0건"으로 나와요</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        필터가 너무 좁을 수 있어요. <strong>세분류</strong>를 "전체"로 바꾸거나, <strong>기간</strong>을 "1년"으로 늘려보세요. 시스템이 자동으로 필터를 완화하지만, 너무 희귀한 키워드는 결과가 적을 수 있습니다.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">"할당량 초과" 오류가 떠요</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        일일 10,000단위를 모두 사용한 것입니다. 다음 날 오후 5시(한국시간)에 자동 리셋됩니다. 급하면 Google Cloud Console에서 새 프로젝트를 만들어 별도 API 키를 발급받을 수 있어요.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">번역 기능이 작동하지 않아요</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        번역은 무료 번역 API를 사용하므로 간헐적으로 느리거나 오류가 발생할 수 있습니다. 번역 결과가 안 나오면 직접 해당 언어 키워드를 입력해 검색해보세요.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">바이럴 지수가 높으면 무조건 좋은 건가요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        바이럴 지수는 <strong>"해당 채널 규모 대비 얼마나 뜨고 있는지"</strong>를 나타냅니다. 소규모 채널에서 1개 영상이 우연히 터진 경우에도 높게 나올 수 있으니, 채널 분석까지 함께 확인하는 것을 권장합니다.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">비밀번호를 잊어버렸어요</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        관리자에게 문의해주세요. 비밀번호는 보안을 위해 암호화되어 저장되므로 복구할 수 없고, 새로 설정해야 합니다.
+      </div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="final-section">
+    <h2>🎯 준비 완료!</h2>
+    <p style="color:var(--text-dim);margin-bottom:20px">
+      이제 서치 트렌드로 뜨는 유튜브 키워드와 채널을 발견하세요.<br>
+      바이럴 지수를 기반으로 숨은 보석 콘텐츠를 찾아 내 채널의 다음 히트작을 기획하세요!
+    </p>
+    <p style="font-size:.82rem;color:var(--text-muted)">
+      추가 질문이 있으면 Claude에게 언제든 문의하세요 😊
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

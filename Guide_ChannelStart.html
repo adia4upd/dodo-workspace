@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 채널스타트 글로벌번역 사용법 - DODO</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d0f;--bg-card:#18181e;--bg-step:#1a1a22;--bg-input:#20202a;--border:#2a2a32;--text:#f0ece4;--text-dim:#8a8680;--text-muted:#5a5650;--gold:#d4a01e;--gold-light:#e8b330;--gold-dim:#a07a15;--gold-glow:rgba(212,160,30,0.12);--gold-border:rgba(212,160,30,0.25);--gold-border-dim:rgba(212,160,30,0.10);--green:#4ecca3;--red:#e07050;--purple:#a78bfa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding-bottom:80px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 10%,rgba(212,160,30,.04) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(212,160,30,.03) 0%,transparent 50%);pointer-events:none}
+.header{text-align:center;padding:60px 20px 40px;position:relative}
+.header-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--gold-border);border-radius:100px;font-size:.75rem;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+.header h1{font-size:2.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.header p{color:var(--text-dim);font-size:1rem;max-width:600px;margin:0 auto}
+.container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--gold-dim);text-decoration:none;font-size:.85rem;font-weight:500;margin-bottom:20px;transition:color .2s}.back-link:hover{color:var(--gold)}
+.toc{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:40px}
+.toc h2{font-size:1rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;font-weight:600}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toc-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-step);border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text);font-size:.9rem;font-weight:600;transition:all .2s}
+.toc-item:hover{border-color:var(--gold);transform:translateX(4px)}
+.toc-num{background:var(--gold);color:#0d0d0f;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.section{margin-bottom:48px}
+.section-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.section-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;background:var(--gold-glow)}
+.section-header h2{font-size:1.35rem;font-weight:800}
+.step{background:var(--bg-step);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:16px;transition:all .2s}
+.step:hover{border-color:rgba(255,255,255,.1)}
+.step-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.step-number{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;flex-shrink:0;background:rgba(212,160,30,.15);color:var(--gold)}
+.step-title{font-size:1.05rem;font-weight:700}
+.step-content{color:var(--text-dim);font-size:.9rem;padding-left:50px}
+.step-content p{margin-bottom:10px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.feat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:all .25s}
+.feat-card:hover{border-color:var(--gold-border-dim);transform:translateY(-2px)}
+.feat-emoji{font-size:1.5rem;margin-bottom:8px}
+.feat-title{font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.feat-desc{font-size:.82rem;color:var(--text-dim);line-height:1.6}
+.info-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:20px;font-size:.9rem}
+.info-box.tip{border-left:3px solid var(--green)}.info-box.warning{border-left:3px solid var(--red)}.info-box.gold{border-left:3px solid var(--gold)}.info-box.purple{border-left:3px solid var(--purple)}
+.info-box .label{font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.info-box.tip .label{color:var(--green)}.info-box.warning .label{color:var(--red)}.info-box.gold .label{color:var(--gold)}.info-box.purple .label{color:var(--purple)}
+.checklist{list-style:none;margin:12px 0}
+.checklist li{padding:8px 0;padding-left:28px;position:relative;font-size:.88rem;color:var(--text-dim)}
+.checklist li::before{content:'✓';position:absolute;left:0;color:var(--gold);font-weight:800}
+.guide-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.85rem}
+.guide-table th{background:var(--bg-input);padding:12px 16px;text-align:left;font-weight:700;color:var(--text-dim);text-transform:uppercase;font-size:.72rem;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.guide-table td{padding:12px 16px;border-bottom:1px solid rgba(42,42,50,.5);color:var(--text-dim)}
+.guide-table td:first-child{font-weight:600;color:var(--text)}
+.flow-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:14px 0}
+.flow-step{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:600;color:var(--text);text-align:center}
+.flow-arrow{color:var(--gold-dim);font-size:1.1rem}
+.divider{height:1px;background:var(--border);margin:48px 0}
+.final-section{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center}
+.final-section h2{font-size:1.4rem;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.faq-item{background:var(--bg-step);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:14px 20px;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .2s}.faq-q:hover{background:var(--bg-card)}
+.faq-q::after{content:'▼';font-size:.6rem;color:var(--text-muted);transition:transform .2s}.faq-item.open .faq-q::after{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--text-dim);font-size:.85rem}.faq-item.open .faq-a{max-height:400px}
+.faq-a-inner{padding:0 20px 16px}
+@media(max-width:640px){.header h1{font-size:1.8rem}.toc-grid{grid-template-columns:1fr}.feat-grid{grid-template-columns:1fr}.step-content{padding-left:0}.container{padding:0 16px}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">DODO · Guide</div>
+  <h1>📖 채널스타트 글로벌번역 사용법 가이드</h1>
+  <p>유튜브 채널 초기 세팅 체크리스트 & 글로벌 다국어 번역 도구의 사용법을 안내합니다.</p>
+</div>
+<div class="container">
+  <a class="back-link" href="DODO_WORKSPACE_index.html">← ⚡ DODO WORKSPACE 홈으로 돌아가기</a>
+  <div class="toc"><h2>📋 목차</h2><div class="toc-grid">
+    <a class="toc-item" href="#overview"><span class="toc-num">1</span> 기능 개요</a>
+    <a class="toc-item" href="#start"><span class="toc-num">2</span> 시작하기 & 홈 설정</a>
+    <a class="toc-item" href="#analysis"><span class="toc-num">3</span> 채널 DNA & 뇌훔치기</a>
+    <a class="toc-item" href="#checklist"><span class="toc-num">4</span> 체크리스트 & 글로벌 번역</a>
+    <a class="toc-item" href="#tips"><span class="toc-num">5</span> 팁 & FAQ</a>
+  </div></div>
+  <div class="info-box gold"><div class="label">⚡ 전체 워크플로우</div><div class="flow-row">
+    <div class="flow-step">🏠 플랫폼 선택</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🔐 API 키 입력</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🧬 채널 DNA 설정</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">✅ 체크리스트</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🌏 글로벌 번역</div>
+  </div></div>
+  <div class="divider"></div>
+  <div class="section" id="overview">
+    <div class="section-header"><div class="section-icon">🏠</div><div><h2>1. 기능 개요</h2></div></div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-emoji">🏠</div><div class="feat-title">플랫폼별 대시보드</div><div class="feat-desc">YouTube / TikTok / Instagram 중 선택. 플랫폼별 맞춤 설정.</div></div>
+      <div class="feat-card"><div class="feat-emoji">🧬</div><div class="feat-title">채널 DNA 분석</div><div class="feat-desc">장르·타겟·톤·차별점 등을 설정하여 채널의 정체성을 정의.</div></div>
+      <div class="feat-card"><div class="feat-emoji">🧠</div><div class="feat-title">뇌훔치기 (벤치마크)</div><div class="feat-desc">경쟁 채널을 분석하여 성공 전략을 역분석.</div></div>
+      <div class="feat-card"><div class="feat-emoji">✅</div><div class="feat-title">체크리스트</div><div class="feat-desc">채널 개설부터 첫 영상까지 단계별 체크리스트 제공.</div></div>
+      <div class="feat-card"><div class="feat-emoji">🌏</div><div class="feat-title">글로벌 번역</div><div class="feat-desc">채널 정보를 10+개 언어로 번역. SEO 최적화 포함.</div></div>
+      <div class="feat-card"><div class="feat-emoji">📋</div><div class="feat-title">결과 복사</div><div class="feat-desc">모든 분석·번역 결과를 원클릭 복사 가능.</div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section" id="start">
+    <div class="section-header"><div class="section-icon">🏠</div><div><h2>2. 시작하기 & 홈 설정</h2><p style="color:var(--text-dim);font-size:.85rem">플랫폼 선택 & API 키</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">1</div><div class="step-title">플랫폼 선택</div></div><div class="step-content"><p>홈 화면에서 <strong>YouTube / TikTok / Instagram</strong> 중 하나를 선택합니다. 선택에 따라 체크리스트와 설정 항목이 달라집니다.</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">2</div><div class="step-title">Claude API 키 입력</div></div><div class="step-content"><p>홈 하단의 API 키 입력란에 <strong>Anthropic Claude API 키</strong>를 입력합니다. 뇌훔치기·글로벌 번역 기능에 필요합니다.</p></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section" id="analysis">
+    <div class="section-header"><div class="section-icon">🧬</div><div><h2>3. 채널 DNA & 뇌훔치기</h2><p style="color:var(--text-dim);font-size:.85rem">채널 정체성 정의 & 경쟁 분석</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">1</div><div class="step-title">🧬 채널 DNA</div></div><div class="step-content"><p>하단 네비게이션의 <strong>"DNA"</strong> 탭에서 채널 정체성을 정의합니다:</p><ul class="checklist"><li><strong>장르</strong> — 교육/엔터테인먼트/먹방 등에서 선택</li><li><strong>타겟</strong> — 20대 여성, 직장인 등 구체적 타겟</li><li><strong>톤</strong> — 전문가형/친구형/스토리텔러형/유머형 등</li><li><strong>차별점</strong> — 경쟁 채널 대비 내 채널만의 강점</li></ul></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">2</div><div class="step-title">🧠 뇌훔치기 (벤치마크)</div></div><div class="step-content"><p><strong>"뇌훔치기"</strong> 탭에서 벤치마크할 채널 URL을 입력하면 Claude AI가 분석합니다:</p><ul class="checklist"><li>콘텐츠 전략 분석</li><li>성공 패턴 도출</li><li>내 채널에 적용할 인사이트 제안</li></ul></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section" id="checklist">
+    <div class="section-header"><div class="section-icon">✅</div><div><h2>4. 체크리스트 & 글로벌 번역</h2></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">1</div><div class="step-title">✅ 채널 세팅 체크리스트</div></div><div class="step-content"><p><strong>"체크"</strong> 탭에서 플랫폼별 채널 세팅 체크리스트를 확인합니다:</p><ul class="checklist"><li>구글 계정 생성 → 채널 생성 → 채널명·핸들 설정</li><li>채널 설명 작성 (SEO) → 키워드 설정</li><li>프로필·배너 제작 → 재생목록 생성</li><li>채널 트레일러 제작 → 쇼츠 전략 수립</li></ul><p>각 항목을 체크하면서 진행 상황을 관리하세요.</p></div></div>
+    <div class="step"><div class="step-header"><div class="step-number">2</div><div class="step-title">🌏 글로벌 번역</div></div><div class="step-content"><p><strong>"글로벌"</strong> 탭에서 채널 정보를 다국어로 번역합니다:</p><ul class="checklist"><li>채널명·설명·키워드를 10+개 언어로 번역</li><li>각 언어별 SEO 최적화 적용</li><li>결과를 원클릭 복사하여 YouTube Studio에 붙여넣기</li></ul></div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section" id="tips">
+    <div class="section-header"><div class="section-icon">💡</div><div><h2>5. 팁 & FAQ</h2></div></div>
+    <div class="info-box gold"><div class="label">⚡ 추천 순서</div>채널 DNA 정의 → 뇌훔치기로 경쟁 분석 → 체크리스트로 세팅 → 글로벌 번역으로 해외 확장. 이 순서로 진행하면 체계적으로 채널을 시작할 수 있어요.</div>
+    <div class="info-box tip"><div class="label">💡 멀티 플랫폼</div>YouTube로 먼저 세팅 완료 후, 플랫폼을 TikTok/Instagram으로 바꿔서 동일 과정을 반복하면 멀티 플랫폼 확장이 쉬워요.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="final-section">
+    <h2>🎉 준비 완료!</h2>
+    <p style="color:var(--text-dim);margin-bottom:20px">이제 도구를 활용하여 콘텐츠를 제작하세요!<br>추가 질문이 있으면 Claude에게 언제든 문의하세요 😊</p>
+  </div>
+</div>
+</body>
+</html>

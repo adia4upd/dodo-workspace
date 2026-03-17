@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔑 API 키 발급 가이드 - 틱톡 트렌드 수집기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0f;
+  --bg-card: #18181e;
+  --bg-step: #1a1a22;
+  --bg-input: #20202a;
+  --border: #2a2a32;
+  --text: #f0ece4;
+  --text-dim: #8a8680;
+  --text-muted: #5a5650;
+  --gold: #d4a01e;
+  --gold-light: #e8b330;
+  --gold-dim: #a07a15;
+  --gold-glow: rgba(212,160,30,0.12);
+  --gold-border: rgba(212,160,30,0.25);
+  --gold-border-dim: rgba(212,160,30,0.10);
+  --green: #4ecca3;
+  --orange: #e8b330;
+  --yellow: #d4a01e;
+  --red: #e07050;
+  --cyan: #d4a01e;
+  --purple: #d4a01e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  padding-bottom: 80px;
+}
+
+/* Background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(212,160,30,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 90%, rgba(212,160,30,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  position: relative;
+}
+
+.header h1 {
+  font-size: 2.4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.header p {
+  color: var(--text-dim);
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Container */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* TOC */
+.toc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 40px;
+}
+
+.toc h2 {
+  font-size: 1rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.toc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.toc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-step);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.toc-item:hover {
+  border-color: var(--gold);
+  transform: translateX(4px);
+}
+
+.toc-num {
+  background: var(--gold);
+  color: #0d0d0f;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+.toc-item.cyan .toc-num { background: var(--gold-dim); color: #fff; }
+
+/* Section */
+.section {
+  margin-bottom: 48px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.section-icon.apify { background: rgba(212,160,30,0.12); }
+.section-icon.claude { background: rgba(212,160,30,0.12); }
+
+.section-header h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.section-header .badge {
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-free { background: rgba(78,204,163,0.12); color: var(--green); }
+.badge-paid { background: rgba(212,160,30,0.12); color: var(--gold); }
+
+/* Info boxes */
+.info-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.info-box.cost {
+  border-left: 3px solid var(--gold);
+}
+
+.info-box.tip {
+  border-left: 3px solid var(--green);
+}
+
+.info-box.warning {
+  border-left: 3px solid var(--red);
+}
+
+.info-box .label {
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.info-box.cost .label { color: var(--gold); }
+.info-box.tip .label { color: var(--green); }
+.info-box.warning .label { color: var(--red); }
+
+/* Steps */
+.step {
+  background: var(--bg-step);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.step:hover {
+  border-color: rgba(255,255,255,0.1);
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.step-number.apify { background: rgba(212,160,30,0.15); color: var(--gold-light); }
+.step-number.claude { background: rgba(212,160,30,0.15); color: var(--gold); }
+
+.step-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.step-content {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding-left: 50px;
+}
+
+.step-content p { margin-bottom: 10px; }
+
+/* URL box */
+.url-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin: 12px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.url-box a {
+  color: var(--gold-light);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.url-box a:hover { text-decoration: underline; }
+
+.copy-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover { background: var(--border); color: var(--text); }
+.copy-btn.copied { background: var(--green); color: #000; border-color: var(--green); }
+
+/* Navigation path */
+.nav-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.nav-item {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.nav-arrow {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.nav-item.highlight {
+  background: rgba(212,160,30,0.12);
+  border-color: rgba(212,160,30,0.3);
+  color: var(--gold);
+}
+
+.nav-item.highlight-cyan {
+  background: rgba(212,160,30,0.12);
+  border-color: rgba(212,160,30,0.3);
+  color: var(--gold-light);
+}
+
+/* Key format */
+.key-format {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  margin: 10px 0;
+  color: var(--yellow);
+  letter-spacing: 0.5px;
+}
+
+/* Checklist */
+.checklist {
+  list-style: none;
+  margin: 12px 0;
+}
+
+.checklist li {
+  padding: 8px 0;
+  padding-left: 28px;
+  position: relative;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+}
+
+.checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 800;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 48px 0;
+}
+
+/* Comparison table */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.85rem;
+}
+
+.compare-table th {
+  background: var(--bg-input);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(42,42,64,0.5);
+  color: var(--text-dim);
+}
+
+.compare-table td:first-child {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Screenshot placeholder */
+.screenshot-hint {
+  background: var(--bg-input);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin: 16px 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.screenshot-hint .emoji { font-size: 2rem; margin-bottom: 8px; }
+
+/* Final section */
+.final-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+}
+
+.final-section h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Progress tracker */
+.progress-bar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 24px 0;
+}
+
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.progress-dot.active { background: var(--gold); box-shadow: 0 0 12px rgba(212,160,30,0.4); }
+.progress-dot.done { background: var(--green); }
+
+/* Accordion for FAQ */
+.faq-item {
+  background: var(--bg-step);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.faq-q {
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.faq-q:hover { background: var(--bg-card); }
+
+.faq-q::after {
+  content: '▼';
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.faq-item.open .faq-q::after { transform: rotate(180deg); }
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.faq-item.open .faq-a { max-height: 300px; }
+
+.faq-a-inner { padding: 0 20px 16px; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .header h1 { font-size: 1.8rem; }
+  .toc-grid { grid-template-columns: 1fr; }
+  .step-content { padding-left: 0; }
+  .nav-path { gap: 4px; }
+  .container { padding: 0 16px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🔑 API 키 발급 완전 가이드</h1>
+  <p>틱톡 트렌드 수집기에 필요한 2가지 API 키를 처음부터 끝까지 안내합니다</p>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>📋 순서</h2>
+    <div class="toc-grid">
+      <a class="toc-item" href="#apify">
+        <span class="toc-num">1</span>
+        Apify API 키 발급 (틱톡 데이터)
+      </a>
+      <a class="toc-item" href="#claude">
+        <span class="toc-num cyan">2</span>
+        Anthropic API 키 발급 (AI 분석)
+      </a>
+      <a class="toc-item" href="#connect">
+        <span class="toc-num">3</span>
+        수집기에 키 연결하기
+      </a>
+      <a class="toc-item" href="#faq">
+        <span class="toc-num cyan">4</span>
+        자주 묻는 질문
+      </a>
+    </div>
+  </div>
+
+  <!-- ==================== APIFY ==================== -->
+  <div class="section" id="apify">
+    <div class="section-header">
+      <div class="section-icon apify">🟢</div>
+      <div>
+        <h2>Part 1. Apify API 키 발급</h2>
+        <p style="color:var(--text-dim);font-size:0.85rem;">틱톡 트렌딩 영상 데이터를 수집하는 데 사용</p>
+      </div>
+      <span class="badge badge-free">무료 가능</span>
+    </div>
+
+    <div class="info-box cost">
+      <div class="label">💰 비용 안내</div>
+      무료 플랜으로 <strong>매월 $5 크레딧</strong>이 제공됩니다. 신용카드 등록 불필요!<br>
+      틱톡 트렌딩 영상 100개 수집 = 약 <strong>$0.10</strong> → 무료 크레딧으로 <strong>월 50회 이상</strong> 수집 가능
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number apify">1</div>
+        <div class="step-title">Apify 웹사이트 접속</div>
+      </div>
+      <div class="step-content">
+        <p>아래 링크를 클릭하여 Apify 콘솔에 접속하세요:</p>
+        <div class="url-box">
+          <span>🔗</span>
+          <a href="https://console.apify.com/sign-up" target="_blank">https://console.apify.com/sign-up</a>
+          <button class="copy-btn" onclick="copyText('https://console.apify.com/sign-up', this)">복사</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number apify">2</div>
+        <div class="step-title">회원가입 (1분)</div>
+      </div>
+      <div class="step-content">
+        <p>가장 쉬운 방법은 <strong>구글 계정으로 가입</strong>하는 것입니다:</p>
+        <ul class="checklist">
+          <li><strong>"Sign up with Google"</strong> 버튼 클릭</li>
+          <li>구글 계정 선택 → 허용</li>
+          <li>가입 완료! (이메일 인증 자동 처리)</li>
+        </ul>
+        <p>구글 계정이 없다면 이메일+비밀번호로도 가입 가능합니다.</p>
+        <div class="screenshot-hint">
+          <div class="emoji">👆</div>
+          "Sign up with Google" 버튼이 화면 중앙에 크게 보입니다
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number apify">3</div>
+        <div class="step-title">API Token 페이지로 이동</div>
+      </div>
+      <div class="step-content">
+        <p>가입 후 대시보드가 열리면, 아래 경로로 이동하세요:</p>
+        <div class="nav-path">
+          <span class="nav-item">왼쪽 메뉴</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item">Settings (⚙️)</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item highlight-cyan">Integrations</span>
+        </div>
+        <p>또는 아래 링크를 직접 클릭하면 바로 이동합니다:</p>
+        <div class="url-box">
+          <span>🔗</span>
+          <a href="https://console.apify.com/account/integrations" target="_blank">https://console.apify.com/account/integrations</a>
+          <button class="copy-btn" onclick="copyText('https://console.apify.com/account/integrations', this)">복사</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number apify">4</div>
+        <div class="step-title">API Token 생성 & 복사</div>
+      </div>
+      <div class="step-content">
+        <p><strong>"+ Add token"</strong> 버튼을 클릭합니다.</p>
+        <ul class="checklist">
+          <li>토큰 이름 입력: <strong>tiktok-trend</strong> (아무 이름 가능)</li>
+          <li><strong>"Save"</strong> 클릭</li>
+          <li>생성된 토큰을 <strong>복사</strong> 버튼으로 복사</li>
+        </ul>
+        <p>토큰은 이런 형태입니다:</p>
+        <div class="key-format">apify_api_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="info-box warning">
+          <div class="label">⚠️ 중요</div>
+          이 토큰은 비밀번호와 같습니다. <strong>절대 다른 사람에게 공유하지 마세요!</strong><br>
+          메모장이나 노트 앱에 안전하게 저장해두세요.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <div class="label">✅ Apify 완료!</div>
+      여기까지 하면 Apify API 키 발급은 끝입니다. 다음은 Claude API 키를 발급할 차례예요.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ==================== CLAUDE ==================== -->
+  <div class="section" id="claude">
+    <div class="section-header">
+      <div class="section-icon claude">🔴</div>
+      <div>
+        <h2>Part 2. Anthropic (Claude) API 키 발급</h2>
+        <p style="color:var(--text-dim);font-size:0.85rem;">AI 기반 바이럴 패턴 분석에 사용</p>
+      </div>
+      <span class="badge badge-paid">유료 (종량제)</span>
+    </div>
+
+    <div class="info-box cost">
+      <div class="label">💰 비용 안내</div>
+      <strong>사용한 만큼만</strong> 과금되는 종량제입니다. (월 고정 요금 없음)<br>
+      바이럴 영상 20개 분석 1회 = 약 <strong>$0.01~0.03</strong> (10~30원 수준)<br>
+      매일 1번 분석해도 한 달에 <strong>1,000원 미만</strong>!<br>
+      <span style="color:var(--orange);">⚠️ API 키 발급 시 <strong>최소 $5 크레딧 충전</strong>이 필요합니다 (약 7,000원)</span>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number claude">1</div>
+        <div class="step-title">Anthropic 콘솔 접속</div>
+      </div>
+      <div class="step-content">
+        <div class="url-box">
+          <span>🔗</span>
+          <a href="https://console.anthropic.com" target="_blank">https://console.anthropic.com</a>
+          <button class="copy-btn" onclick="copyText('https://console.anthropic.com', this)">복사</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number claude">2</div>
+        <div class="step-title">회원가입 (2분)</div>
+      </div>
+      <div class="step-content">
+        <ul class="checklist">
+          <li><strong>"Continue with Google"</strong> 클릭 (구글 계정으로 간편 가입)</li>
+          <li>또는 이메일 + 비밀번호로 가입 가능</li>
+          <li><strong>휴대폰 번호 인증</strong>이 필요합니다 (한국 번호 +82 사용 가능)</li>
+          <li>타입 선택: <strong>"Individual"</strong> 선택 (개인 사용자)</li>
+        </ul>
+        <div class="info-box tip">
+          <div class="label">📱 전화번호 인증 팁</div>
+          한국 번호로 인증할 때: 국가 코드 <strong>+82</strong> 선택 → 010-xxxx-xxxx 에서 앞의 0을 빼고 <strong>10xxxxxxxx</strong> 입력<br>
+          SMS로 인증코드가 옵니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number claude">3</div>
+        <div class="step-title">크레딧 충전 (결제 등록)</div>
+      </div>
+      <div class="step-content">
+        <p>API 키를 사용하려면 먼저 크레딧을 충전해야 합니다:</p>
+        <div class="nav-path">
+          <span class="nav-item">왼쪽 메뉴</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item">Plans & Billing</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item highlight">Add Credits</span>
+        </div>
+        <ul class="checklist">
+          <li>신용카드 또는 체크카드 등록 (비자/마스터 가능)</li>
+          <li>최소 <strong>$5</strong> 충전 (약 7,000원)</li>
+          <li>이 크레딧으로 수백 번 분석 가능!</li>
+        </ul>
+        <div class="info-box tip">
+          <div class="label">💡 비용 관리 팁</div>
+          Settings → Limits에서 <strong>월간 사용 한도</strong>를 설정할 수 있어요.<br>
+          예: 월 $5 한도로 설정하면 그 이상은 자동 차단됩니다. 과금 걱정 없이 안심하고 사용하세요!
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number claude">4</div>
+        <div class="step-title">API 키 생성 & 복사</div>
+      </div>
+      <div class="step-content">
+        <div class="nav-path">
+          <span class="nav-item">왼쪽 메뉴</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item highlight">API Keys</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item highlight">+ Create Key</span>
+        </div>
+        <p>또는 아래 링크를 직접 클릭:</p>
+        <div class="url-box">
+          <span>🔗</span>
+          <a href="https://console.anthropic.com/settings/keys" target="_blank">https://console.anthropic.com/settings/keys</a>
+          <button class="copy-btn" onclick="copyText('https://console.anthropic.com/settings/keys', this)">복사</button>
+        </div>
+        <ul class="checklist">
+          <li><strong>"Create Key"</strong> 버튼 클릭</li>
+          <li>키 이름 입력: <strong>tiktok-analyzer</strong> (아무 이름 가능)</li>
+          <li>생성된 키를 <strong>즉시 복사</strong>해서 저장!</li>
+        </ul>
+        <p>키는 이런 형태입니다:</p>
+        <div class="key-format">sk-ant-api03-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="info-box warning">
+          <div class="label">🚨 매우 중요</div>
+          <strong>이 키는 딱 한 번만 표시됩니다!</strong> 창을 닫으면 다시 볼 수 없어요.<br>
+          반드시 메모장이나 노트 앱에 복사해서 안전하게 저장하세요.<br>
+          만약 저장하지 못했다면, 기존 키를 삭제하고 새로 만들면 됩니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box tip">
+      <div class="label">✅ Claude API 완료!</div>
+      두 가지 API 키가 모두 준비되었습니다! 이제 수집기에 연결하면 됩니다.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ==================== CONNECT ==================== -->
+  <div class="section" id="connect">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(212,160,30,0.12);">⚡</div>
+      <div>
+        <h2>Part 3. 수집기에 키 연결하기</h2>
+        <p style="color:var(--text-dim);font-size:0.85rem;">30초면 됩니다!</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number" style="background:rgba(212,160,30,0.15);color:var(--gold);">1</div>
+        <div class="step-title">틱톡 트렌드 수집기 열기</div>
+      </div>
+      <div class="step-content">
+        <p>다운로드한 <strong>틱톡_트렌드_수집기.html</strong> 파일을 더블클릭해서 브라우저에서 여세요.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number" style="background:rgba(212,160,30,0.15);color:var(--gold);">2</div>
+        <div class="step-title">API 키 입력</div>
+      </div>
+      <div class="step-content">
+        <p>오른쪽 상단의 <strong>🔑 API 설정</strong> 버튼을 클릭하세요:</p>
+        <ul class="checklist">
+          <li><strong>Apify API Token</strong> 칸에 → apify_api_XXX... 키 붙여넣기</li>
+          <li><strong>Anthropic API Key</strong> 칸에 → sk-ant-api03-XXX... 키 붙여넣기</li>
+          <li><strong>"저장"</strong> 버튼 클릭</li>
+        </ul>
+        <p>상단에 <strong>Apify ✅ 연결</strong>, <strong>Claude ✅ 연결</strong> 이 표시되면 성공!</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number" style="background:rgba(78,204,163,0.15);color:var(--green);">3</div>
+        <div class="step-title">🎉 실제 데이터로 수집 시작!</div>
+      </div>
+      <div class="step-content">
+        <p><strong>🚀 트렌드 수집 시작</strong> 버튼을 클릭하면 실제 틱톡 데이터가 수집됩니다!</p>
+        <ul class="checklist">
+          <li>실제 틱톡 트렌딩 영상이 국가별로 수집됨</li>
+          <li>바이럴 스코어가 실시간으로 계산됨</li>
+          <li>Claude가 AI 기반으로 패턴을 심층 분석</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ==================== COMPARISON ==================== -->
+  <div class="section">
+    <h3 style="margin-bottom:16px; font-size:1.1rem;">📊 두 API 키 한눈에 비교</h3>
+    <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <thead>
+          <tr><th>항목</th><th>Apify</th><th>Anthropic (Claude)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>용도</td><td>틱톡 데이터 수집</td><td>AI 패턴 분석</td></tr>
+          <tr><td>가격</td><td>무료 ($5 크레딧/월)</td><td>종량제 (최소 $5 충전)</td></tr>
+          <tr><td>카드 등록</td><td>❌ 불필요</td><td>✅ 필요</td></tr>
+          <tr><td>전화 인증</td><td>❌ 불필요</td><td>✅ 필요</td></tr>
+          <tr><td>키 형태</td><td style="font-family:'JetBrains Mono';font-size:0.78rem;">apify_api_XXX...</td><td style="font-family:'JetBrains Mono';font-size:0.78rem;">sk-ant-api03-XXX...</td></tr>
+          <tr><td>없으면?</td><td>데모 데이터 사용</td><td>기본 통계 분석만</td></tr>
+          <tr><td>발급 소요시간</td><td>2분</td><td>5분</td></tr>
+          <tr><td>발급 페이지</td><td>console.apify.com</td><td>console.anthropic.com</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ==================== FAQ ==================== -->
+  <div class="section" id="faq">
+    <h2 style="margin-bottom:20px; font-size:1.2rem;">❓ 자주 묻는 질문</h2>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">API 키 없이도 사용할 수 있나요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        네! API 키 없이도 <strong>데모 모드</strong>로 모든 기능을 체험할 수 있어요. 데모 모드에서는 가상의 한국어 데이터로 바이럴 스코어 계산, 시각화, 기본 분석까지 모두 작동합니다. 실제 틱톡 데이터를 수집하고 싶을 때만 API 키를 발급하면 됩니다.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Apify만 연결하고 Claude는 안 해도 되나요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        네! Apify만 연결하면 <strong>실제 틱톡 데이터 수집 + 바이럴 스코어 + 시각화</strong>까지 모두 작동합니다. Claude API는 "AI 패턴 분석" 기능에만 필요해요. Claude 없이도 기본 통계 분석(해시태그 빈도, 평균 점수 등)은 자동으로 제공됩니다.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">비용이 갑자기 많이 나올 수 있나요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        걱정 마세요! <strong>Apify</strong>는 무료 크레딧($5/월) 내에서 충분히 사용 가능하고, 초과하면 자동 중단됩니다. <strong>Claude</strong>는 Settings → Limits에서 월간 한도를 $5로 설정하면 그 이상 과금되지 않아요. 수집기에서 1회 분석에 드는 비용은 10~30원 수준입니다.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">키를 분실했어요. 어떻게 하나요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <strong>Apify</strong>: Integrations 페이지에서 기존 토큰을 삭제하고 새로 만들면 됩니다.<br>
+        <strong>Claude</strong>: API Keys 페이지에서 기존 키를 삭제(Revoke)하고 "Create Key"로 새로 발급하세요.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">한국 카드로 결제 가능한가요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        네! 국내 발급 <strong>비자(Visa) 또는 마스터카드(Mastercard)</strong>가 있으면 결제 가능합니다. 체크카드도 됩니다. Apify 무료 플랜은 카드 등록 자체가 필요 없어요.
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">브라우저를 닫으면 키가 사라지나요?</div>
+      <div class="faq-a"><div class="faq-a-inner">
+        HTML 수집기에서는 <strong>브라우저를 닫으면 입력한 키가 초기화</strong>됩니다. 다음에 다시 열면 키를 다시 붙여넣기해야 해요. 그래서 키를 메모장에 별도 저장해두시는 걸 추천합니다!
+      </div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FINAL -->
+  <div class="final-section">
+    <h2>🎉 준비 완료!</h2>
+    <p style="color:var(--text-dim); margin-bottom:20px;">
+      API 키를 모두 발급했다면, 이제 <strong>틱톡_트렌드_수집기.html</strong>을 열고<br>
+      🔑 API 설정 → 키 입력 → 🚀 트렌드 수집 시작!
+    </p>
+    <p style="font-size:0.82rem; color:var(--text-muted);">
+      막히는 부분이 있으면 Claude에게 언제든 질문하세요 😊
+    </p>
+  </div>
+
+</div>
+
+<script>
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '복사';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✅ 복사됨';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '복사';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

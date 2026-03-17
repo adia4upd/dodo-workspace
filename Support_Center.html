@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📞 고객센터 - DODO WORKSPACE</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0d0f;--bg-card:#18181e;--bg-step:#1a1a22;--bg-input:#20202a;
+  --border:#2a2a32;--border-hover:rgba(255,255,255,0.10);
+  --text:#f0ece4;--text-dim:#8a8680;--text-muted:#5a5650;
+  --gold:#d4a01e;--gold-light:#e8b330;--gold-dim:#a07a15;
+  --gold-glow:rgba(212,160,30,0.12);--gold-border:rgba(212,160,30,0.25);--gold-border-dim:rgba(212,160,30,0.10);
+  --green:#4ecca3;--red:#e07050;--purple:#a78bfa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR','Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding-bottom:80px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 10%,rgba(212,160,30,.04) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(212,160,30,.03) 0%,transparent 50%);pointer-events:none}
+
+.header{text-align:center;padding:60px 20px 40px;position:relative}
+.header-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--gold-border);border-radius:100px;font-size:.75rem;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px;font-family:'Plus Jakarta Sans',sans-serif}
+.header h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.header p{color:var(--text-dim);font-size:1rem;max-width:550px;margin:0 auto;font-weight:300}
+
+.container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--gold-dim);text-decoration:none;font-size:.85rem;font-weight:500;margin-bottom:24px;transition:color .2s}.back-link:hover{color:var(--gold)}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
+.tab{padding:14px 24px;font-size:14px;font-weight:600;color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab .count{font-size:11px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(232,80,60,0.12);color:#e8503c}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeUp .4s ease}
+
+/* Notice card */
+.notice-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:all .3s}
+.notice-card:hover{border-color:var(--gold-border-dim)}
+.notice-header{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;transition:background .2s}
+.notice-header:hover{background:rgba(255,255,255,0.02)}
+.notice-type{font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;letter-spacing:.5px;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif}
+.type-notice{background:rgba(212,160,30,0.12);color:var(--gold);border:1px solid var(--gold-border-dim)}
+.type-update{background:rgba(78,204,163,0.1);color:var(--green);border:1px solid rgba(78,204,163,0.15)}
+.type-important{background:rgba(224,112,80,0.1);color:var(--red);border:1px solid rgba(224,112,80,0.15)}
+.notice-title{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+.notice-date{font-size:11px;color:var(--text-muted);font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0}
+.notice-arrow{color:var(--text-muted);font-size:10px;transition:transform .2s;flex-shrink:0}
+.notice-card.open .notice-arrow{transform:rotate(180deg)}
+.notice-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.notice-card.open .notice-body{max-height:600px}
+.notice-body-inner{padding:0 22px 22px;padding-left:58px;color:var(--text-dim);font-size:14px;line-height:1.85}
+.notice-body-inner p{margin-bottom:10px}
+.notice-body-inner strong{color:var(--text);font-weight:600}
+.notice-body-inner ul{margin:8px 0;padding-left:20px}
+.notice-body-inner li{margin-bottom:4px}
+
+/* Pinned */
+.notice-card.pinned{border-color:var(--gold-border-dim);background:linear-gradient(135deg,rgba(212,160,30,0.03),transparent)}
+.notice-card.pinned .notice-title{color:var(--gold-light)}
+.pin-icon{font-size:12px;color:var(--gold-dim);flex-shrink:0}
+
+/* FAQ */
+.faq-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:all .3s}
+.faq-card:hover{border-color:var(--gold-border-dim)}
+.faq-q{display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;transition:background .2s}
+.faq-q:hover{background:rgba(255,255,255,0.02)}
+.faq-q-icon{width:28px;height:28px;border-radius:8px;background:var(--gold-glow);border:1px solid var(--gold-border-dim);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--gold);font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0}
+.faq-q-text{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+.faq-arrow{color:var(--text-muted);font-size:10px;transition:transform .2s}
+.faq-card.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.faq-card.open .faq-a{max-height:500px}
+.faq-a-inner{padding:0 22px 22px;padding-left:62px;color:var(--text-dim);font-size:14px;line-height:1.85}
+.faq-a-inner strong{color:var(--text);font-weight:600}
+
+/* Category filter */
+.cat-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.cat-btn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;font-family:inherit;transition:all .2s}
+.cat-btn:hover{border-color:var(--gold-border-dim);color:var(--text)}
+.cat-btn.active{background:var(--gold-glow);border-color:var(--gold-border);color:var(--gold)}
+
+/* Empty */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-muted)}
+.empty-state .emoji{font-size:40px;margin-bottom:14px;filter:grayscale(0.4)}
+
+/* Contact box */
+.contact-box{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-top:32px;text-align:center}
+.contact-box h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px}
+.contact-box p{font-size:13px;color:var(--text-dim);margin-bottom:16px}
+.contact-channels{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.contact-btn{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;transition:all .3s;display:flex;align-items:center;gap:8px;font-family:inherit}
+.contact-btn.email{background:rgba(212,160,30,0.08);border:1px solid var(--gold-border-dim);color:var(--gold)}
+.contact-btn.email:hover{background:rgba(212,160,30,0.15);border-color:var(--gold-border)}
+.contact-btn.kakao{background:rgba(254,229,0,0.08);border:1px solid rgba(254,229,0,0.15);color:#fee500}
+.contact-btn.kakao:hover{background:rgba(254,229,0,0.15)}
+
+/* Search */
+.search-box{margin-bottom:24px}
+.search-input{width:100%;padding:14px 20px 14px 44px;background:var(--bg-step);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:all .3s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a5650' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:16px center}
+.search-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+.search-input::placeholder{color:var(--text-muted)}
+
+.divider{height:1px;background:var(--border);margin:40px 0}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:640px){
+  .header h1{font-size:1.7rem}
+  .notice-body-inner{padding-left:22px}
+  .faq-a-inner{padding-left:22px}
+  .tabs{overflow-x:auto}
+  .container{padding:0 16px}
+}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">DODO · Support</div>
+  <h1>📞 고객센터</h1>
+  <p>공지사항, 자주 묻는 질문, 문의 안내를 확인하세요.</p>
+</div>
+
+<div class="container">
+  <a class="back-link" href="DODO_WORKSPACE_index.html">← ⚡ DODO WORKSPACE 홈으로 돌아가기</a>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="notice" onclick="switchTab('notice')">📢 공지사항 <span class="count" id="notice-count" style="display:none"></span></button>
+    <button class="tab" data-tab="faq" onclick="switchTab('faq')">❓ FAQ</button>
+  </div>
+
+  <!-- Notice Tab -->
+  <div class="tab-content active" id="tab-notice">
+    <div id="notice-list"></div>
+  </div>
+
+  <!-- FAQ Tab -->
+  <div class="tab-content" id="tab-faq">
+    <div class="search-box">
+      <input class="search-input" id="faq-search" placeholder="궁금한 내용을 검색하세요..." oninput="filterFaq()">
+    </div>
+    <div class="cat-filter" id="faq-cats"></div>
+    <div id="faq-list"></div>
+  </div>
+
+  <!-- Contact -->
+  <div class="contact-box">
+    <h3>📮 추가 문의가 필요하신가요?</h3>
+    <p>아래 채널을 통해 언제든 문의해주세요.</p>
+    <div class="contact-channels" id="contact-channels"></div>
+  </div>
+</div>
+
+<script>
+// =========================================================
+//  ★ 공지사항 설정 — 여기에 공지를 추가하세요! ★
+//
+//  type: "notice" (일반) / "update" (업데이트) / "important" (중요)
+//  pinned: true면 상단 고정
+// =========================================================
+const NOTICES = [
+  {
+    type: "notice",
+    title: "⚡ DODO WORKSPACE v1.0 오픈",
+    date: "2026-03-17",
+    pinned: true,
+    body: `
+      <p>DODO WORKSPACE가 공식 오픈했습니다!</p>
+      <p>6개 콘텐츠 제작 도구를 하나의 워크스페이스에서 관리할 수 있습니다:</p>
+      <ul>
+        <li>🎯 서치 트렌드 — 유튜브 트렌드 키워드 분석</li>
+        <li>🎬 스크립트 AI 스튜디오 — AI 스크립트 자동 생성</li>
+        <li>🎵 플레이리스트 AI 스튜디오 — 음악 프롬프트 생성</li>
+        <li>🛒 쇼핑숏츠 스튜디오 — 쇼핑 숏폼 대본 제작</li>
+        <li>🚀 채널스타트 글로벌번역 — 채널 세팅 & 번역</li>
+        <li>🔥 틱톡 트렌드 수집기 — 틱톡 바이럴 분석</li>
+      </ul>
+      <p>각 도구별 <strong>사용법 가이드</strong>도 함께 제공됩니다. 문의사항은 하단 채널을 이용해주세요.</p>
+    `
+  },
+  // 아래에 새 공지를 추가하세요:
+  // {
+  //   type: "update",
+  //   title: "서치 트렌드 v1.1 업데이트",
+  //   date: "2026-03-20",
+  //   pinned: false,
+  //   body: `<p>검색 필터 UI가 개선되었습니다.</p>`
+  // },
+];
+
+// =========================================================
+//  ★ FAQ 설정 — 여기에 질문/답변을 추가하세요! ★
+//
+//  cat: 카테고리 (자유롭게 추가 가능)
+// =========================================================
+const FAQS = [
+  { cat: "시작하기", q: "처음 사용하는데 어떻게 시작하나요?", a: "ZIP 파일을 압축 해제한 후, <strong>DODO_WORKSPACE_index.html</strong>을 더블클릭하여 브라우저에서 여세요. 대시보드에서 각 도구를 클릭하면 새 탭에서 실행됩니다." },
+  { cat: "시작하기", q: "API 키는 어디서 발급받나요?", a: "대시보드 상단의 <strong>🔑 API 키 발급 가이드</strong> 또는 <strong>🎬 YouTube API 키 발급 가이드</strong> 배너를 클릭하면 단계별 안내를 확인할 수 있습니다." },
+  { cat: "시작하기", q: "비밀번호는 어디서 받나요?", a: "각 프로그램의 비밀번호는 <strong>관리자에게 문의</strong>해주세요. 비밀번호는 보안을 위해 암호화되어 있어 복구가 불가능하며, 분실 시 새로 설정해야 합니다." },
+  { cat: "API", q: "YouTube API는 무료인가요?", a: "네, YouTube Data API v3는 <strong>완전 무료</strong>입니다. 일일 10,000 할당량 단위가 제공되며, 신용카드 등록 없이 사용 가능합니다." },
+  { cat: "API", q: "Claude API 비용은 얼마인가요?", a: "Claude API는 사용량 기반 과금입니다. 스크립트 1건 생성 = 약 <strong>10~50원</strong> 수준이며, Settings → Limits에서 월간 한도를 설정하면 과금 걱정 없이 사용 가능합니다." },
+  { cat: "API", q: "Apify API는 무료인가요?", a: "Apify는 매월 <strong>$5 무료 크레딧</strong>이 제공됩니다. 틱톡 트렌드 수집에 사용되며, 월 50회 이상 수집이 가능합니다. 신용카드 등록 불필요." },
+  { cat: "API", q: "할당량 초과 오류가 떠요", a: "YouTube API: 다음 날 오후 5시(한국시간)에 자동 리셋. Apify: 월초에 크레딧 리셋. Claude: Settings에서 충전 또는 한도 확인." },
+  { cat: "도구 사용", q: "카드 순서를 바꿀 수 있나요?", a: "네! 대시보드 우측 상단의 <strong>\"배치 편집\"</strong> 버튼을 클릭 → 카드를 드래그앤드롭으로 원하는 순서로 이동 → \"편집 완료\" 클릭. 순서는 브라우저에 자동 저장됩니다." },
+  { cat: "도구 사용", q: "각 도구의 사용법은 어디서 보나요?", a: "대시보드 하단의 <strong>📖 사용법 가이드</strong> 섹션에서 각 도구별 가이드를 확인하거나, 각 카드의 📖 버튼을 클릭하세요." },
+  { cat: "도구 사용", q: "여러 도구를 동시에 사용할 수 있나요?", a: "네! 각 도구는 <strong>새 탭</strong>에서 열리므로 여러 도구를 동시에 사용할 수 있습니다. 브라우저 탭 간에 자유롭게 전환하세요." },
+  { cat: "업데이트", q: "파일이 업데이트되면 어떻게 하나요?", a: "대시보드의 <strong>🔔 업데이트 파일</strong> 섹션에서 변경된 파일을 확인하고 다운로드하세요. 다운로드한 파일을 같은 폴더에 덮어씌우면 됩니다." },
+  { cat: "업데이트", q: "전체 파일을 다시 받아야 하나요?", a: "아니요! 변경된 파일만 다운로드하여 기존 파일을 교체하면 됩니다. 전체 재설치는 필요 없습니다." },
+  { cat: "문제 해결", q: "파일을 열면 '액세스할 수 없음' 오류가 떠요", a: "모든 파일이 <strong>같은 폴더</strong>에 있는지 확인하세요. 파일이 다른 폴더에 흩어져 있으면 링크가 작동하지 않습니다. ZIP을 한 폴더에 압축 해제하면 해결됩니다." },
+  { cat: "문제 해결", q: "브라우저를 닫으면 API 키가 사라져요", a: "도구별로 <strong>\"키 저장\"</strong> 토글이 있습니다. 이를 켜면 브라우저에 암호화되어 저장되므로 다음에 자동 입력됩니다. 공용 PC에서는 끄는 것을 권장합니다." },
+  { cat: "문제 해결", q: "인터넷이 안 되는 환경에서도 사용 가능한가요?", a: "대시보드와 가이드는 오프라인에서도 열립니다. 하지만 각 도구는 <strong>API 호출이 필요</strong>하므로 인터넷 연결이 있어야 정상 작동합니다." },
+];
+
+// =========================================================
+//  ★ 문의 채널 설정 — 연락처를 수정하세요! ★
+// =========================================================
+const CONTACTS = [
+  { type: "email", label: "이메일 문의", href: "mailto:aha7kim@naver.com", icon: "✉️" },
+];
+// =========================================================
+
+// Render notices
+function renderNotices() {
+  const list = document.getElementById('notice-list');
+  if (!NOTICES.length) {
+    list.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>등록된 공지사항이 없습니다.</p></div>';
+    return;
+  }
+  const sorted = [...NOTICES].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  const typeLabel = { notice: '공지', update: '업데이트', important: '중요' };
+  list.innerHTML = sorted.map((n, i) => `
+    <div class="notice-card ${n.pinned ? 'pinned' : ''}" onclick="this.classList.toggle('open')">
+      <div class="notice-header">
+        <span class="notice-type type-${n.type}">${typeLabel[n.type] || '공지'}</span>
+        ${n.pinned ? '<span class="pin-icon">📌</span>' : ''}
+        <span class="notice-title">${n.title}</span>
+        <span class="notice-date">${n.date}</span>
+        <span class="notice-arrow">▼</span>
+      </div>
+      <div class="notice-body"><div class="notice-body-inner">${n.body}</div></div>
+    </div>
+  `).join('');
+
+  const important = NOTICES.filter(n => n.type === 'important').length;
+  const countEl = document.getElementById('notice-count');
+  if (important) { countEl.textContent = important; countEl.style.display = 'inline'; }
+}
+
+// Render FAQ
+let activeCat = 'all';
+
+function renderFaqCats() {
+  const cats = ['all', ...new Set(FAQS.map(f => f.cat))];
+  const el = document.getElementById('faq-cats');
+  el.innerHTML = cats.map(c =>
+    `<button class="cat-btn ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c === 'all' ? '전체' : c}</button>`
+  ).join('');
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  renderFaqCats();
+  filterFaq();
+}
+
+function filterFaq() {
+  const q = document.getElementById('faq-search').value.toLowerCase();
+  const list = document.getElementById('faq-list');
+  let filtered = FAQS;
+  if (activeCat !== 'all') filtered = filtered.filter(f => f.cat === activeCat);
+  if (q) filtered = filtered.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q));
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><div class="emoji">🔍</div><p>검색 결과가 없습니다.</p></div>';
+    return;
+  }
+  list.innerHTML = filtered.map((f, i) => `
+    <div class="faq-card" onclick="this.classList.toggle('open')">
+      <div class="faq-q">
+        <div class="faq-q-icon">Q</div>
+        <span class="faq-q-text">${f.q}</span>
+        <span class="faq-arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">${f.a}</div></div>
+    </div>
+  `).join('');
+}
+
+// Render contacts
+function renderContacts() {
+  const el = document.getElementById('contact-channels');
+  el.innerHTML = CONTACTS.map(c =>
+    `<a class="contact-btn ${c.type}" href="${c.href}" target="_blank">${c.icon} ${c.label}</a>`
+  ).join('');
+}
+
+// Tab switch
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+}
+
+// Init
+renderNotices();
+renderFaqCats();
+filterFaq();
+renderContacts();
+</script>
+</body>
+</html>

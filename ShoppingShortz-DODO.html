@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> 🛒 쇼핑숏츠 스튜디오-DODO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--page:#111113;--card:#1B1B1F;--inner:#131315;--input:#0E0E10;--bdr:#2A2A2E;--bdr-in:#232327;--bdr-focus:#D4951C;--orange:#F5A623;--orange-d:rgba(245,166,35,.12);--amber:#E8B731;--amber-d:rgba(232,183,49,.12);--amber-t:#F0C95C;--green:#4ADE80;--green-d:rgba(74,222,128,.10);--blue:#60A5FA;--blue-d:rgba(96,165,250,.10);--rose:#F87171;--rose-d:rgba(248,113,113,.10);--purple:#C084FC;--purple-d:rgba(192,132,252,.10);--cyan:#22D3EE;--cyan-d:rgba(34,211,238,.10);--pink:#F472B6;--pink-d:rgba(244,114,182,.10);--white:#fff;--t1:#E4E4E8;--t2:#9E9EA8;--t3:#5C5C66;--ff:'Pretendard Variable',Pretendard,-apple-system,sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ff);background:var(--page);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:4px}
+@keyframes wave{0%{height:6px}25%{height:22px}50%{height:10px}75%{height:28px}100%{height:6px}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fillFlash{0%{border-color:var(--green);box-shadow:0 0 8px rgba(74,222,128,.2)}100%{border-color:var(--bdr-in);box-shadow:none}}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px}.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:22px;margin-bottom:16px;transition:border-color .3s ease,box-shadow .3s ease}.card:hover{border-color:rgba(245,166,35,.12);box-shadow:0 2px 16px rgba(0,0,0,.15)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.card-hdr-left{display:flex;align-items:center;gap:8px}.card-hdr-left .emoji{font-size:18px}.card-hdr-left .title{font-size:16px;font-weight:700;color:var(--white)}
+.badge{background:var(--inner);border:1px solid var(--bdr-in);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--t2);font-family:var(--mono)}
+.tag{display:inline-block;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;line-height:1.3}
+.lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;color:var(--t3)}
+.inp{width:100%;padding:12px 14px;border-radius:10px;background:var(--input);border:1px solid var(--bdr-in);color:var(--t1);font-size:14px;outline:none;font-family:var(--ff);transition:all .25s ease}.inp:focus{border-color:var(--bdr-focus);box-shadow:0 0 12px rgba(212,149,28,.1)}.inp:hover{border-color:rgba(212,149,28,.2)}.inp::placeholder{color:var(--t3)}textarea.inp{resize:vertical}
+.btn-amber{padding:7px 14px;border-radius:8px;background:var(--amber-d);border:1px solid rgba(232,183,49,.33);color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);transition:all .25s ease}.btn-amber:hover{background:rgba(232,183,49,.22);transform:translateY(-2px);box-shadow:0 4px 12px rgba(232,183,49,.15)}.btn-amber:active{transform:translateY(0);box-shadow:none}.btn-amber.sm{padding:4px 10px;font-size:11px}.btn-amber.active{background:var(--green-d);border-color:rgba(74,222,128,.33);color:var(--green)}
+.btn-primary{width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,#E8A020,#D4951C);border:none;color:#000;font-size:16px;font-weight:800;cursor:pointer;font-family:var(--ff);position:relative;overflow:hidden;transition:all .3s ease}.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(232,160,32,.4)}.btn-primary:active{transform:translateY(-1px)}.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary .shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:shimmer 3s ease-in-out infinite;background-size:200% 100%}
+.inner-box{background:var(--inner);border:1px solid var(--bdr-in);border-radius:10px;padding:14px}
+.prompt-block{background:#0A0A0C;border-radius:10px;overflow:hidden;margin-top:8px}.prompt-block-hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}.prompt-block-hdr .label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700}.prompt-block-hdr .lang{font-size:9px;font-weight:600;color:var(--t3);background:var(--inner);padding:1px 6px;border-radius:4px}.prompt-block-body{padding:10px 12px;font-size:12px;font-family:var(--mono);color:var(--t1);line-height:1.7;word-break:break-word}
+.dur-btn{flex:1;padding:11px;border-radius:9px;background:var(--inner);border:1px solid var(--bdr-in);color:var(--t3);cursor:pointer;font-size:14px;font-weight:600;font-family:var(--ff);transition:all .25s ease}.dur-btn:hover{border-color:rgba(245,166,35,.2);color:var(--t2);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.2)}.dur-btn.active{background:var(--orange-d);border-color:rgba(245,166,35,.27);color:var(--orange)}
+.scene-card{background:var(--inner);border:1px solid var(--bdr-in);border-radius:12px;overflow:hidden;border-left:3px solid var(--purple);margin-bottom:8px}
+.scene-hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bdr-in)}.scene-num{width:26px;height:26px;border-radius:7px;background:var(--purple-d);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--mono)}
+.scene-tabs{display:flex;gap:2px;padding:6px 10px;border-bottom:1px solid var(--bdr-in);background:#0C0C0E;overflow-x:auto}.scene-tab{padding:5px 10px;border-radius:6px;border:none;background:transparent;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:all .2s ease}.scene-tab:hover{color:var(--t1);background:rgba(255,255,255,.04)}.scene-tab.active{color:var(--orange);background:rgba(245,166,35,.08)}
+.scene-body{padding:12px 14px}
+.accordion{background:var(--card);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;margin-bottom:10px;transition:all .25s ease}.accordion:hover{border-color:rgba(245,166,35,.15);box-shadow:0 2px 12px rgba(0,0,0,.15)}.accordion.open{border-color:rgba(245,166,35,.2)}.accordion-hdr{padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .2s}.accordion-hdr:hover{background:rgba(255,255,255,.02)}.tag-circle{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:var(--mono)}.accordion-body{padding:0 18px 18px;display:none}.accordion.open .accordion-body{display:block}
+.hook-box{background:var(--inner);border-radius:10px;padding:14px 16px;position:relative;margin-bottom:12px}.hook-label{position:absolute;top:-1px;left:14px;padding:2px 8px;border-radius:0 0 5px 5px;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#000}
+.hashtag{padding:5px 12px;border-radius:7px;background:var(--card);border:1px solid var(--bdr);color:var(--amber-t);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s ease}.hashtag:hover{border-color:rgba(232,183,49,.3);background:var(--amber-d);transform:translateY(-2px);box-shadow:0 3px 10px rgba(232,183,49,.1)}
+.wave-bar{width:3px;border-radius:2px;background:linear-gradient(180deg,var(--orange),var(--amber))}
+.msg-box{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5}.msg-box.err{background:var(--rose-d);border:1px solid rgba(248,113,113,.2);color:var(--rose)}.msg-box.ok{background:var(--green-d);border:1px solid rgba(74,222,128,.2);color:var(--green)}.msg-box.info{background:var(--blue-d);border:1px solid rgba(96,165,250,.2);color:var(--blue)}
+.hidden{display:none}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.mb-10{margin-bottom:10px}.mb-14{margin-bottom:14px}.mb-16{margin-bottom:16px}.text-center{text-align:center}.flex-col{display:flex;flex-direction:column;gap:5px}
+.field-filled{animation:fillFlash .8s ease-out}
+.method-tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--inner);border-radius:10px;padding:4px}.method-tab{flex:1;padding:8px;border-radius:7px;border:none;background:transparent;color:var(--t3);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .25s ease}.method-tab:hover{color:var(--t2);background:rgba(255,255,255,.03);transform:translateY(-1px)}.method-tab .te{font-size:16px}.method-tab.active{background:var(--card);color:var(--orange);border:1px solid var(--bdr);transform:translateY(-1px)}.method-tab .rec{font-size:9px;color:var(--green);font-weight:700}
+.btn-analyze{padding:10px 16px;border-radius:10px;background:var(--orange-d);border:1px solid rgba(245,166,35,.27);color:var(--orange);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--ff);width:100%;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .25s ease}.btn-analyze:hover{background:rgba(245,166,35,.2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(245,166,35,.15)}.btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}.btn-analyze .spinner{width:14px;height:14px;border:2px solid transparent;border-top-color:var(--orange);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.screenshot-zone{background:var(--inner);border:2px dashed var(--bdr-in);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .3s ease}.screenshot-zone:hover{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.03);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.2)}.screenshot-zone.has-img{border-style:solid;border-color:var(--green);padding:0;overflow:hidden;position:relative}.screenshot-zone.has-img img{width:100%;max-height:280px;object-fit:contain;display:block;background:#0a0a0c}
+.key-display{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);font-family:var(--mono);font-size:12px;color:var(--t2);margin-bottom:10px;flex-wrap:wrap}.key-btns{margin-left:auto;display:flex;gap:6px}
+.btn-test{padding:4px 10px;border-radius:6px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);color:var(--cyan);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ff);transition:all .2s ease}.btn-test:hover{background:rgba(34,211,238,.15);transform:translateY(-1px);box-shadow:0 2px 8px rgba(34,211,238,.1)}
+.btn-danger{padding:4px 10px;border-radius:6px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:var(--rose);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ff);transition:all .2s ease}.btn-danger:hover{background:rgba(248,113,113,.15);transform:translateY(-1px);box-shadow:0 2px 8px rgba(248,113,113,.1)}
+/* Tone styles */
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.style-card{padding:12px;border-radius:10px;background:var(--inner);border:2px solid var(--bdr-in);cursor:pointer;transition:all .25s ease;position:relative}
+.style-card:hover{border-color:rgba(245,166,35,.3);transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.style-card.selected{border-color:var(--orange);background:var(--orange-d);transform:translateY(-2px);box-shadow:0 4px 16px rgba(245,166,35,.15)}
+.style-card .sc-emoji{font-size:20px}
+.style-card .sc-name{color:var(--white);font-size:13px;font-weight:700;margin-top:5px}
+.style-card .sc-desc{color:var(--t3);font-size:10px;margin-top:2px;line-height:1.4;font-style:italic}
+.style-card.selected .sc-desc{color:var(--t2)}
+.style-card .sc-check{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:2px solid var(--bdr-in);display:flex;align-items:center;justify-content:center;font-size:11px}
+.style-card.selected .sc-check{background:var(--orange);border-color:var(--orange);color:#000}
+.harmon-box{padding:14px;border-radius:12px;background:linear-gradient(135deg,rgba(192,132,252,.06),rgba(245,166,35,.06));border:1px solid rgba(192,132,252,.15);margin-bottom:14px}
+.harmon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}
+.harmon-step{padding:5px;border-radius:5px;background:var(--inner);border:1px solid var(--bdr-in);text-align:center;font-size:10px;line-height:1.2}
+.harmon-step .hs-num{font-weight:800;color:var(--purple);font-family:var(--mono)}
+.harmon-step .hs-kr{color:var(--t1);font-weight:600;margin-top:1px}
+.h-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-d);border:1px solid rgba(192,132,252,.2)}
+.load-step{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);margin-bottom:8px;font-size:13px;transition:all .3s}
+.load-step.active{border-color:var(--orange);background:var(--orange-d)}.load-step.done{border-color:rgba(74,222,128,.3);background:var(--green-d)}.load-step.fail{border-color:rgba(248,113,113,.3);background:var(--rose-d)}
+.load-step .icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.load-step.waiting .icon{background:var(--inner);color:var(--t3)}.load-step.active .icon{background:var(--orange);color:#000}.load-step.done .icon{background:var(--green);color:#000}.load-step.fail .icon{background:var(--rose);color:#fff}
+.load-step .text{color:var(--t2)}.load-step.active .text{color:var(--orange);font-weight:600}.load-step.done .text{color:var(--green)}.load-step.fail .text{color:var(--rose)}
+.load-step .timer{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--t3)}
+.btn-cancel{padding:10px 24px;border-radius:10px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:var(--rose);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ff);margin-top:16px;transition:all .2s ease}.btn-cancel:hover{background:rgba(248,113,113,.15);transform:translateY(-2px);box-shadow:0 4px 12px rgba(248,113,113,.1)}
+.btn-selectall{padding:6px 14px;border-radius:8px;background:var(--purple-d);border:1px solid rgba(192,132,252,.2);color:var(--purple);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--ff);transition:all .25s ease}.btn-selectall:hover{background:rgba(192,132,252,.15);transform:translateY(-1px);box-shadow:0 3px 10px rgba(192,132,252,.1)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ═══════════ 15 TONE STYLES (말투) ═══════════ */
+const TONES=[
+  {id:'shock',name:'충격/질문형',emoji:'🧲',desc:'"이거 실화?" "진짜 이 가격에?"',ex:'이거 몰랐으면 큰일날 뻔!',cat:'훅'},
+  {id:'empathy',name:'공감/위로형',emoji:'🫂',desc:'"나도 그랬어..." "이해해..."',ex:'맨날 고민했잖아, 나도 그랬거든',cat:'감성'},
+  {id:'trend',name:'트렌드/유행형',emoji:'🔥',desc:'"요즘 다 이거 씀" "난리남"',ex:'틱톡에서 500만뷰 터진 거 봤어?',cat:'훅'},
+  {id:'meme',name:'밈/드립형',emoji:'😂',desc:'"ㅋㅋㅋ 미쳤다" "이게 되네?"',ex:'아니 이걸 이 가격에 판다고요? ㅋㅋ',cat:'MZ'},
+  {id:'asmr',name:'감성/속삭임형',emoji:'🎧',desc:'"조용히... 느껴봐..." 감각적',ex:'부드러운 텍스처가 손끝에서 녹아내려요',cat:'감성'},
+  {id:'review',name:'솔직 리뷰형',emoji:'📦',desc:'"솔직히 말할게" "장단점 다"',ex:'3주 써봤는데 솔직히 말할게요',cat:'신뢰'},
+  {id:'deal',name:'꿀딜/가성비형',emoji:'💰',desc:'"이 가격 실화?" "지금 아니면"',ex:'오늘만 이 가격! 내일이면 끝!',cat:'전환'},
+  {id:'story',name:'스토리/내러티브형',emoji:'📖',desc:'"그날 우연히..." 미니 서사',ex:'퇴근길에 우연히 발견한 이것...',cat:'감성'},
+  {id:'expert',name:'전문가/권위형',emoji:'👨‍⚕️',desc:'"연구 결과" "전문가 추천"',ex:'피부과 의사인 제가 직접 써본 결과',cat:'신뢰'},
+  {id:'bestie',name:'찐친/절친형',emoji:'🤝',desc:'"야 이거 사" "진짜야 믿어"',ex:'야 나만 알려줄게 이거 진짜 개좋아',cat:'MZ'},
+  {id:'twist',name:'반전/두번봄형',emoji:'🔄',desc:'"처음엔 별로였는데..." 반전',ex:'솔직히 처음엔 후회했어요... 근데요',cat:'훅'},
+  {id:'experiment',name:'실험/검증형',emoji:'🔬',desc:'"직접 해봄" "진짜인지 테스트"',ex:'광고대로인지 직접 실험해봤습니다',cat:'신뢰'},
+  {id:'tmi',name:'TMI/수다형',emoji:'🗯️',desc:'"아무도 안물어봤지만" 수다',ex:'아무도 안 물어봤는데 이거 진짜 TMI인데요',cat:'MZ'},
+  {id:'compare',name:'VS비교형',emoji:'⚔️',desc:'"A vs B 뭐가 나을까?" 비교',ex:'3만원짜리 vs 3천원짜리, 차이 있을까?',cat:'전환'},
+  {id:'mom',name:'엄마/살림형',emoji:'👩‍👧',desc:'"엄마가 써보니까..." 살림 노하우',ex:'20년 살림 경력으로 말하는데 이건 사세요',cat:'신뢰'},
+];
+
+const HARMON=['BEFORE 불편한일상','전환점 알게된계기','의문점 반신반의','체험 장점+단점','AFTER 달라진일상','CTA 진심추천'];
+const PASSWORD='0425';
+
+/* ═══════════ STATE ═══════════ */
+const S={step:localStorage.getItem('dodo_logged_in')?( (localStorage.getItem('dodo_api_key')||(function(){try{return JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}').claude||''}catch(e){return''}}()))?'input':'apisetup' ):'login',apiKey:localStorage.getItem('dodo_api_key')||(function(){try{const c=JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}');return c.claude||''}catch(e){return''}})()||'',method:'screenshot',image:null,preview:null,ssImage:null,ssPreview:null,pasteText:'',searchQuery:'',name:'',price:'',link:'',desc:'',audience:'',dur:'30초',selectedTones:['shock','meme','bestie'],result:null,error:null,analyzing:false,cancelled:false,loadSteps:[],partialResult:{},loginError:'',viewingHistory:null};
+
+/* ═══════════ UTILS ═══════════ */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function maskKey(k){return k?.length>8?'••••'+k.slice(-6):'••••••'}
+function copyText(t,b){navigator.clipboard.writeText(t);const o=b.textContent;b.textContent='✓';b.classList.add('active');setTimeout(()=>{b.textContent=o;b.classList.remove('active')},1200)}
+function syncDOM(){$$('.field').forEach(el=>{if(el.dataset.f)S[el.dataset.f]=el.value})}
+function showMsg(sel,type,text){const el=$(sel);if(!el)return;el.className='msg-box '+type;el.innerHTML=text;el.style.display='block'}
+function hlFields(fs){setTimeout(()=>fs.forEach(f=>{const el=$('[data-f="'+f+'"]');if(el){el.classList.add('field-filled');setTimeout(()=>el.classList.remove('field-filled'),1000)}}),100)}
+
+/* ═══════════ HISTORY ═══════════ */
+function getHistory(){try{return JSON.parse(localStorage.getItem('dodo_history')||'[]')}catch(e){return[]}}
+function saveHistory(h){try{localStorage.setItem('dodo_history',JSON.stringify(h))}catch(e){console.error('History save failed',e)}}
+function addToHistory(result,productName,tones){
+  const h=getHistory();
+  h.unshift({id:Date.now(),date:new Date().toISOString(),productName:productName||'',tones:tones||[],result:result,fav:false});
+  if(h.length>50)h.length=50; // max 50 records
+  saveHistory(h);
+}
+function toggleFav(id){const h=getHistory();const item=h.find(x=>x.id===id);if(item)item.fav=!item.fav;saveHistory(h)}
+function deleteHistory(id){const h=getHistory().filter(x=>x.id!==id);saveHistory(h)}
+function clearAllHistory(){saveHistory([])}
+function fmtDate(iso){const d=new Date(iso);const m=d.getMonth()+1,day=d.getDate(),h=d.getHours(),min=String(d.getMinutes()).padStart(2,'0');return`${m}/${day} ${h}:${min}`}
+function extractJSON(text){if(!text)return null;let c=text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();try{return JSON.parse(c)}catch(e){}let d=0,s=-1;for(let i=0;i<c.length;i++){if(c[i]==='{'){if(!d)s=i;d++}if(c[i]==='}'){d--;if(!d&&s>=0){try{return JSON.parse(c.substring(s,i+1))}catch(e){s=-1}}}}if(s>=0){let p=c.substring(s),ob=0,os=0;for(const ch of p){if(ch==='{')ob++;if(ch==='}')ob--;if(ch==='[')os++;if(ch===']')os--}while(os-->0)p+=']';while(ob-->0)p+='}';try{return JSON.parse(p)}catch(e){}}return null}
+function getResp(d){let t='';(d.content||[]).forEach(b=>{if(b.type==='text')t+=b.text});return t}
+async function readB64(f){return new Promise((r,j)=>{const x=new FileReader();x.onload=()=>r(x.result.split(',')[1]);x.onerror=j;x.readAsDataURL(f)})}
+
+// Compress image to max 1MB for API compatibility
+async function compressImage(file,maxW=1200){
+  return new Promise((resolve)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        let w=img.width,h=img.height;
+        if(w>maxW){h=Math.round(h*(maxW/w));w=maxW}
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        // Try quality levels until under 1MB
+        let quality=0.8;
+        let dataUrl=canvas.toDataURL('image/jpeg',quality);
+        while(dataUrl.length>1400000&&quality>0.3){quality-=0.1;dataUrl=canvas.toDataURL('image/jpeg',quality)}
+        resolve({b64:dataUrl.split(',')[1],mediaType:'image/jpeg'});
+      };
+      img.onerror=()=>resolve(null);
+      img.src=e.target.result;
+    };
+    reader.onerror=()=>resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+async function callAPI(sys,msgs,tools,timeout=120000){
+  const body={model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:msgs};
+  if(tools?.length)body.tools=tools;
+  try{
+    const fetchP=fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify(body)
+    });
+    const timeoutP=new Promise((_,rej)=>setTimeout(()=>rej(new Error('⏰ 타임아웃('+Math.round(timeout/1000)+'초)')),timeout));
+    const res=await Promise.race([fetchP,timeoutP]);
+    if(!res.ok){
+      let errMsg='HTTP '+res.status;
+      try{const ebody=await res.text();const ej=JSON.parse(ebody);errMsg=ej?.error?.message||errMsg}catch(pe){try{errMsg=await res.text()}catch(te){}}
+      throw new Error(errMsg);
+    }
+    const data=await res.json();
+    console.log('[API OK]',data.usage);
+    return data;
+  }catch(e){
+    console.error('[API ERR]',e);
+    throw e;
+  }
+}
+
+/* ═══════════ PROMPTS ═══════════ */
+const EXTRACT_P=`상품 정보 추출. JSON만: {"product_name":"","price":"","description":"200자이상","target_audience":""}`;
+const ANALYSIS_P=`상품 분석. JSON만: {"product_analysis":{"product_name":"","category":"","target_audience":"","usp":["","",""],"pain_points":["",""],"emotional_triggers":["",""],"color_mood":"","platform_notes":{"youtube_shorts":"","instagram_reels":"","tiktok":""}},"thumbnail_ideas":[{"concept":"","main_text":"","sub_text":"","visual_style":"","image_prompt_en":""}],"hashtags":["","","","","","","",""]}`;
+
+function scriptP(toneNames){
+  return `당신은 쇼핑 숏폼 영상 전문 카피라이터입니다.
+
+★★★ 핵심: "상품 설명" 절대 금지! "사람의 체험 스토리"로만 써라 ★★★
+
+❌ 금지: "이 상품은 100% 유기농입니다" → 카탈로그
+✅ 필수: "매일 아침 우유 마시면 배 아팠는데..." → 사람 이야기
+
+★ 6씬 구조: 비포 → 전환 → 의문 → 체험 → 애프터 → CTA
+
+씬1 [BEFORE — 훅] (톤 80%)
+  → "사용 전" 불편한 일상을 생생하게
+  → 시청자가 "나도 그래!" 공감하는 구체적 상황
+  → 예: "매일 아침 우유 마시면 배가 아팠어..."
+  → 화면: 불편한 상황, 어둡고 답답한 무드
+
+씬2 [전환점] (톤 40%)
+  → 누군가/어디서 이 상품을 알게 된 계기
+  → 예: "그러다 친구가 이거 알아보더라고요..."
+  → 화면: 자연스러운 전환, 상품 첫 등장
+
+씬3 [의문점 — 반신반의] (톤 50%)
+  → 써보기 전 걱정/의심/편견을 솔직하게
+  → "그래도 ○○할 것 같은데?" "진짜 되긴 하나?"
+  → 예: "느끼할 것 같았는데 먹어보니..."
+  → 이 씬이 있어야 씬4 체험의 반전이 살아남!
+  → 화면: 반신반의 표정, ?물음표 자막
+
+씬4 [체험 — 반전] (톤 70%)
+  → 실제 사용하며 의문이 깨지는 순간 (오감 묘사)
+  → 예: "처음 딱 먹었을 때 향이 확~ 근데 가격은 좀..."
+  → 반드시 단점/아쉬운점 1가지도 솔직하게 (신뢰도↑)
+  → 화면: 사용 클로즈업, 밝아지는 톤
+
+씬5 [AFTER — 달라진 일상] (톤 40%)
+  → BEFORE씬1과 대비되는 변화된 모습
+  → 같은 상황인데 결과가 다름
+  → 예: "이제 아침마다 배 안 아프고 카페 만드는 게 기다려져"
+  → 화면: 밝고 깨끗한 무드, 비포/애프터 대비
+
+씬6 [CTA — 진심 추천] (톤 100%)
+  → 누구에게 특히 좋은지 + 강력 행동 유도
+  → 예: "유당불내증이면 진짜 이거 써봐. 링크 올려둘게"
+  → 화면: 만족 표정, 상품+사용자, CTA 텍스트/링크
+
+★★ 말투 강약 리듬 ★★
+씬1: ████░ 80% — 공감 훅 (메인톤 강)
+씬2: ██░░░ 40% — 자연스러운 전환
+씬3: ██▓░░ 50% — 의심/걱정 (약간 부정적 톤)
+씬4: ███▓░ 70% — 반전! 체험 감탄 (톤 올라감)
+씬5: ██░░░ 40% — 차분한 비교/입증
+씬6: █████ 100% — 풀파워 CTA
+
+${toneNames.map(t=>{const tone=TONES.find(x=>x.name===t);return tone?`\n▶ "${t}" 톤: ${tone.desc}
+  - 훅(80%): "${tone.ex}"
+  - 의문(50%): 같은 화자가 "근데 이거 진짜 괜찮나?" 느낌
+  - 체험(70%): "어? 생각보다..." 반전 감탄
+  - CTA(100%): 해당 말투로 풀파워 추천`:`- "${t}"`}).join('\n')}
+
+JSON만(백틱없이): {"scripts":[${toneNames.map(t=>`{"style":"${t}","duration":"","hook":"3초훅(BEFORE공감, 톤80%)","concept_summary":"6씬 비포/애프터 체험기 + ${t}","scenes":[{"scene_number":1,"duration":"","harmon_stage":"BEFORE","tone_intensity":"80%","storyboard":{"composition":"","camera_angle":"","camera_movement":"","transition_in":"","color_grade":""},"script":{"narration":"사용전 불편한 일상","screen_text":"","text_animation":"","voice_tone":""},"image_prompt":{"prompt_en":"detailed English 9:16","style_keywords":"","aspect_ratio":"9:16"},"video_prompt":{"prompt_en":"detailed English","motion_type":"","duration_seconds":3},"audio":{"sfx":"","bgm_sync":""}},{"scene_number":2,"duration":"","harmon_stage":"전환점","tone_intensity":"40%","storyboard":{"composition":"","camera_angle":"","camera_movement":"","transition_in":"","color_grade":""},"script":{"narration":"알게 된 계기","screen_text":"","text_animation":"","voice_tone":""},"image_prompt":{"prompt_en":"","style_keywords":"","aspect_ratio":"9:16"},"video_prompt":{"prompt_en":"","motion_type":"","duration_seconds":3},"audio":{"sfx":"","bgm_sync":""}},{"scene_number":3,"duration":"","harmon_stage":"의문점","tone_intensity":"50%","storyboard":{"composition":"","camera_angle":"","camera_movement":"","transition_in":"","color_grade":""},"script":{"narration":"반신반의 의심","screen_text":"","text_animation":"","voice_tone":""},"image_prompt":{"prompt_en":"","style_keywords":"","aspect_ratio":"9:16"},"video_prompt":{"prompt_en":"","motion_type":"","duration_seconds":3},"audio":{"sfx":"","bgm_sync":""}},{"scene_number":4,"duration":"","harmon_stage":"체험","tone_intensity":"70%","storyboard":{"composition":"","camera_angle":"","camera_movement":"","transition_in":"","color_grade":""},"script":{"narration":"반전체험+단점1개","screen_text":"","text_animation":"","voice_tone":""},"image_prompt":{"prompt_en":"","style_keywords":"","aspect_ratio":"9:16"},"video_prompt":{"prompt_en":"","motion_type":"","duration_seconds":3},"audio":{"sfx":"","bgm_sync":""}},{"scene_number":5,"duration":"","harmon_stage":"AFTER","tone_intensity":"40%","storyboard":{"composition":"","camera_angle":"","camera_movement":"","transition_in":"","color_grade":""},"script":{"narration":"달라진일상","screen_text":"","text_animation":"","voice_tone":""},"image_prompt":{"prompt_en":"","style_keywords":"","aspect_ratio":"9:16"},"video_prompt":{"prompt_en":"","motion_type":"","duration_seconds":3},"audio":{"sfx":"","bgm_sync":""}},{"scene_number":6,"duration":"","harmon_stage":"CTA","tone_intensity":"100%","storyboard":{"composition":"","camera_angle":"","camera_movement":"","transition_in":"","color_grade":""},"script":{"narration":"진심추천+행동유도","screen_text":"","text_animation":"","voice_tone":""},"image_prompt":{"prompt_en":"","style_keywords":"","aspect_ratio":"9:16"},"video_prompt":{"prompt_en":"","motion_type":"","duration_seconds":3},"audio":{"sfx":"","bgm_sync":""}}],"bgm_mood":"","editing_tips":""}`).join(',')
+}]} 각 대본 반드시 6씬. 상품스펙 나열금지. 사람체험 스토리만. 씬3 의문/걱정 필수. 씬4 단점1개 필수. prompt_en 영어 상세.`}
+
+/* ═══════════ RENDER ═══════════ */
+function render(){const a=$('#app');a.innerHTML='';if(S.step==='login')renderLogin(a);else if(S.step==='apisetup')renderApiSetup(a);else if(S.step==='history')renderHistory(a);else if(S.step==='guide')renderGuide(a);else if(S.step==='input')renderInput(a);else if(S.step==='loading')renderLoading(a);else if(S.step==='result')renderResult(a)}
+
+/* ═══════════ HISTORY SCREEN ═══════════ */
+function renderHistory(a){
+  const history=getHistory();
+  const favs=history.filter(x=>x.fav);
+  const normals=history.filter(x=>!x.fav);
+  
+  a.innerHTML=`
+  <div style="padding:24px 0 16px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:22px">📂</span>
+      <h1 style="font-size:22px;font-weight:900;color:var(--orange);margin:0">히스토리</h1>
+      <span class="badge">${history.length}개</span>
+    </div>
+    <button class="btn-amber" id="histBackBtn">← 돌아가기</button>
+  </div>
+  
+  ${history.length===0?`
+    <div class="card" style="text-align:center;padding:40px 20px">
+      <span style="font-size:36px;opacity:.4">📭</span>
+      <p style="color:var(--t3);font-size:14px;margin-top:12px">아직 생성 기록이 없습니다</p>
+      <p style="color:var(--t3);font-size:12px">대본을 생성하면 자동으로 저장됩니다</p>
+    </div>
+  `:`
+    ${favs.length?`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="font-size:14px">⭐</span>
+        <span style="font-size:13px;font-weight:700;color:var(--amber-t)">즐겨찾기</span>
+        <span class="badge">${favs.length}</span>
+      </div>
+      ${favs.map(item=>historyCard(item)).join('')}
+      
+      ${normals.length?`<div style="display:flex;align-items:center;gap:6px;margin:16px 0 10px">
+        <span style="font-size:14px">🕐</span>
+        <span style="font-size:13px;font-weight:700;color:var(--t2)">최근 기록</span>
+        <span class="badge">${normals.length}</span>
+      </div>`:''}
+    `:`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="font-size:14px">🕐</span>
+        <span style="font-size:13px;font-weight:700;color:var(--t2)">최근 기록</span>
+      </div>
+    `}
+    ${normals.map(item=>historyCard(item)).join('')}
+    
+    ${history.length>1?`
+      <div style="text-align:center;padding:20px 0 40px">
+        <button style="background:none;border:1px solid rgba(248,113,113,.2);color:var(--rose);padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff)" id="clearAllBtn">🗑️ 전체 삭제</button>
+      </div>
+    `:''}
+  `}`;
+
+  setTimeout(()=>{
+    $('#histBackBtn')?.addEventListener('click',()=>{S.step='input';render()});
+    $('#clearAllBtn')?.addEventListener('click',()=>{if(confirm('모든 히스토리를 삭제하시겠습니까?')){clearAllHistory();render()}});
+    $$('.hist-view').forEach(b=>b.addEventListener('click',()=>{
+      const id=parseInt(b.dataset.id);
+      const item=getHistory().find(x=>x.id===id);
+      if(item){S.result=item.result;S.viewingHistory=id;S.step='result';render()}
+    }));
+    $$('.hist-fav').forEach(b=>b.addEventListener('click',e=>{
+      e.stopPropagation();toggleFav(parseInt(b.dataset.id));render();
+    }));
+    $$('.hist-del').forEach(b=>b.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(confirm('이 기록을 삭제하시겠습니까?')){deleteHistory(parseInt(b.dataset.id));render()}
+    }));
+  },0);
+}
+
+function historyCard(item){
+  const pa=item.result?.product_analysis||{};
+  const scriptCount=item.result?.scripts?.length||0;
+  const toneList=(item.tones||[]).map(id=>{const t=TONES.find(x=>x.id===id);return t?t.emoji:''}).join('');
+  
+  return`<div class="card" style="padding:14px 16px;cursor:pointer;transition:border-color .2s;margin-bottom:8px" >
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="flex:1;min-width:0" class="hist-view" data-id="${item.id}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          ${item.fav?'<span style="font-size:14px">⭐</span>':''}
+          <span style="color:var(--white);font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(item.productName||pa.product_name||'제목 없음')}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="color:var(--t3);font-size:11px;font-family:var(--mono)">${fmtDate(item.date)}</span>
+          <span class="tag" style="color:var(--green);background:var(--green-d);font-size:10px">${scriptCount}종</span>
+          ${toneList?`<span style="font-size:12px;letter-spacing:2px">${toneList}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px">
+        <button class="hist-fav" data-id="${item.id}" style="background:none;border:1px solid ${item.fav?'rgba(232,183,49,.3)':'var(--bdr-in)'};border-radius:6px;width:32px;height:32px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${item.fav?'⭐':'☆'}</button>
+        <button class="hist-del" data-id="${item.id}" style="background:none;border:1px solid rgba(248,113,113,.2);border-radius:6px;width:32px;height:32px;cursor:pointer;font-size:12px;color:var(--rose);display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════ LOGIN ═══════════ */
+function renderLogin(a){
+  a.innerHTML=`
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px">
+    <div style="width:100%;max-width:380px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🎬</div>
+      <h1 style="font-size:26px;font-weight:900;color:var(--orange);margin:0 0 6px"> 🛒 쇼핑숏츠 스튜디오-DODO</h1>
+      <p style="color:var(--t3);font-size:13px;margin-bottom:32px">비포/애프터 체험기 × 말투 스타일 = 숏폼 대본</p>
+      
+      <div class="card" style="text-align:left">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <span style="font-size:20px">🔒</span>
+          <span style="font-size:15px;font-weight:700;color:var(--white)">비밀번호 입력</span>
+        </div>
+        <div style="position:relative">
+          <input class="inp" id="pwInput" type="password" placeholder="비밀번호 4자리" maxlength="10" style="font-size:18px;text-align:center;letter-spacing:8px;padding:16px;font-family:var(--mono)">
+        </div>
+        ${S.loginError?`<div class="msg-box err" style="margin-top:10px">${S.loginError}</div>`:''}
+        <button class="btn-primary" id="loginBtn" style="margin-top:16px"><span style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px">🔓 로그인</span><div class="shimmer"></div></button>
+      </div>
+      
+      <p style="color:var(--t3);font-size:11px;margin-top:16px">Powered by DODO Content System</p>
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    const inp=$('#pwInput');const btn=$('#loginBtn');
+    inp?.focus();
+    inp?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+    btn?.addEventListener('click',doLogin);
+  },0);
+}
+
+function doLogin(){
+  const v=$('#pwInput')?.value||'';
+  if(v===PASSWORD){
+    S.loginError='';
+    localStorage.setItem('dodo_logged_in','1');
+    S.step=S.apiKey?'input':'apisetup';
+    render();
+  }else{
+    S.loginError=v?'비밀번호가 틀렸습니다':'비밀번호를 입력해주세요';
+    render();
+  }
+}
+
+/* ═══════════ API SETUP + GUIDE ═══════════ */
+function renderApiSetup(a){
+  a.innerHTML=`
+  <div style="padding:36px 0 24px;text-align:center">
+    <div style="font-size:36px;margin-bottom:10px">🔑</div>
+    <h1 style="font-size:24px;font-weight:900;color:var(--orange);margin:0 0 6px">Claude API 키 설정</h1>
+    <p style="color:var(--t3);font-size:13px">프로그램 사용을 위해 API 키가 필요합니다</p>
+  </div>
+  
+  <!-- API Key Input -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🔑</span><span class="title">API 키 입력</span></div></div>
+    <input class="inp" id="apiSetupInput" type="password" placeholder="sk-ant-api03-..." style="font-family:var(--mono);font-size:13px;padding:14px">
+    <div id="apiSetupMsg" style="display:none"></div>
+    <button class="btn-primary" id="apiSetupSave" style="margin-top:14px"><span style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px">🔌 연결 확인 후 시작하기</span><div class="shimmer"></div></button>
+  </div>
+
+  <!-- GUIDE -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">📖</span><span class="title">API 키 발급 가이드</span></div></div>
+    
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- Step 1 -->
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--orange);color:#000;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">1</div>
+        <div style="flex:1">
+          <div style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:4px">Anthropic 계정 만들기</div>
+          <p style="color:var(--t2);font-size:12px;line-height:1.6;margin-bottom:6px">아래 링크에서 회원가입하세요 (구글 로그인 가능)</p>
+          <a href="https://console.anthropic.com" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);color:var(--cyan);font-size:12px;font-weight:600;text-decoration:none">console.anthropic.com ↗</a>
+        </div>
+      </div>
+      
+      <!-- Step 2 -->
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--orange);color:#000;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">2</div>
+        <div style="flex:1">
+          <div style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:4px">크레딧 충전하기</div>
+          <p style="color:var(--t2);font-size:12px;line-height:1.6;margin-bottom:6px">Settings → Billing → Add Credit<br>최소 <b style="color:var(--orange)">$5 (약 7,000원)</b> 충전 추천<br>대본 1회 생성 비용: 약 $0.05~0.15 (70~200원)</p>
+          <a href="https://console.anthropic.com/settings/billing" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);color:var(--cyan);font-size:12px;font-weight:600;text-decoration:none">결제 페이지 ↗</a>
+        </div>
+      </div>
+      
+      <!-- Step 3 -->
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--orange);color:#000;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">3</div>
+        <div style="flex:1">
+          <div style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:4px">API 키 생성하기</div>
+          <p style="color:var(--t2);font-size:12px;line-height:1.6;margin-bottom:6px">Settings → API Keys → <b style="color:var(--orange)">Create Key</b> 클릭<br>이름: 아무거나 (예: "dodo-shorts")<br>생성된 <span style="color:var(--amber);font-family:var(--mono)">sk-ant-api03-...</span> 키를 복사</p>
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);color:var(--cyan);font-size:12px;font-weight:600;text-decoration:none">API Keys 페이지 ↗</a>
+        </div>
+      </div>
+      
+      <!-- Step 4 -->
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--orange);color:#000;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">4</div>
+        <div style="flex:1">
+          <div style="color:var(--white);font-size:14px;font-weight:700;margin-bottom:4px">위에 붙여넣기</div>
+          <p style="color:var(--t2);font-size:12px;line-height:1.6">복사한 키를 위 입력란에 붙여넣고 연결 확인!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">💡</span><span class="title">자주 묻는 질문</span></div></div>
+    
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <div style="color:var(--orange);font-size:13px;font-weight:700;margin-bottom:4px">Q. 비용이 얼마나 드나요?</div>
+        <p style="color:var(--t2);font-size:12px;line-height:1.6">대본 1회 생성 (분석 + 대본 2~4종) 약 <b style="color:var(--white)">70~200원</b>입니다.<br>$5 충전하면 약 <b style="color:var(--green)">30~70회</b> 사용 가능합니다.</p>
+      </div>
+      <div>
+        <div style="color:var(--orange);font-size:13px;font-weight:700;margin-bottom:4px">Q. API 키가 노출되면 위험한가요?</div>
+        <p style="color:var(--t2);font-size:12px;line-height:1.6">키는 브라우저 <b>로컬에만</b> 저장되며 외부 전송되지 않습니다.<br>걱정되면 Anthropic 콘솔에서 언제든 키를 재발급할 수 있습니다.</p>
+      </div>
+      <div>
+        <div style="color:var(--orange);font-size:13px;font-weight:700;margin-bottom:4px">Q. 키를 나중에 변경할 수 있나요?</div>
+        <p style="color:var(--t2);font-size:12px;line-height:1.6">네! 프로그램 내 🔑 API 키 설정에서 언제든 변경/삭제 가능합니다.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div style="text-align:center;padding-bottom:40px">
+    <button style="background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;font-family:var(--ff);text-decoration:underline" id="logoutBtn">로그아웃</button>
+  </div>`;
+
+  setTimeout(()=>{
+    const inp=$('#apiSetupInput');inp?.focus();
+    inp?.addEventListener('keydown',e=>{if(e.key==='Enter')saveApiSetup()});
+    $('#apiSetupSave')?.addEventListener('click',saveApiSetup);
+    $('#logoutBtn')?.addEventListener('click',()=>{localStorage.removeItem('dodo_logged_in');S.step='login';render()});
+  },0);
+}
+
+async function saveApiSetup(){
+  const v=$('#apiSetupInput')?.value.trim();
+  if(!v){showMsg('#apiSetupMsg','err','API 키를 입력해주세요');return}
+  if(!v.startsWith('sk-')){showMsg('#apiSetupMsg','err','올바른 API 키 형식이 아닙니다 (sk-ant-api03-... 으로 시작)');return}
+  
+  const btn=$('#apiSetupSave');
+  if(btn){btn.disabled=true;btn.querySelector('span').textContent='🔌 연결 확인 중…'}
+  
+  try{
+    S.apiKey=v;
+    await callAPI('Reply OK',[{role:'user',content:'ping'}],null,15000);
+    localStorage.setItem('dodo_api_key',v);
+    showMsg('#apiSetupMsg','ok','✓ API 연결 성공! 프로그램을 시작합니다…');
+    setTimeout(()=>{S.step='input';render()},1200);
+  }catch(e){
+    S.apiKey='';
+    showMsg('#apiSetupMsg','err','✗ 연결 실패: '+e.message+'<br><br>확인사항:<br>· 키가 정확히 복사되었는지<br>· 크레딧이 충전되어 있는지<br>· 키가 비활성화되지 않았는지');
+    if(btn){btn.disabled=false;btn.querySelector('span').textContent='🔌 연결 확인 후 시작하기'}
+  }
+}
+
+/* ═══════════ WORKFLOW GUIDE ═══════════ */
+function renderGuide(a){
+  a.innerHTML=`
+  <div style="padding:24px 0 16px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:22px">📖</span>
+      <h1 style="font-size:22px;font-weight:900;color:var(--orange);margin:0">제작 워크플로우</h1>
+    </div>
+    <button class="btn-amber" id="guideBack">← 돌아가기</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🔄</span><span class="title">전체 흐름</span></div></div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      ${[
+        {emoji:'🔥',title:'STEP 0. 트렌드 리서치',desc:'틱톡 트렌드 수집기로 인기 패턴 분석',color:'rose'},
+        {emoji:'📝',title:'STEP 1. 대본 생성',desc:'쇼핑숏츠 스튜디오에서 대본 + 프롬프트',color:'orange'},
+        {emoji:'🔍',title:'STEP 2. 레퍼런스 검색',desc:'해외 TikTok/샤홍슈에서 비슷한 영상 찾기',color:'cyan'},
+        {emoji:'⬇️',title:'STEP 3. 영상 다운로드',desc:'무료 도구로 워터마크 없이 다운',color:'green'},
+        {emoji:'✂️',title:'STEP 4. 자막 제거',desc:'AI로 하드코딩 자막 자동 제거',color:'rose'},
+        {emoji:'🎬',title:'STEP 5. 편집 & 완성',desc:'본인 나레이션 + 레퍼런스 스타일 = 완성',color:'purple'},
+      ].map((s,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;${i<5?'border-bottom:1px solid var(--bdr-in)':''}">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--${s.color}-d);color:var(--${s.color});display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${s.emoji}</div>
+          <div><div style="color:var(--white);font-size:13px;font-weight:700">${s.title}</div><div style="color:var(--t3);font-size:11px;margin-top:1px">${s.desc}</div></div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- STEP 0 -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🔥</span><span class="title">STEP 0. 트렌드 리서치</span></div><span class="tag" style="color:#ff0050;background:rgba(255,0,80,.1)">별도 도구</span></div>
+    <div style="color:var(--t2);font-size:12px;line-height:1.7;margin-bottom:12px">
+      <p>대본을 만들기 <b style="color:var(--orange)">전에</b> 현재 틱톡에서 뜨는 패턴을 분석하면</p>
+      <p>훨씬 효과적인 숏폼을 만들 수 있어요!</p>
+    </div>
+    <div class="inner-box" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:20px">🔥</span>
+        <div>
+          <div style="color:var(--white);font-size:14px;font-weight:700">틱톡 트렌드 수집기</div>
+          <div style="color:var(--t3);font-size:11px">국가별 트렌딩 영상 수집 → 바이럴 스코어 분석 → AI 패턴 분석</div>
+        </div>
+      </div>
+      <button onclick="window.open('tiktok-trend-DODO.html','_blank')" style="width:100%;padding:10px;border-radius:8px;background:linear-gradient(135deg,rgba(255,0,80,.15),rgba(0,242,234,.1));border:1px solid rgba(255,0,80,.25);color:#ff0050;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--ff);display:flex;align-items:center;justify-content:center;gap:6px">🔥 트렌드 수집기 열기 (새 탭) ↗</button>
+    </div>
+    <div style="color:var(--t2);font-size:12px;line-height:1.7">
+      <p><b style="color:var(--white)">활용법:</b></p>
+      <p>1. 트렌드 수집기에서 국가별 인기 영상 수집</p>
+      <p>2. 바이럴 스코어 높은 영상의 <b style="color:var(--orange)">구조/길이/해시태그</b> 확인</p>
+      <p>3. AI 분석으로 <b style="color:var(--orange)">공통 패턴</b> 파악</p>
+      <p>4. 분석 결과를 참고하여 쇼핑숏츠 스튜디오에서 대본 생성!</p>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">📝</span><span class="title">STEP 1. 대본 생성</span></div><span class="tag" style="color:var(--orange);background:var(--orange-d)">이 앱에서</span></div>
+    <div style="color:var(--t2);font-size:12px;line-height:1.7">
+      <p>1. 상품 정보 입력 (스크린샷/텍스트/키워드)</p>
+      <p>2. 말투 스타일 선택 (1~여러개)</p>
+      <p>3. <b style="color:var(--orange)">대본 생성</b> → 6씬 비포/애프터 체험기 대본</p>
+      <p>4. 결과에서 <b style="color:var(--cyan)">이미지/영상 프롬프트</b>를 복사</p>
+      <p style="margin-top:8px;color:var(--t3)">💡 대본의 스토리보드와 앵글을 참고해서 레퍼런스를 찾으면 효율적!</p>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🔍</span><span class="title">STEP 2. 레퍼런스 영상 검색</span></div></div>
+    <p style="color:var(--t2);font-size:12px;line-height:1.6;margin-bottom:12px">상품명을 영어/중국어/일본어로 번역해서 각 플랫폼에서 검색하세요.<br><b style="color:var(--orange)">키워드 탭의 🌐번역 기능</b>을 활용하면 편리합니다!</p>
+    
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${[
+        {platform:'TikTok (해외)',flag:'🌍',search:'상품명(EN) + review / haul / unboxing',url:'https://www.tiktok.com',color:'rose'},
+        {platform:'샤홍슈 (小红书)',flag:'🇨🇳',search:'상품명(CN) + 测评 / 推荐 / 开箱',url:'https://www.xiaohongshu.com',color:'rose'},
+        {platform:'YouTube Shorts',flag:'🎬',search:'상품명(EN) + shorts + review',url:'https://www.youtube.com/shorts',color:'rose'},
+        {platform:'Instagram Reels',flag:'📸',search:'#상품명(EN) + #review',url:'https://www.instagram.com/reels',color:'purple'},
+      ].map(p=>`
+        <div class="inner-box" style="padding:10px 12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:13px;font-weight:700;color:var(--white)">${p.flag} ${p.platform}</span>
+            <a href="${p.url}" target="_blank" style="color:var(--cyan);font-size:11px;text-decoration:none;font-weight:600">열기↗</a>
+          </div>
+          <div style="color:var(--t3);font-size:11px;font-family:var(--mono)">${p.search}</div>
+        </div>
+      `).join('')}
+    </div>
+    
+    <div style="margin-top:12px;padding:10px;border-radius:8px;background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.1)">
+      <div style="color:var(--orange);font-size:11px;font-weight:700;margin-bottom:4px">🔑 검색 키워드 공식</div>
+      <div style="color:var(--t2);font-size:11px;font-family:var(--mono);line-height:1.6">
+        상품명(번역) + review / 测评 / レビュー<br>
+        상품명(번역) + unboxing / 开箱 / 開封<br>
+        상품명(번역) + recipe / 做法 / レシピ<br>
+        상품명(번역) + before after / 对比 / ビフォーアフター
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">⬇️</span><span class="title">STEP 3. 영상 다운로드</span></div><span class="tag" style="color:var(--green);background:var(--green-d)">무료</span></div>
+    <p style="color:var(--t2);font-size:12px;margin-bottom:12px">링크 복사 → 아래 사이트에 붙여넣기 → 워터마크 없이 MP4 다운로드</p>
+    
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${[
+        {name:'SnapTik',platform:'TikTok',url:'https://snaptik.app',desc:'가장 안정적. 워터마크 제거 자동',star:true},
+        {name:'SSSTik',platform:'TikTok',url:'https://ssstik.io',desc:'MP4/MP3 선택 가능. 빠른 속도'},
+        {name:'SaveTik',platform:'TikTok + 抖音',url:'https://savetik.co',desc:'틱톡 + 더우인(중국) 둘 다 지원'},
+        {name:'SaveInsta',platform:'Instagram',url:'https://saveinsta.app',desc:'릴스/스토리 다운로드'},
+        {name:'yt-dlp',platform:'YouTube',url:'https://github.com/yt-dlp/yt-dlp',desc:'오픈소스 CLI. 모든 플랫폼 지원'},
+      ].map(t=>`
+        <a href="${t.url}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--inner);border:1px solid var(--bdr-in);transition:border-color .2s">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px"><span style="color:var(--white);font-size:13px;font-weight:700">${t.name}</span>${t.star?'<span style="color:var(--orange);font-size:10px;font-weight:700">⭐추천</span>':''}<span style="color:var(--t3);font-size:10px;font-family:var(--mono)">${t.platform}</span></div>
+            <div style="color:var(--t3);font-size:11px;margin-top:2px">${t.desc}</div>
+          </div>
+          <span style="color:var(--cyan);font-size:12px">↗</span>
+        </a>
+      `).join('')}
+    </div>
+
+    <div style="margin-top:12px;padding:10px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in)">
+      <div style="color:var(--amber-t);font-size:11px;font-weight:700;margin-bottom:4px">📋 다운로드 방법 (공통)</div>
+      <div style="color:var(--t2);font-size:11px;line-height:1.7">
+        1. 영상 앱에서 <b>공유</b> → <b>링크 복사</b><br>
+        2. 위 사이트 접속 → 링크 <b>붙여넣기</b><br>
+        3. <b>Download</b> (워터마크 없는 옵션) 클릭<br>
+        4. MP4 파일로 저장 완료!
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">✂️</span><span class="title">STEP 4. AI 자막 제거</span></div><span class="tag" style="color:var(--green);background:var(--green-d)">무료</span></div>
+    <p style="color:var(--t2);font-size:12px;margin-bottom:12px">다운받은 영상에 하드코딩된 자막을 AI가 자동으로 깨끗하게 제거합니다.</p>
+    
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${[
+        {name:'CreatOK',url:'https://www.creatok.ai/video-subtitle-remover',desc:'60초 이하 무료, 가입 불필요. 숏폼에 딱!',star:true,free:'60초 무료'},
+        {name:'GhostCut',url:'https://jollytoday.com',desc:'자막 제거 + 번역 + 더빙 올인원. 틱톡 셀러 특화',free:'무료 체험'},
+        {name:'AVCLabs',url:'https://www.blurvideo.ai/ai-tools/remove-subtitles-from-video.html',desc:'움직이는 자막도 추적 제거. 4K 지원',free:'무료'},
+        {name:'Media.io',url:'https://anieraser.media.io/remove-subtitles-from-video.html',desc:'다양한 형식 지원. 소프트/하드 자막 모두',free:'제한적 무료'},
+        {name:'Vmake',url:'https://vmake.ai/remove-subtitles-from-video',desc:'원클릭 자막 제거. 화질 유지 우수',free:'제한적 무료'},
+      ].map(t=>`
+        <a href="${t.url}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--inner);border:1px solid var(--bdr-in)">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px"><span style="color:var(--white);font-size:13px;font-weight:700">${t.name}</span>${t.star?'<span style="color:var(--orange);font-size:10px;font-weight:700">⭐추천</span>':''}<span class="tag" style="color:var(--green);background:var(--green-d);font-size:9px;padding:2px 6px">${t.free}</span></div>
+            <div style="color:var(--t3);font-size:11px;margin-top:2px">${t.desc}</div>
+          </div>
+          <span style="color:var(--cyan);font-size:12px">↗</span>
+        </a>
+      `).join('')}
+    </div>
+
+    <div style="margin-top:12px;padding:10px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in)">
+      <div style="color:var(--amber-t);font-size:11px;font-weight:700;margin-bottom:4px">📋 자막 제거 방법 (CreatOK 기준)</div>
+      <div style="color:var(--t2);font-size:11px;line-height:1.7">
+        1. creatok.ai 접속 → <b>영상 업로드</b> (60초 이하)<br>
+        2. AI가 자동으로 자막 감지<br>
+        3. <b>Remove</b> 클릭 → 잠시 대기<br>
+        4. 자막 제거된 클린 영상 <b>다운로드</b>!
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🎬</span><span class="title">STEP 5. 편집 & 완성</span></div></div>
+    <div style="color:var(--t2);font-size:12px;line-height:1.8">
+      <p><b style="color:var(--white)">방법 A. 레퍼런스 참고 촬영</b></p>
+      <p style="margin-bottom:8px">→ 레퍼런스 영상의 앵글/구도/전환을 참고하여 본인 영상 촬영</p>
+      <p><b style="color:var(--white)">방법 B. B-roll 활용 편집</b></p>
+      <p style="margin-bottom:8px">→ 다운받은 영상을 B-roll 소스로 활용 (출처 표기 권장)</p>
+      <p><b style="color:var(--white)">방법 C. AI 영상 생성</b></p>
+      <p style="margin-bottom:12px">→ 대본의 영상 프롬프트를 Runway/Kling에 입력하여 AI 영상 생성</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in)">
+        <span style="font-size:16px">🎙️</span>
+        <div><div style="color:var(--white);font-size:12px;font-weight:700">나레이션</div><div style="color:var(--t3);font-size:10px">대본의 나레이션을 본인 목소리/ElevenLabs로 녹음</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in)">
+        <span style="font-size:16px">📝</span>
+        <div><div style="color:var(--white);font-size:12px;font-weight:700">자막</div><div style="color:var(--t3);font-size:10px">대본의 screen_text를 자막으로 삽입 (CapCut/VREW)</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in)">
+        <span style="font-size:16px">🎵</span>
+        <div><div style="color:var(--white);font-size:12px;font-weight:700">BGM + SFX</div><div style="color:var(--t3);font-size:10px">대본의 bgm_mood와 sfx를 참고하여 배경음악/효과음 삽입</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">⚠️</span><span class="title">저작권 주의사항</span></div></div>
+    <div style="color:var(--t2);font-size:12px;line-height:1.7">
+      <p style="margin-bottom:6px">• 다른 크리에이터 영상을 <b style="color:var(--rose)">그대로 재업로드하면 저작권 위반</b>입니다</p>
+      <p style="margin-bottom:6px">• 레퍼런스/분석 용도로만 활용하세요</p>
+      <p style="margin-bottom:6px">• B-roll 활용 시 <b>출처 표기</b>를 권장합니다</p>
+      <p>• 최종 콘텐츠는 <b style="color:var(--green)">본인 촬영 + AI 생성</b>으로 제작하세요</p>
+    </div>
+  </div>
+
+  <!-- QUICK FLOW -->
+  <div class="card" style="margin-bottom:40px">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">⚡</span><span class="title">한눈에 보는 요약</span></div></div>
+    <div style="display:flex;flex-direction:column;gap:0;padding:8px 12px;border-radius:10px;background:var(--inner);border:1px solid var(--bdr-in)">
+      ${[
+        {s:'🔥 트렌드 수집기로 인기 패턴 분석',c:'rose'},
+        {s:'스튜디오에서 대본 생성',c:'orange'},
+        {s:'키워드 번역 (🌐 영어/중국어/일본어)',c:'cyan'},
+        {s:'TikTok/샤홍슈에서 레퍼런스 검색',c:'blue'},
+        {s:'SnapTik으로 다운로드 (워터마크 X)',c:'green'},
+        {s:'CreatOK으로 자막 AI 제거',c:'rose'},
+        {s:'본인 나레이션 + 편집 → 업로드!',c:'purple'},
+      ].map((x,i)=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;${i<6?'border-bottom:1px solid var(--bdr-in)':''}">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--${x.c});color:#000;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">${i+1}</div>
+          <span style="color:var(--t1);font-size:12px;font-weight:600">${x.s}</span>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  `;
+  setTimeout(()=>{
+    $('#guideBack')?.addEventListener('click',()=>{S.step='input';render()});
+  },0);
+}
+
+function renderInput(a){
+  const cnt=S.selectedTones.length;
+  a.innerHTML=`
+  <div class="text-center" style="padding:36px 0 24px">
+    <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;border:1px solid var(--bdr);background:var(--card);font-size:12px;color:var(--t2);margin-bottom:14px"><span style="color:var(--orange);font-weight:700">DODO</span><span style="color:var(--t3)">·</span>Shopping Shorts Studio</div>
+    <h1 style="font-size:26px;font-weight:900;color:var(--orange);margin:0 0 8px"> 🛒 쇼핑숏츠 스튜디오-DODO</h1>
+    <p style="color:var(--t3);font-size:13px">비포/애프터 체험기 × 말투 스타일 = 숏폼 대본</p>
+  </div>
+  <!-- API (compact) -->
+  <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);margin-bottom:16px">
+    <span style="font-size:14px">🔑</span>
+    <span style="font-size:12px;color:var(--t2);font-family:var(--mono)">${maskKey(S.apiKey)}</span>
+    <span class="tag" style="color:var(--green);background:var(--green-d);font-size:10px">✓</span>
+    <div style="margin-left:auto;display:flex;gap:6px">
+      <button class="btn-amber sm" id="trendBtn" onclick="window.open('tiktok-trend-DODO.html','_blank')" style="background:rgba(255,0,80,.08);border-color:rgba(255,0,80,.2);color:#ff0050">🔥 트렌드</button>
+      <button class="btn-amber sm" id="guideBtn" style="background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.2);color:var(--cyan)">📖 가이드</button>
+      <button class="btn-amber sm" id="historyBtn" style="background:rgba(192,132,252,.08);border-color:rgba(192,132,252,.2);color:var(--purple)">📂 히스토리${(()=>{const c=getHistory().length;return c?' ('+c+')':''})()}</button>
+      <button class="btn-amber sm" id="apiChangeBtn">변경</button>
+      <button class="btn-danger" id="logoutBtnMain" style="font-size:10px">로그아웃</button>
+    </div>
+  </div>
+  <!-- ANALYZE -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🤖</span><span class="title">AI 자동 분석</span></div></div>
+    <div class="method-tabs">
+      <button class="method-tab ${S.method==='screenshot'?'active':''}" data-method="screenshot"><span class="te">📸</span><span>스크린샷</span>${S.method==='screenshot'?'<span class="rec">추천</span>':''}</button>
+      <button class="method-tab ${S.method==='paste'?'active':''}" data-method="paste"><span class="te">📋</span><span>텍스트</span></button>
+      <button class="method-tab ${S.method==='search'?'active':''}" data-method="search"><span class="te">🔍</span><span>키워드</span></button>
+    </div>
+    <div id="m_screenshot" class="${S.method==='screenshot'?'':'hidden'}"><input type="file" id="ssFile" accept="image/*" style="display:none">${S.ssPreview?`<div class="screenshot-zone has-img"><img src="${S.ssPreview}"><button id="ssRemove" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.8);border:none;color:#fff;border-radius:8px;width:28px;height:28px;cursor:pointer">✕</button></div>`:`<div class="screenshot-zone" id="ssDrop"><span style="font-size:28px;opacity:.6">📸</span><p style="color:var(--orange);font-size:13px;font-weight:600;margin-top:8px">스크린샷 업로드</p></div>`}<button class="btn-analyze" id="ssAnalyze" style="margin-top:10px" ${!S.ssImage||S.analyzing?'disabled':''}>${S.analyzing&&S.method==='screenshot'?'<span class="spinner"></span>분석…':'📸 추출'}</button></div>
+    <div id="m_paste" class="${S.method==='paste'?'':'hidden'}"><textarea class="inp" id="pasteArea" rows="5" placeholder="상품 페이지 Ctrl+A → Ctrl+C → Ctrl+V">${esc(S.pasteText)}</textarea><button class="btn-analyze" id="pasteAnalyze" style="margin-top:10px" ${!S.pasteText.trim()||S.analyzing?'disabled':''}>${S.analyzing&&S.method==='paste'?'<span class="spinner"></span>분석…':'📋 추출'}</button></div>
+    <div id="m_search" class="${S.method==='search'?'':'hidden'}">
+      <input class="inp" id="searchInput" placeholder="예: 허니트리 코코넛 밀크 330ml" value="${esc(S.searchQuery)}">
+      <p style="color:var(--t3);font-size:11px;margin-top:6px">상품명을 입력하면 AI가 알고 있는 정보로 자동 채워줍니다</p>
+      
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <span style="color:var(--t3);font-size:11px;font-weight:600;display:flex;align-items:center">🌐 번역 ▸</span>
+        <button class="btn-amber sm trans-btn" data-lang="en" style="color:var(--cyan)">🇺🇸 영어</button>
+        <button class="btn-amber sm trans-btn" data-lang="zh" style="color:var(--rose)">🇨🇳 중국어</button>
+        <button class="btn-amber sm trans-btn" data-lang="ja" style="color:var(--pink)">🇯🇵 일본어</button>
+        <button class="btn-amber sm trans-btn" data-lang="all" style="color:var(--green)">3개 한번에</button>
+      </div>
+      <div id="transResult" class="hidden" style="margin-top:8px"></div>
+      <div id="transMsg" style="display:none"></div>
+      
+      <button class="btn-analyze" id="searchAnalyze" style="margin-top:10px" ${!S.searchQuery.trim()||S.analyzing?'disabled':''}>${S.analyzing&&S.method==='search'?'<span class="spinner"></span>분석 중…':'🔍 AI 분석'}</button>
+    </div>
+    <div id="analyzeMsg" style="display:none"></div>
+  </div>
+  <!-- IMAGE --><div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">📸</span><span class="title">상품 이미지</span></div><span style="color:var(--t3);font-size:11px">대본+프롬프트 정확도 ↑</span></div><input type="file" id="fileInput" accept="image/*" style="display:none">${S.preview?`<div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--green)"><img src="${S.preview}" style="width:100%;max-height:160px;object-fit:cover"><button id="removeImg" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:7px;width:26px;height:26px;cursor:pointer">✕</button><div style="position:absolute;bottom:0;left:0;right:0;padding:4px 8px;background:rgba(74,222,128,.15);font-size:10px;color:var(--green);font-weight:600;text-align:center">✓ 이미지가 대본 생성에 반영됩니다</div></div>`:`<div id="dropZone" style="background:var(--inner);border:1px dashed var(--bdr-in);border-radius:10px;padding:16px;text-align:center;cursor:pointer"><p style="color:var(--t3);font-size:12px">상품 사진 업로드 → AI가 보고 프롬프트 작성</p></div>`}</div>
+  <!-- INFO --><div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">📦</span><span class="title">상품 정보</span></div></div><div class="mb-14"><div class="lbl" style="color:var(--t2)">상품명 *</div><input class="inp field" data-f="name" value="${esc(S.name)}" placeholder="상품명"></div><div class="mb-14"><div class="lbl" style="color:var(--t2)">가격</div><input class="inp field" data-f="price" value="${esc(S.price)}" placeholder="가격"></div><div class="mb-14"><div class="lbl" style="color:var(--t2)">타겟</div><input class="inp field" data-f="audience" value="${esc(S.audience)}" placeholder="타겟 고객"></div><div><div class="lbl" style="color:var(--t2)">설명</div><textarea class="inp field" data-f="desc" rows="3" placeholder="특징, 장점, 기능">${esc(S.desc)}</textarea></div></div>
+  <!-- TONE SELECTOR -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🗣️</span><span class="title">말투 스타일</span><span class="badge">${cnt}개 선택</span></div>
+      <span style="font-size:11px;color:var(--t3)">2~4개 추천</span>
+    </div>
+    <!-- Harmon base info -->
+    <div class="harmon-box">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="h-tag">⭕ 기본 구조</span><span style="font-size:13px;font-weight:700;color:var(--white)">6씬 비포/애프터 체험기</span></div>
+      <p style="color:var(--t2);font-size:11px;line-height:1.5;margin-bottom:8px">상품 설명 ❌ → <b style="color:var(--orange)">사람의 체험 스토리</b> ✅<br>의문→반전 구조로 몰입감↑ · 단점 포함으로 신뢰↑</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
+        <div class="harmon-step"><div class="hs-num" style="color:var(--rose)">1 BEFORE</div><div class="hs-kr">불편한 일상</div><div style="color:var(--orange);font-size:9px;margin-top:2px">████░ 80%</div></div>
+        <div class="harmon-step"><div class="hs-num">2 전환점</div><div class="hs-kr">알게 된 계기</div><div style="color:var(--t3);font-size:9px;margin-top:2px">██░░░ 40%</div></div>
+        <div class="harmon-step"><div class="hs-num" style="color:var(--amber-t)">3 의문점</div><div class="hs-kr">반신반의 🤔</div><div style="color:var(--amber-t);font-size:9px;margin-top:2px">██▓░░ 50%</div></div>
+        <div class="harmon-step"><div class="hs-num" style="color:var(--cyan)">4 체험</div><div class="hs-kr">반전!+단점</div><div style="color:var(--cyan);font-size:9px;margin-top:2px">███▓░ 70%</div></div>
+        <div class="harmon-step"><div class="hs-num" style="color:var(--green)">5 AFTER</div><div class="hs-kr">달라진 일상</div><div style="color:var(--t3);font-size:9px;margin-top:2px">██░░░ 40%</div></div>
+        <div class="harmon-step"><div class="hs-num" style="color:var(--green)">6 CTA</div><div class="hs-kr">진심 추천</div><div style="color:var(--green);font-size:9px;margin-top:2px">█████ 100%</div></div>
+      </div>
+    </div>
+    <div class="style-grid">
+      ${['훅','MZ','감성','신뢰','전환'].map(cat=>{
+        const items=TONES.filter(t=>t.cat===cat);
+        if(!items.length)return'';
+        return`<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;margin-top:${cat==='훅'?'0':'8'}px"><span style="font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1px">${cat==='훅'?'🎯 훅/주목':cat==='MZ'?'😜 MZ/재미':cat==='감성'?'💜 감성/서사':cat==='신뢰'?'✅ 신뢰/전문':cat==='전환'?'💥 전환/비교':cat}</span><div style="flex:1;height:1px;background:var(--bdr-in)"></div></div>`+
+        items.map(t=>{const sel=S.selectedTones.includes(t.id);return`<div class="style-card ${sel?'selected':''}" data-tone="${t.id}"><div class="sc-check">${sel?'✓':''}</div><span class="sc-emoji">${t.emoji}</span><div class="sc-name">${t.name}</div><div class="sc-desc">"${t.ex}"</div></div>`}).join('');
+      }).join('')}
+    </div>
+  </div>
+  <!-- DUR --><div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">⏱️</span><span class="title">영상 길이</span></div></div><div style="display:flex;gap:8px">${['15초','30초','45초','60초'].map(d=>`<button class="dur-btn ${d===S.dur?'active':''}" data-dur="${d}">${d}</button>`).join('')}</div></div>
+  ${S.error?`<div class="msg-box err mb-16">${S.error}</div>`:''}
+  <button class="btn-primary" id="genBtn" ${cnt<1?'disabled':''}><span style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px">⭕ 비포/애프터 × ${cnt}가지 말투 대본 생성</span><div class="shimmer"></div></button>
+  <div style="margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);font-size:11px;color:var(--t3);line-height:1.8;margin-bottom:40px">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:var(--t2);font-weight:700">📊 생성 계획</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+      <span style="padding:3px 8px;border-radius:5px;background:var(--inner);color:var(--amber-t);font-weight:600">1회 분석</span>
+      <span style="color:var(--t3)">+</span>
+      ${(()=>{const selNames=S.selectedTones.map(id=>TONES.find(t=>t.id===id)?.name).filter(Boolean);const pairs=[];for(let i=0;i<selNames.length;i+=2)pairs.push(selNames.slice(i,i+2));return pairs.map((p,i)=>`<span style="padding:3px 8px;border-radius:5px;background:var(--inner);color:var(--orange);font-weight:600">${p.join(' + ')}</span>${i<pairs.length-1?'<span style="color:var(--t3)">+</span>':''}`).join('')})()}
+      <span style="color:var(--t3);margin-left:4px">= 총 <b style="color:var(--white)">${Math.ceil(cnt/2)+1}회</b> API 호출</span>
+    </div>
+  </div>`;
+  setTimeout(bindInput,0);
+}
+
+function bindInput(){
+  $('#apiChangeBtn')?.addEventListener('click',()=>{S.step='apisetup';render()});
+  $('#guideBtn')?.addEventListener('click',()=>{S.step='guide';render()});
+  $('#historyBtn')?.addEventListener('click',()=>{S.step='history';render()});
+  $('#logoutBtnMain')?.addEventListener('click',()=>{localStorage.removeItem('dodo_logged_in');localStorage.removeItem('dodo_api_key');S.apiKey='';S.step='login';render()});
+  $$('.method-tab').forEach(t=>t.addEventListener('click',()=>{syncDOM();S.method=t.dataset.method;render()}));
+  const ssf=$('#ssFile');$('#ssDrop')?.addEventListener('click',()=>ssf?.click());$('#ssRemove')?.addEventListener('click',()=>{S.ssImage=null;S.ssPreview=null;render()});
+  ssf?.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;S.ssImage=f;const r=new FileReader();r.onload=ev=>{S.ssPreview=ev.target.result;render()};r.readAsDataURL(f)});
+  $('#ssAnalyze')?.addEventListener('click',async()=>{
+    if(!S.ssImage||!S.apiKey)return;S.analyzing=true;render();
+    try{
+      const comp=await compressImage(S.ssImage);
+      if(!comp)throw new Error('이미지 처리 실패. 다른 이미지를 시도해주세요.');
+      console.log('[SS] compressed size:',Math.round(comp.b64.length/1024)+'KB');
+      const d=await callAPI(EXTRACT_P,[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:comp.mediaType,data:comp.b64}},
+        {type:'text',text:'이 상품 페이지 스크린샷에서 상품명, 가격, 상세설명, 타겟고객을 추출해서 JSON으로 알려줘.'}
+      ]}]);
+      applyInfo(extractJSON(getResp(d)));
+    }catch(e){S.analyzing=false;render();setTimeout(()=>showMsg('#analyzeMsg','err',e.message),50)}
+  });
+  $('#pasteArea')?.addEventListener('input',e=>S.pasteText=e.target.value);
+  $('#pasteAnalyze')?.addEventListener('click',async()=>{if(!S.pasteText.trim()||!S.apiKey)return;S.analyzing=true;render();try{const d=await callAPI(EXTRACT_P,[{role:'user',content:'추출:\n'+S.pasteText}]);applyInfo(extractJSON(getResp(d)))}catch(e){S.analyzing=false;render();setTimeout(()=>showMsg('#analyzeMsg','err',e.message),50)}});
+  $('#searchInput')?.addEventListener('input',e=>S.searchQuery=e.target.value);
+  // Translation buttons
+  $$('.trans-btn').forEach(btn=>btn.addEventListener('click',async()=>{
+    const q=$('#searchInput')?.value.trim();
+    if(!q){showMsg('#transMsg','err','상품명을 먼저 입력하세요');return}
+    if(!S.apiKey){showMsg('#transMsg','err','API 키 필요');return}
+    const lang=btn.dataset.lang;
+    const origText=btn.textContent;
+    btn.disabled=true;btn.textContent='…';
+    try{
+      let prompt='';
+      if(lang==='all'){
+        prompt=`다음 한국어 상품명/키워드를 영어, 중국어(간체), 일본어로 각각 번역해줘. 검색에 최적화된 자연스러운 표현으로. JSON만: {"en":"영어","zh":"中文","ja":"日本語"}\n\n${q}`;
+      }else{
+        const langName={en:'영어',zh:'중국어(간체)',ja:'일본어'}[lang];
+        prompt=`다음 한국어를 ${langName}로 번역해줘. 검색에 최적화된 자연스러운 표현으로. 번역 결과만 출력:\n\n${q}`;
+      }
+      const d=await callAPI('번역 전문가. 요청된 형식으로만 출력.',[{role:'user',content:prompt}],null,15000);
+      const resp=getResp(d).trim();
+      
+      if(lang==='all'){
+        const j=extractJSON(resp);
+        if(j){
+          const resEl=$('#transResult');
+          resEl.className='';
+          resEl.innerHTML=`
+            <div style="display:flex;flex-direction:column;gap:6px">
+              ${[{flag:'🇺🇸',l:'EN',v:j.en,c:'cyan'},{flag:'🇨🇳',l:'CN',v:j.zh,c:'rose'},{flag:'🇯🇵',l:'JP',v:j.ja,c:'pink'}].map(x=>`
+                <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in)">
+                  <span style="font-size:14px">${x.flag}</span>
+                  <span style="flex:1;color:var(--white);font-size:13px;font-weight:600">${esc(x.v||'')}</span>
+                  <button class="btn-amber sm trans-use" data-val="${esc(x.v||'')}" style="color:var(--${x.c})">입력</button>
+                  <button class="btn-amber sm trans-copy" data-val="${esc(x.v||'')}">복사</button>
+                </div>
+              `).join('')}
+            </div>`;
+          resEl.querySelectorAll('.trans-use').forEach(b=>b.addEventListener('click',()=>{
+            const inp=$('#searchInput');if(inp){inp.value=b.dataset.val;S.searchQuery=b.dataset.val}
+          }));
+          resEl.querySelectorAll('.trans-copy').forEach(b=>b.addEventListener('click',()=>copyText(b.dataset.val,b)));
+        }else{showMsg('#transMsg','err','번역 실패')}
+      }else{
+        const clean=resp.replace(/```/g,'').replace(/"/g,'').trim();
+        const inp=$('#searchInput');
+        if(inp){inp.value=clean;S.searchQuery=clean}
+        showMsg('#transMsg','ok','✓ 번역 완료: '+clean);
+      }
+    }catch(e){showMsg('#transMsg','err',e.message)}
+    btn.disabled=false;btn.textContent=origText;
+  }));
+  $('#searchAnalyze')?.addEventListener('click',async()=>{
+    if(!S.searchQuery.trim()||!S.apiKey)return;
+    S.analyzing=true;render();
+    try{
+      const d=await callAPI(
+        EXTRACT_P,
+        [{role:'user',content:'다음 상품의 정보를 알려줘. 모르는 정보는 해당 카테고리 기준으로 추정해서 작성해. JSON만 출력해:\n\n상품: '+S.searchQuery}]
+      );
+      const i=extractJSON(getResp(d));
+      if(!i)throw new Error('정보 추출 실패. 다른 상품명을 시도해보세요.');
+      applyInfo(i);
+    }catch(e){S.analyzing=false;render();setTimeout(()=>showMsg('#analyzeMsg','err',e.message),50)}
+  });
+  const fi=$('#fileInput');$('#dropZone')?.addEventListener('click',()=>fi?.click());$('#removeImg')?.addEventListener('click',()=>{S.image=null;S.preview=null;render()});
+  fi?.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;S.image=f;const r=new FileReader();r.onload=ev=>{S.preview=ev.target.result;render()};r.readAsDataURL(f)});
+  $$('.field').forEach(el=>el.addEventListener('input',()=>S[el.dataset.f]=el.value));
+  $$('.dur-btn').forEach(b=>b.addEventListener('click',()=>{syncDOM();S.dur=b.dataset.dur;render()}));
+  $$('.style-card').forEach(c=>c.addEventListener('click',()=>{syncDOM();const id=c.dataset.tone;const idx=S.selectedTones.indexOf(id);if(idx>=0)S.selectedTones.splice(idx,1);else S.selectedTones.push(id);render()}));
+  $('#genBtn')?.addEventListener('click',doGenerate);
+}
+function applyInfo(info){if(!info){S.analyzing=false;render();setTimeout(()=>showMsg('#analyzeMsg','err','추출 실패'),50);return}const f=[];if(info.product_name){S.name=info.product_name;f.push('name')}if(info.price){S.price=info.price;f.push('price')}if(info.description){S.desc=info.description;f.push('desc')}if(info.target_audience){S.audience=info.target_audience;f.push('audience')}S.analyzing=false;render();setTimeout(()=>{if(f.length){showMsg('#analyzeMsg','ok','✓ '+f.length+'개!'+(info.product_name?' · '+info.product_name:''));hlFields(f)}else showMsg('#analyzeMsg','info','정보 없음')},50)}
+
+/* ═══════════ GENERATE ═══════════ */
+async function doGenerate(){
+  syncDOM();if(!S.name.trim()){S.error='상품명 필요';render();return}if(!S.apiKey){S.error='API 키 필요';render();return}if(!S.selectedTones.length){S.error='말투를 1개 이상 선택';render();return}
+  const selNames=S.selectedTones.map(id=>TONES.find(t=>t.id===id)?.name).filter(Boolean);
+  const pairs=[];for(let i=0;i<selNames.length;i+=2)pairs.push(selNames.slice(i,i+2));
+  S.error=null;S.cancelled=false;
+  S.loadSteps=[{id:'a',label:'📊 상품 분석 + 썸네일 + 해시태그',status:'waiting',time:0}];
+  pairs.forEach((p,i)=>S.loadSteps.push({id:'s'+i,label:'⭕ '+p.join(' + '),status:'waiting',time:0}));
+  S.partialResult={scripts:[]};S.step='loading';render();
+
+  // Prepare product image if exists
+  let imgContent=[];
+  if(S.image){
+    try{
+      const comp=await compressImage(S.image);
+      if(comp){
+        imgContent=[{type:'image',source:{type:'base64',media_type:comp.mediaType,data:comp.b64}}];
+        console.log('[GEN] product image:',Math.round(comp.b64.length/1024)+'KB');
+      }
+    }catch(e){console.warn('Image compress failed',e)}
+  }
+
+  const infoText=`상품: ${S.name}\n${S.price?'가격: '+S.price+'\n':''}${S.desc?'설명: '+S.desc+'\n':''}${S.audience?'타겟: '+S.audience+'\n':''}길이: ${S.dur}`;
+  // Build message with optional image
+  function makeMsg(extraText){
+    const content=[...imgContent,{type:'text',text:infoText+(extraText||'')+'\nJSON만.'}];
+    return[{role:'user',content:imgContent.length?content:infoText+(extraText||'')+'\nJSON만.'}];
+  }
+
+  let tiv=setInterval(()=>{S.loadSteps.forEach(s=>{if(s.status==='active')s.time++});updateLoadUI()},1000);
+  async function run(idx,fn){if(S.cancelled)throw new Error('취소');S.loadSteps[idx].status='active';updateLoadUI();try{const r=await fn();S.loadSteps[idx].status='done';updateLoadUI();return r}catch(e){S.loadSteps[idx].status='fail';updateLoadUI();throw e}}
+  try{
+    // Step 1: Analysis (with image)
+    const r1=await run(0,async()=>{
+      const d=await callAPI(ANALYSIS_P,makeMsg(imgContent.length?'\n첨부된 상품 이미지도 참고하여 분석해주세요.':''));
+      const j=extractJSON(getResp(d));if(!j)throw new Error('분석 실패');return j;
+    });
+    S.partialResult.analysis=r1;
+
+    // Step 2+: Scripts (with image for better prompts)
+    for(let i=0;i<pairs.length;i++){
+      const scripts=await run(i+1,async()=>{
+        const d=await callAPI(scriptP(pairs[i]),makeMsg(imgContent.length?'\n첨부된 상품 이미지를 참고하여 image_prompt와 video_prompt를 더 정확하게 작성해주세요.':''));
+        const j=extractJSON(getResp(d));if(!j?.scripts)throw new Error(pairs[i].join('+')+' 실패');return j.scripts;
+      });
+      S.partialResult.scripts.push(...scripts);
+    }
+    clearInterval(tiv);S.result={product_analysis:r1.product_analysis||{},scripts:S.partialResult.scripts,thumbnail_ideas:r1.thumbnail_ideas||[],hashtags:r1.hashtags||[]};S.viewingHistory=null;addToHistory(S.result,S.name,S.selectedTones);S.step='result';render();
+  }catch(e){clearInterval(tiv);console.error(e);if(S.partialResult.analysis||S.partialResult.scripts.length){S.result={product_analysis:S.partialResult.analysis?.product_analysis||{},scripts:S.partialResult.scripts,thumbnail_ideas:S.partialResult.analysis?.thumbnail_ideas||[],hashtags:S.partialResult.analysis?.hashtags||[]};S.step='result';render();setTimeout(()=>{const w=document.createElement('div');w.className='msg-box info';w.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);max-width:400px;z-index:99';w.textContent='⚠ 부분 결과: '+e.message;document.body.appendChild(w);setTimeout(()=>w.remove(),6000)},100)}else{S.error=e.message;S.step='input';render()}}
+}
+function updateLoadUI(){S.loadSteps.forEach((s,i)=>{const el=$('#ls'+i);if(!el)return;el.className='load-step '+s.status;const ic=el.querySelector('.icon');if(s.status==='waiting')ic.textContent=i+1;else if(s.status==='active')ic.innerHTML='<span class="spinner" style="width:12px;height:12px;border-width:2px"></span>';else if(s.status==='done')ic.textContent='✓';else ic.textContent='✗';el.querySelector('.timer').textContent=s.time?s.time+'초':''})}
+function renderLoading(a){a.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px"><h2 style="color:var(--orange);font-size:18px;font-weight:800;margin-bottom:6px">⭕ 비포/애프터 × 말투 대본 생성</h2><p style="color:var(--t3);font-size:12px;margin-bottom:20px">비포→체험→애프터, 말투만 다르게</p><div style="width:100%;max-width:420px">${S.loadSteps.map((s,i)=>`<div class="load-step ${s.status}" id="ls${i}"><div class="icon">${i+1}</div><div class="text">${s.label}</div><div class="timer"></div></div>`).join('')}</div><button class="btn-cancel" id="cancelBtn">✕ 취소</button></div>`;setTimeout(()=>$('#cancelBtn')?.addEventListener('click',()=>{S.cancelled=true;S.error='취소됨';S.step='input';render()}),0)}
+
+/* ═══════════ RESULT ═══════════ */
+function renderResult(a){
+  const r=S.result;if(!r)return;const pa=r.product_analysis||{};const scripts=r.scripts||[];const thumbs=r.thumbnail_ideas||[];const tags=r.hashtags||[];const pn=pa.platform_notes||{};
+  const cls=[{t:'A',c:'orange'},{t:'B',c:'green'},{t:'C',c:'purple'},{t:'D',c:'pink'},{t:'E',c:'cyan'},{t:'F',c:'amber'},{t:'G',c:'blue'},{t:'H',c:'rose'},{t:'I',c:'green'},{t:'J',c:'purple'}];
+  const isFromHistory=!!S.viewingHistory;
+  const histItem=isFromHistory?getHistory().find(x=>x.id===S.viewingHistory):null;
+  const isFav=histItem?.fav||false;
+  
+  let h=`<div style="position:sticky;top:0;z-index:10;padding:12px 0;display:flex;justify-content:space-between;align-items:center;background:var(--page);border-bottom:1px solid var(--bdr)">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span>🎬</span><span style="font-size:15px;font-weight:800;color:var(--orange)">완료</span>
+      <span class="tag" style="color:var(--green);background:var(--green-d)">✓ ${scripts.length}종</span>
+      <span class="h-tag">⭕ B/A체험기</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      ${S.viewingHistory?`<button class="btn-amber sm" id="favToggle" style="font-size:14px;${isFav?'background:rgba(232,183,49,.15);border-color:rgba(232,183,49,.3)':''}">${isFav?'⭐':'☆'}</button>`:''}
+      <button class="btn-amber sm" id="histFromResult" style="background:rgba(192,132,252,.08);border-color:rgba(192,132,252,.2);color:var(--purple)">📂</button>
+      <button class="btn-amber" id="resetBtn">+ 새 상품</button>
+    </div>
+  </div><div style="padding-top:16px">`;
+  // Analysis
+  h+=`<div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🔍</span><span class="title">분석</span></div></div><div class="inner-box mb-14"><div class="grid-2"><div><div class="lbl">상품명</div><p style="color:var(--white);font-size:15px;font-weight:700">${pa.product_name||''}</p></div><div><div class="lbl">카테고리</div><p>${pa.category||''}</p></div></div></div><div class="inner-box mb-14"><div class="lbl">타겟</div><p style="line-height:1.6">${pa.target_audience||''}</p></div><div class="grid-3 mb-14"><div class="inner-box"><div class="lbl" style="color:var(--green)">USP</div><div class="flex-col">${(pa.usp||[]).map(u=>`<span class="tag" style="color:var(--green);background:var(--green-d)">${u}</span>`).join('')}</div></div><div class="inner-box"><div class="lbl" style="color:var(--rose)">페인</div><div class="flex-col">${(pa.pain_points||[]).map(p=>`<span class="tag" style="color:var(--rose);background:var(--rose-d)">${p}</span>`).join('')}</div></div><div class="inner-box"><div class="lbl" style="color:var(--amber-t)">감정</div><div class="flex-col">${(pa.emotional_triggers||[]).map(t=>`<span class="tag" style="color:var(--amber-t);background:var(--amber-d)">${t}</span>`).join('')}</div></div></div>`;
+  if(pa.color_mood)h+=`<div class="inner-box mb-14"><div class="lbl" style="color:var(--amber-t)">🎨 컬러</div><p style="font-size:13px">${pa.color_mood}</p></div>`;
+  if(pn.youtube_shorts||pn.instagram_reels||pn.tiktok){h+=`<div class="inner-box"><div class="lbl" style="color:var(--cyan)">📱 플랫폼</div><div style="display:flex;flex-direction:column;gap:4px;margin-top:4px">`;if(pn.youtube_shorts)h+=`<p style="color:var(--t2);font-size:11px"><b style="color:var(--rose)">YT</b> ${pn.youtube_shorts}</p>`;if(pn.instagram_reels)h+=`<p style="color:var(--t2);font-size:11px"><b style="color:var(--purple)">IG</b> ${pn.instagram_reels}</p>`;if(pn.tiktok)h+=`<p style="color:var(--t2);font-size:11px"><b style="color:var(--cyan)">TT</b> ${pn.tiktok}</p>`;h+=`</div></div>`}h+=`</div>`;
+  // Scripts
+  h+=`<div class="card" style="padding:20px 20px 8px"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🗣️</span><span class="title">대본</span><span class="badge">${scripts.length}종</span><span class="h-tag">B/A 체험기</span></div></div>`;
+  scripts.forEach((sc,si)=>{const cl=cls[si%cls.length];const id='sc'+si;
+    h+=`<div class="accordion ${si===0?'open':''}" id="${id}"><div class="accordion-hdr" data-toggle="${id}"><div style="display:flex;align-items:center;gap:10px"><div class="tag-circle" style="background:var(--${cl.c}-d);color:var(--${cl.c})">${cl.t}</div><div><div style="color:var(--white);font-size:14px;font-weight:700">${sc.style||''}</div><div style="color:var(--t3);font-size:11px;font-family:var(--mono);margin-top:2px">${sc.duration||''}</div></div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" style="transition:transform .3s;${si===0?'transform:rotate(180deg)':''}"><polyline points="6 9 12 15 18 9"/></svg></div><div class="accordion-body">`;
+    if(sc.concept_summary)h+=`<div style="padding:6px 10px;border-radius:7px;background:var(--inner);border:1px solid var(--bdr-in);margin-bottom:10px;font-size:12px;color:var(--t2)"><span style="color:var(--${cl.c});font-weight:700">컨셉: </span>${sc.concept_summary}</div>`;
+    h+=`<div class="hook-box" style="border:1px solid rgba(192,132,252,.15)"><div class="hook-label" style="background:var(--${cl.c})">HOOK</div><p style="color:var(--white);font-size:16px;font-weight:700;line-height:1.6;margin-top:5px">"${sc.hook||''}"</p></div>`;
+    // Bulk copy
+    const bScript=(sc.scenes||[]).map(s=>{const ss=s.script||{};return`[씬${s.scene_number}] ${s.duration} ${s.harmon_stage||HARMON[s.scene_number-1]||''}\n나레이션: ${ss.narration}\n자막: ${ss.screen_text}`}).join('\n\n');
+    const bImg=(sc.scenes||[]).map(s=>`[씬${s.scene_number}]\n${(s.image_prompt||{}).prompt_en||''}`).join('\n\n');
+    const bVid=(sc.scenes||[]).map(s=>`[씬${s.scene_number}]\n${(s.video_prompt||{}).prompt_en||''}`).join('\n\n');
+    const bSB=(sc.scenes||[]).map(s=>{const sb=s.storyboard||{};return`[씬${s.scene_number}]\n구성: ${sb.composition}\n앵글: ${sb.camera_angle}\n무빙: ${sb.camera_movement}`}).join('\n\n');
+    const bAud=(sc.scenes||[]).map(s=>{const au=s.audio||{};return`[씬${s.scene_number}]\nSFX: ${au.sfx}\nBGM: ${au.bgm_sync}`}).join('\n\n');
+    h+=`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;padding:10px;border-radius:10px;background:var(--inner);border:1px solid var(--bdr-in)"><span style="color:var(--t3);font-size:11px;font-weight:600;display:flex;align-items:center;margin-right:4px">전체복사▸</span><button class="btn-amber sm copy-btn" style="color:var(--orange)" data-copy="${encodeURIComponent('['+sc.style+'] 대본\n\n'+bScript)}">🎙대본</button><button class="btn-amber sm copy-btn" style="color:var(--purple)" data-copy="${encodeURIComponent('['+sc.style+'] 스토리보드\n\n'+bSB)}">🎬보드</button><button class="btn-amber sm copy-btn" style="color:var(--cyan)" data-copy="${encodeURIComponent('['+sc.style+'] 이미지 프롬프트\n\n'+bImg)}">🖼️이미지</button><button class="btn-amber sm copy-btn" style="color:var(--green)" data-copy="${encodeURIComponent('['+sc.style+'] 영상 프롬프트\n\n'+bVid)}">📹영상</button><button class="btn-amber sm copy-btn" style="color:var(--pink)" data-copy="${encodeURIComponent('['+sc.style+'] 오디오\n\n'+bAud)}">🔊SFX</button></div>`;
+    (sc.scenes||[]).forEach((sn,sni)=>{const sid='s'+si+'_'+sni;const sb=sn.storyboard||{};const ss=sn.script||{};const ip=sn.image_prompt||{};const vp=sn.video_prompt||{};const au=sn.audio||{};
+      const hStage=sn.harmon_stage||HARMON[sni]||'';
+      const toneInt=sn.tone_intensity||['80%','40%','50%','70%','40%','100%'][sni]||'';
+      const intColors={'80%':'var(--orange)','40%':'var(--t3)','50%':'var(--amber-t)','60%':'var(--amber-t)','70%':'var(--cyan)','100%':'var(--green)'};
+      const intColor=intColors[toneInt]||'var(--t3)';
+      const cp=`[씬${sn.scene_number}] ${sn.duration} ${hStage}\n나레이션: ${ss.narration}\n자막: ${ss.screen_text}\n이미지: ${ip.prompt_en}\n영상: ${vp.prompt_en}`;
+      h+=`<div class="scene-card"><div class="scene-hdr"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><div class="scene-num">${sn.scene_number}</div><span style="color:var(--t2);font-size:11px;font-family:var(--mono)">${sn.duration||''}</span><span style="font-size:10px;color:var(--purple);background:var(--purple-d);padding:2px 6px;border-radius:4px;font-weight:600">${hStage}</span><span style="font-size:9px;color:${intColor};background:var(--inner);padding:2px 6px;border-radius:4px;font-weight:700;font-family:var(--mono)">톤${toneInt}</span></div><button class="btn-amber sm copy-btn" data-copy="${encodeURIComponent(cp)}">복사</button></div>`;
+      h+=`<div class="scene-tabs">${[{id:'script',l:'🎙대본'},{id:'sb',l:'🎬보드'},{id:'img',l:'🖼️이미지'},{id:'vid',l:'📹영상'},{id:'aud',l:'🔊SFX'}].map((t,ti)=>`<button class="scene-tab ${ti===0?'active':''}" data-sid="${sid}" data-tab="${t.id}">${t.l}</button>`).join('')}</div><div class="scene-body">`;
+      h+=`<div class="tp" data-sid="${sid}" data-tab="script"><div class="mb-10"><div class="lbl" style="color:var(--orange)">나레이션</div><p style="color:var(--white);font-size:13px;line-height:1.7">${ss.narration||''}</p></div><div class="mb-10"><div class="lbl" style="color:var(--blue)">자막</div><div style="padding:6px 10px;border-radius:7px;background:var(--blue-d);color:var(--blue);font-size:12px;font-weight:600">${ss.screen_text||''}</div></div><div class="grid-2"><div><div class="lbl" style="color:var(--purple)">효과</div><p style="color:var(--t2);font-size:11px">${ss.text_animation||''}</p></div><div><div class="lbl" style="color:var(--pink)">톤</div><p style="color:var(--t2);font-size:11px">${ss.voice_tone||''}</p></div></div></div>`;
+      h+=`<div class="tp hidden" data-sid="${sid}" data-tab="sb"><div class="mb-10"><div class="lbl" style="color:var(--purple)">구성</div><p style="font-size:12px;line-height:1.6">${sb.composition||''}</p></div><div class="grid-2"><div style="background:#0A0A0C;border-radius:7px;padding:8px"><div class="lbl" style="color:var(--cyan)">앵글</div><p style="font-size:11px">${sb.camera_angle||''}</p></div><div style="background:#0A0A0C;border-radius:7px;padding:8px"><div class="lbl" style="color:var(--green)">무빙</div><p style="font-size:11px">${sb.camera_movement||''}</p></div></div></div>`;
+      h+=`<div class="tp hidden" data-sid="${sid}" data-tab="img"><div class="prompt-block" style="border:1px solid rgba(34,211,238,.1)"><div class="prompt-block-hdr" style="background:rgba(34,211,238,.04)"><div class="label"><span style="color:var(--cyan)">IMAGE</span><span class="lang">EN</span></div><button class="prompt-copy copy-btn" data-copy="${encodeURIComponent(ip.prompt_en||'')}">복사</button></div><div class="prompt-block-body">${ip.prompt_en||''}</div></div></div>`;
+      h+=`<div class="tp hidden" data-sid="${sid}" data-tab="vid"><div class="prompt-block" style="border:1px solid rgba(74,222,128,.1)"><div class="prompt-block-hdr" style="background:rgba(74,222,128,.04)"><div class="label"><span style="color:var(--green)">VIDEO</span><span class="lang">EN</span></div><button class="prompt-copy copy-btn" data-copy="${encodeURIComponent(vp.prompt_en||'')}">복사</button></div><div class="prompt-block-body">${vp.prompt_en||''}</div></div></div>`;
+      h+=`<div class="tp hidden" data-sid="${sid}" data-tab="aud"><div class="mb-10"><div class="lbl" style="color:var(--pink)">SFX</div><p style="font-size:12px">${au.sfx||''}</p></div><div><div class="lbl" style="color:var(--amber-t)">BGM</div><p style="font-size:12px">${au.bgm_sync||''}</p></div></div>`;
+      h+=`</div></div>`;});
+    h+=`<div class="grid-2 mb-10"><div class="inner-box"><div class="lbl" style="color:var(--rose)">🎵BGM</div><p style="font-size:12px">${sc.bgm_mood||''}</p></div><div class="inner-box"><div class="lbl" style="color:var(--blue)">✂️편집</div><p style="font-size:12px">${sc.editing_tips||''}</p></div></div>`;
+    const fcp=(sc.scenes||[]).map(s=>`[씬${s.scene_number}] ${s.harmon_stage||HARMON[s.scene_number-1]||''}\n나레이션: ${(s.script||{}).narration}\n자막: ${(s.script||{}).screen_text}\n이미지: ${(s.image_prompt||{}).prompt_en}\n영상: ${(s.video_prompt||{}).prompt_en}`).join('\n\n');
+    h+=`<button class="btn-amber copy-btn" data-copy="${encodeURIComponent('['+sc.style+']\nHOOK: '+sc.hook+'\n\n'+fcp)}">전체 복사</button></div></div>`;});
+  h+=`</div>`;
+  if(thumbs.length){h+=`<div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🖼️</span><span class="title">썸네일</span></div></div>`;thumbs.forEach((t,i)=>{h+=`<div class="inner-box mb-10"><span class="tag" style="color:var(--orange);background:var(--orange-d)">컨셉 ${i+1}</span><p style="color:var(--white);font-size:14px;font-weight:700;margin:6px 0 3px">${t.main_text||''}</p><p style="color:var(--t2);font-size:11px;margin-bottom:6px">${t.sub_text||''}</p>`;if(t.image_prompt_en)h+=`<div class="prompt-block" style="border:1px solid rgba(34,211,238,.1)"><div class="prompt-block-hdr" style="background:rgba(34,211,238,.04)"><div class="label"><span style="color:var(--cyan)">THUMB</span><span class="lang">EN</span></div><button class="prompt-copy copy-btn" data-copy="${encodeURIComponent(t.image_prompt_en)}">복사</button></div><div class="prompt-block-body">${t.image_prompt_en}</div></div>`;h+=`</div>`});h+=`</div>`}
+  if(tags.length){h+=`<div class="card" style="margin-bottom:40px"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">#️⃣</span><span class="title">해시태그</span></div><button class="btn-amber sm copy-btn" data-copy="${encodeURIComponent(tags.map(t=>'#'+t).join(' '))}">전체</button></div><div class="inner-box" style="display:flex;flex-wrap:wrap;gap:6px">${tags.map(t=>`<span class="hashtag" data-tag="${t}">#${t}</span>`).join('')}</div></div>`}
+  h+=`</div>`;a.innerHTML=h;
+  setTimeout(()=>{
+    $('#resetBtn')?.addEventListener('click',()=>{S.step='input';S.result=null;S.viewingHistory=null;render()});
+    $('#histFromResult')?.addEventListener('click',()=>{S.step='history';render()});
+    $('#favToggle')?.addEventListener('click',()=>{if(S.viewingHistory){toggleFav(S.viewingHistory);render()}});
+    $$('[data-toggle]').forEach(el=>el.addEventListener('click',()=>{const x=$('#'+el.dataset.toggle);x.classList.toggle('open');el.querySelector('svg').style.transform=x.classList.contains('open')?'rotate(180deg)':'rotate(0)'}));
+    $$('.scene-tab').forEach(tab=>tab.addEventListener('click',()=>{const sid=tab.dataset.sid,tid=tab.dataset.tab;$$('.scene-tab[data-sid="'+sid+'"]').forEach(t=>{t.classList.remove('active');t.style.color='';t.style.background=''});tab.classList.add('active');const cm={script:'var(--orange)',sb:'var(--purple)',img:'var(--cyan)',vid:'var(--green)',aud:'var(--pink)'};tab.style.color=cm[tid]||'';$$('.tp[data-sid="'+sid+'"]').forEach(p=>p.classList.add('hidden'));$('.tp[data-sid="'+sid+'"][data-tab="'+tid+'"]')?.classList.remove('hidden')}));
+    $$('.copy-btn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();copyText(decodeURIComponent(b.dataset.copy),b)}));
+    $$('.hashtag').forEach(el=>el.addEventListener('click',()=>{navigator.clipboard.writeText('#'+el.dataset.tag);el.style.color='var(--green)';setTimeout(()=>el.style.color='',1000)}));
+  },50);
+}
+render();
+</script>
+</body>
+</html>
