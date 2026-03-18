@@ -836,7 +836,37 @@ tbody td:first-child { font-family: 'JetBrains Mono', monospace; font-weight: 60
 <div class="container">
 
   <!-- CONTROLS -->
-  <div class="controls">
+  <div class="controls" style="flex-wrap:wrap">
+    <div class="control-group" style="flex:1;min-width:200px">
+      <label>🔍 검색 키워드</label>
+      <input type="text" id="searchKeyword" placeholder="예: 다이어트, 맛집, OOTD..." style="width:100%" onkeydown="if(event.key==='Enter')startCollect()">
+    </div>
+    <div class="control-group">
+      <label>📂 카테고리</label>
+      <select id="category" onchange="updateSubcategory()">
+        <option value="">전체 (트렌딩)</option>
+        <option value="entertainment">🎭 엔터테인먼트</option>
+        <option value="food">🍔 먹방/요리</option>
+        <option value="beauty">💄 뷰티/패션</option>
+        <option value="fitness">💪 운동/건강</option>
+        <option value="education">📚 교육/정보</option>
+        <option value="comedy">😂 코미디/밈</option>
+        <option value="tech">📱 테크/IT</option>
+        <option value="travel">✈️ 여행</option>
+        <option value="pet">🐶 반려동물</option>
+        <option value="music">🎵 음악/댄스</option>
+        <option value="finance">💰 재테크/경제</option>
+        <option value="gaming">🎮 게임</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>🏷️ 세부 주제</label>
+      <select id="subcategory">
+        <option value="">전체</option>
+      </select>
+    </div>
+  </div>
+  <div class="controls" style="margin-top:8px">
     <div class="control-group">
       <label>국가</label>
       <select id="country">
@@ -1018,6 +1048,7 @@ let STATE = {
   charts: {},
   sortCol: -1,
   sortAsc: true,
+  searchQuery: '',
 };
 
 // ===== API KEY MANAGEMENT =====
@@ -1282,11 +1313,18 @@ async function startCollect() {
   const minScore = parseFloat(document.getElementById('minScore').value);
   const minViews = parseInt(document.getElementById('minViews').value);
 
-  showLoading('📡 틱톡 트렌딩 데이터 수집 중...');
+  // Build search query from keyword + category + subcategory
+  const keyword = document.getElementById('searchKeyword').value.trim();
+  const category = document.getElementById('category').selectedOptions[0]?.textContent.replace(/^[^\s]+\s/,'').trim() || '';
+  const subcategory = document.getElementById('subcategory').value;
+  const queryParts = [keyword, subcategory, (!keyword && !subcategory) ? category : ''].filter(Boolean);
+  const searchQuery = queryParts.join(' ').trim();
+
+  showLoading(searchQuery ? `🔍 "${searchQuery}" 검색 수집 중...` : '📡 틱톡 트렌딩 데이터 수집 중...');
 
   let rawVideos;
   if (STATE.apifyKey) {
-    rawVideos = await collectFromApify(country, count);
+    rawVideos = await collectFromApify(country, count, searchQuery);
     if (!rawVideos || rawVideos.length === 0) {
       hideLoading();
       return; // 사용자가 취소했거나 데이터 없음
@@ -1300,6 +1338,7 @@ async function startCollect() {
   await delay(400);
 
   STATE.allScored = rawVideos.map(v => calculateViralScore(v));
+  STATE.searchQuery = searchQuery;
   STATE.viralVideos = STATE.allScored
     .filter(v => v.viralScore >= minScore && v.views >= minViews)
     .sort((a, b) => b.viralScore - a.viralScore);
@@ -1309,14 +1348,41 @@ async function startCollect() {
   renderResults();
 }
 
+// ===== SEARCH CATEGORIES =====
+const SUBCATEGORIES = {
+  entertainment: ['챌린지','립싱크','브이로그','일상','리액션','스토리타임'],
+  food: ['맛집','레시피','먹방','카페','디저트','다이어트식단'],
+  beauty: ['메이크업','스킨케어','헤어','OOTD','패션하울','네일'],
+  fitness: ['홈트','헬스','요가','필라테스','다이어트','식단'],
+  education: ['공부법','자기계발','영어','독서','생활꿀팁','IT'],
+  comedy: ['밈','개그','패러디','몰카','상황극','리액션'],
+  tech: ['아이폰','갤럭시','앱추천','가젯','AI','프로그래밍'],
+  travel: ['국내여행','해외여행','호텔','맛집투어','여행팁','카페투어'],
+  pet: ['강아지','고양이','동물일상','펫용품','훈련','귀여운동물'],
+  music: ['댄스챌린지','커버','악기연주','노래','DJ','K-POP'],
+  finance: ['주식','부동산','절약','재테크팁','투자','N잡'],
+  gaming: ['모바일게임','PC게임','게임리뷰','공략','e스포츠','실황']
+};
+
+function updateSubcategory() {
+  const cat = document.getElementById('category').value;
+  const sub = document.getElementById('subcategory');
+  sub.innerHTML = '<option value="">전체</option>';
+  if (cat && SUBCATEGORIES[cat]) {
+    SUBCATEGORIES[cat].forEach(s => {
+      sub.innerHTML += '<option value="' + s + '">' + s + '</option>';
+    });
+  }
+}
+
 // ===== APIFY API =====
 const APIFY_ACTORS = [
-  { id: 'novi~tiktok-trend-api', input: (country, count) => ({ country, maxItems: count }) },
-  { id: 'clockworks~free-tiktok-scraper', input: (country, count) => ({ searchQueries: ['trending'], maxResults: count, country }) },
-  { id: 'codebyte~tiktok-trending-videos-insights', input: (country, count) => ({ countryCode: country, maxItems: count }) },
+  { id: 'novi~tiktok-trend-api', input: (country, count, query) => query ? { country, maxItems: count, searchQuery: query } : { country, maxItems: count } },
+  { id: 'clockworks~free-tiktok-scraper', input: (country, count, query) => ({ searchQueries: [query || 'trending'], maxResults: count, country }) },
+  { id: 'codebyte~tiktok-trending-videos-insights', input: (country, count, query) => query ? { countryCode: country, maxItems: count, searchQuery: query } : { countryCode: country, maxItems: count } },
 ];
 
-async function collectFromApify(country, count) {
+async function collectFromApify(country, count, searchQuery) {
   for (let actorIdx = 0; actorIdx < APIFY_ACTORS.length; actorIdx++) {
     const actor = APIFY_ACTORS[actorIdx];
     try {
@@ -1328,7 +1394,7 @@ async function collectFromApify(country, count) {
       const runResp = await fetch(runUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(actor.input(country, count))
+        body: JSON.stringify(actor.input(country, count, searchQuery))
       });
 
       // 에러 응답 상세 확인
@@ -1565,12 +1631,13 @@ function renderKPI() {
   const topScore = vv.length ? vv[0].viralScore : 'N/A';
 
   document.getElementById('kpiGrid').innerHTML = [
+    STATE.searchQuery ? kpiCard('🔍', '"'+STATE.searchQuery+'"', '검색어') : '',
     kpiCard('📡', STATE.rawCount, '수집 영상'),
     kpiCard('🔥', vv.length + '개', '바이럴 영상'),
     kpiCard('📊', avgScore + '점', '평균 스코어'),
     kpiCard('🏆', topScore + '점', '최고 스코어'),
     kpiCard('🕐', new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }), '수집 시간'),
-  ].join('');
+  ].filter(Boolean).join('');
 }
 
 function kpiCard(icon, value, label) {
