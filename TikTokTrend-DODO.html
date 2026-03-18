@@ -1464,8 +1464,17 @@ function normalizeApifyItem(item) {
 
   return {
     id: item.id || item.videoId || item.aweme_id || '',
-    url: item.webVideoUrl || item.url || item.videoUrl ||
-         (item.id ? `https://www.tiktok.com/@${author.uniqueId || 'user'}/video/${item.id}` : ''),
+    url: (function(){
+      const candidates = [item.webVideoUrl, item.url, item.videoUrl, item.video_url, item.shareUrl];
+      for(const u of candidates){
+        if(u && typeof u === 'string' && u.includes('/video/')) return u;
+      }
+      const vid = item.id || item.videoId || item.aweme_id || '';
+      const uid = author.uniqueId || author.name || author.username || '';
+      if(vid && uid) return 'https://www.tiktok.com/@' + uid + '/video/' + vid;
+      if(vid) return 'https://www.tiktok.com/video/' + vid;
+      return '';
+    })(),
     description: item.text || item.desc || item.description || item.title || '',
     authorUsername: author.name || author.uniqueId || author.username || author.id || '',
     authorNickname: author.nickName || author.nickname || author.displayName || '',
