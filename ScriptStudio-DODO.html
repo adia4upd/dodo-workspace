@@ -827,8 +827,151 @@ function renderResult(){
     ba.innerHTML='<span style="font-size:15px">📦</span>전체 복사 (5스텝)';
     ba.onclick=()=>{navigator.clipboard.writeText([S.step1Result,S.step2Result,S.step3Result,S.step4Result,S.step5Result].filter(Boolean).join("\n\n---\n\n"));ba.innerHTML='<span style="font-size:15px">✅</span>복사 완료!';setTimeout(()=>{ba.innerHTML='<span style="font-size:15px">📦</span>전체 복사 (5스텝)';},1800);};
     ft.appendChild(ba);
+
+    // ★ 스토리보드 내보내기 버튼
+    const sb=document.createElement("button");
+    sb.style.cssText="padding:10px 22px;background:linear-gradient(135deg,#1d9e75,#4ecca3);color:#fff;font-size:13px;font-weight:800;border:none;border-radius:8px;cursor:pointer;font-family:inherit;box-shadow:0 2px 16px rgba(78,204,163,0.25);display:flex;align-items:center;gap:8px;transition:all 0.2s";
+    sb.innerHTML='<span style="font-size:15px">📋</span>스토리보드 내보내기';
+    sb.onmouseenter=()=>{sb.style.transform="translateY(-1px)";sb.style.boxShadow="0 4px 20px rgba(78,204,163,0.4)";};
+    sb.onmouseleave=()=>{sb.style.transform="none";sb.style.boxShadow="0 2px 16px rgba(78,204,163,0.25)";};
+    sb.onclick=()=>exportStoryboard();
+    ft.appendChild(sb);
   }
   el.appendChild(ft);
+}
+
+// ===== STORYBOARD EXPORT =====
+function exportStoryboard(){
+  const lines=[];
+  const now=new Date();
+  const dateStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  
+  lines.push('# DODO 영상제작 스토리보드');
+  lines.push('# 생성일: '+dateStr);
+  lines.push('# 생성도구: 스크립트AI스튜디오 -DODO');
+  lines.push('');
+  
+  // Project info
+  lines.push('## 프로젝트 정보');
+  const titleMatch=S.step1Result?.match(/(?:제목|Title)[:\s]*(.+)/i);
+  lines.push('프로젝트명: '+(titleMatch?titleMatch[1].replace(/[#*\-]+/g,'').trim():'DODO_Video_'+dateStr));
+  lines.push('비율: 16:9');
+  lines.push('해상도: 1920x1080');
+  lines.push('프레임: 30fps');
+  lines.push('');
+  
+  // Parse scenes from step 2 (storyboard)
+  lines.push('## 타임라인');
+  lines.push('# 형식: Cut번호 | 시작~끝 | 파일명 | 트랜지션 | 설명');
+  lines.push('# ※ 시간은 나레이션(narration.mp3) 기준 자동 분배됩니다');
+  lines.push('');
+  
+  const sbText=S.step2Result||'';
+  const sceneRegex=/(?:S|씬|Scene|CUT|Cut)\s*(\d+)[^\n]*\n([\s\S]*?)(?=(?:S|씬|Scene|CUT|Cut)\s*\d|$)/gi;
+  let match;
+  let sceneNum=0;
+  const scenes=[];
+  
+  while((match=sceneRegex.exec(sbText))!==null){
+    sceneNum++;
+    const desc=match[2].replace(/[#*]+/g,'').trim().split('\n')[0].trim();
+    scenes.push({num:sceneNum, desc:desc.slice(0,60)});
+  }
+  
+  // If no scenes parsed, create from line analysis
+  if(!scenes.length){
+    const headings=sbText.split('\n').filter(l=>/^#{2,3}\s/.test(l)||/^(S|씬|Scene|CUT)\s*\d/i.test(l));
+    headings.forEach((h,i)=>{
+      scenes.push({num:i+1, desc:h.replace(/^[#\s*]+/,'').trim().slice(0,60)});
+    });
+  }
+  
+  // Fallback: at least create 6 default scenes
+  if(!scenes.length){
+    for(let i=1;i<=6;i++) scenes.push({num:i, desc:'씬 '+i});
+  }
+  
+  scenes.forEach((sc,i)=>{
+    const fname='cut'+String(sc.num).padStart(2,'0')+'.mp4';
+    const trans=i===0?'없음':'페이드 0.5s';
+    lines.push('Cut '+sc.num+' | auto | '+fname+' | '+trans+' | '+sc.desc);
+  });
+  
+  lines.push('');
+  
+  // Narration info
+  lines.push('## 나레이션');
+  lines.push('파일: narration.mp3');
+  lines.push('볼륨: 100%');
+  lines.push('');
+  
+  // Subtitle
+  lines.push('## 자막');
+  lines.push('파일: subtitles.srt');
+  lines.push('스타일: 하단, 흰색, 24px, 검정 배경(70% 투명도)');
+  lines.push('폰트: Noto Sans KR Bold');
+  lines.push('');
+  
+  // BGM
+  lines.push('## BGM');
+  lines.push('파일: bgm.mp3 (선택)');
+  lines.push('볼륨: 30%');
+  lines.push('덕킹: 자동 (나레이션 구간 볼륨 다운)');
+  lines.push('페이드아웃: 마지막 3초');
+  lines.push('');
+  
+  // Output
+  lines.push('## 출력 설정');
+  lines.push('파일명: output.mp4');
+  lines.push('코덱: H.264 (libx264)');
+  lines.push('오디오: AAC');
+  lines.push('해상도: 1920x1080');
+  lines.push('프레임: 30fps');
+  lines.push('');
+  
+  // Image prompts (from step 3)
+  if(S.step3Result){
+    lines.push('## 이미지 프롬프트 (AI 이미지 생성용)');
+    const imgPrompts=extractImagePrompts(S.step3Result);
+    if(imgPrompts) lines.push(imgPrompts);
+    else lines.push(S.step3Result.slice(0,2000));
+    lines.push('');
+  }
+  
+  // Video prompts (from step 4)
+  if(S.step4Result){
+    lines.push('## 영상 프롬프트 (AI 영상 생성용)');
+    const vidPrompts=extractVideoPrompts(S.step4Result);
+    if(vidPrompts) lines.push(vidPrompts);
+    else lines.push(S.step4Result.slice(0,2000));
+    lines.push('');
+  }
+  
+  // Script (from step 1)
+  if(S.step1Result){
+    lines.push('## 전체 대본');
+    const script=extractScriptOnly(S.step1Result)||S.step1Result;
+    lines.push(script);
+    lines.push('');
+  }
+  
+  // Claude Code instructions
+  lines.push('## Claude Code 사용법');
+  lines.push('# 1. 이 파일과 영상/음성/자막 파일을 같은 폴더에 넣으세요');
+  lines.push('# 2. 터미널에서 해당 폴더로 이동: cd ~/Desktop/my_video');
+  lines.push('# 3. Claude Code 실행: claude');
+  lines.push('# 4. 다음과 같이 말하세요:');
+  lines.push('#    "storyboard.txt 파일을 읽고 이 문서대로 영상을 만들어줘"');
+  lines.push('# 5. Claude Code가 FFmpeg로 자동 병합합니다!');
+  
+  // Download
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='storyboard_'+dateStr+'.txt';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function renderHistory(){
