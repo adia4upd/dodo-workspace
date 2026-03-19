@@ -836,8 +836,209 @@ function renderResult(){
     sb.onmouseleave=()=>{sb.style.transform="none";sb.style.boxShadow="0 2px 16px rgba(78,204,163,0.25)";};
     sb.onclick=()=>exportStoryboard();
     ft.appendChild(sb);
+
+    // ★ Grok 연동 버튼
+    const gk=document.createElement("button");
+    gk.style.cssText="padding:10px 22px;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;font-size:13px;font-weight:800;border:1px solid rgba(255,255,255,0.15);border-radius:8px;cursor:pointer;font-family:inherit;box-shadow:0 2px 16px rgba(0,0,0,0.3);display:flex;align-items:center;gap:8px;transition:all 0.2s";
+    gk.innerHTML='<span style="font-size:15px">🤖</span>Grok 프롬프트';
+    gk.onmouseenter=()=>{gk.style.transform="translateY(-1px)";gk.style.borderColor="rgba(255,255,255,0.3)";};
+    gk.onmouseleave=()=>{gk.style.transform="none";gk.style.borderColor="rgba(255,255,255,0.15)";};
+    gk.onclick=()=>openGrokPanel();
+    ft.appendChild(gk);
   }
   el.appendChild(ft);
+}
+
+// ===== GROK PROMPT GENERATOR =====
+const GROK_STYLES = {
+  stickman: { name:'스케치 스틱맨', icon:'✏️', prefix:'Simple stickman sketch illustration, black ink outlines on beige/cream paper texture, hand-drawn comic style, expressive stick figure characters with simple facial expressions, minimal detail, clean lines, speech bubble style text overlay allowed' },
+  cartoon: { name:'카툰 해설', icon:'🎨', prefix:'Colorful flat cartoon editorial illustration, bold black outlines, bright saturated colors, exaggerated expressions, Korean webtoon style, dynamic composition, infographic elements allowed' },
+  cinematic: { name:'시네마틱 실사', icon:'🎬', prefix:'Cinematic photorealistic scene, dramatic lighting, shallow depth of field, 35mm film grain, moody atmospheric, professional photography, 4K quality' },
+  anime: { name:'일본 애니메이션', icon:'🎌', prefix:'Japanese anime style illustration, detailed background art, Studio Ghibli inspired, warm color palette, soft natural lighting, expressive anime characters, high quality cel shading' },
+  '3d': { name:'3D 애니메이션', icon:'🧸', prefix:'Pixar style 3D rendered scene, cute stylized characters, soft studio lighting, vibrant colors, high quality CGI render, smooth textures, family-friendly aesthetic' },
+  flat: { name:'플랫 일러스트', icon:'📐', prefix:'Modern flat design illustration, minimal geometric shapes, pastel color palette, clean vector art style, infographic layout, no gradients, solid colors only' },
+  news: { name:'뉴스 스타일', icon:'📰', prefix:'Professional news broadcast style photograph, formal setting, studio lighting, editorial quality, press photo aesthetic, serious tone' },
+  yadam: { name:'한국 야담', icon:'🏯', prefix:'Traditional Korean ink wash painting style (수묵화), historical Joseon era scene, muted earth tones, calligraphic brush strokes, atmospheric fog, traditional Korean architecture and clothing' },
+  pixel: { name:'레트로 픽셀', icon:'🕹️', prefix:'Retro 16-bit pixel art style, nostalgic color palette, detailed sprite work, vintage video game aesthetic, scanline effect' },
+  clay: { name:'클레이 애니', icon:'🧊', prefix:'Claymation stop-motion style, plasticine/clay characters, miniature handmade set, soft diffused studio lighting, textured surfaces, warm cozy feel' },
+};
+
+let grokStyle = 'stickman';
+let grokPanelOpen = false;
+
+function openGrokPanel(){
+  // Parse scenes from step 2/3
+  const scenes = parseGrokScenes();
+  if(!scenes.length){ alert('스토리보드(STEP 2) 또는 이미지 프롬프트(STEP 3)가 필요합니다.'); return; }
+
+  grokPanelOpen = true;
+  const overlay = document.createElement('div');
+  overlay.id = 'grokOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;overflow-y:auto;padding:20px;backdrop-filter:blur(6px)';
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'max-width:800px;margin:0 auto;background:#111116;border:1px solid #2a2a34;border-radius:16px;padding:0;overflow:hidden';
+
+  // Header
+  modal.innerHTML = `
+    <div style="padding:20px 24px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:1px solid #2a2a34;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:18px;font-weight:900;color:#fff;display:flex;align-items:center;gap:10px">🤖 Grok 프롬프트 생성기</div>
+        <div style="font-size:12px;color:#8a8a94;margin-top:4px">grok.com에 복사+붙여넣기하여 이미지/영상을 생성하세요</div>
+      </div>
+      <button onclick="closeGrokPanel()" style="background:none;border:none;color:#8a8a94;font-size:20px;cursor:pointer;padding:4px">✕</button>
+    </div>
+
+    <div style="padding:20px 24px">
+      <!-- Style Selection -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;color:#e8a030;margin-bottom:10px">🎨 영상 스타일 선택</div>
+        <div id="grokStyles" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"></div>
+      </div>
+
+      <!-- Ratio -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+        <span style="font-size:12px;color:#8a8a94;font-weight:600">화면비율:</span>
+        <button class="grk-ratio active" onclick="setGrokRatio('16:9',this)" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid #2a2a34;background:rgba(232,160,48,0.1);color:#e8a030;cursor:pointer">16:9</button>
+        <button class="grk-ratio" onclick="setGrokRatio('9:16',this)" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid #2a2a34;background:transparent;color:#8a8a94;cursor:pointer">9:16</button>
+        <button class="grk-ratio" onclick="setGrokRatio('1:1',this)" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid #2a2a34;background:transparent;color:#8a8a94;cursor:pointer">1:1</button>
+        <span style="flex:1"></span>
+        <button onclick="copyAllGrok()" style="padding:8px 18px;background:linear-gradient(135deg,#e8a030,#d4941e);color:#111;font-size:12px;font-weight:800;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px">
+          <span style="font-size:14px">📋</span>전체 프롬프트 복사
+        </button>
+      </div>
+
+      <!-- Workflow Guide -->
+      <div style="background:#1a1a22;border:1px solid #2a2a34;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:12px;color:#8a8a94;line-height:1.8">
+        <span style="font-weight:700;color:#e8a030">사용법:</span>
+        ❶ 스타일 선택 → ❷ 씬별 프롬프트 복사 → ❸ <a href="https://grok.com" target="_blank" style="color:#22d3ee;text-decoration:none;font-weight:600">grok.com</a> 접속 → ❹ "상상" 탭 클릭 → ❺ 프롬프트 붙여넣기 → ❻ 이미지 생성 → ❼ "영상 만들기" 클릭 → ❽ 다운로드
+      </div>
+
+      <!-- Scene Prompts -->
+      <div id="grokScenes" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeGrokPanel(); };
+  document.body.appendChild(overlay);
+
+  renderGrokStyles();
+  renderGrokScenes(scenes);
+}
+
+let grokRatio = '16:9';
+
+function setGrokRatio(r, btn){
+  grokRatio = r;
+  document.querySelectorAll('.grk-ratio').forEach(b=>{b.style.background='transparent';b.style.color='#8a8a94';});
+  btn.style.background='rgba(232,160,48,0.1)';btn.style.color='#e8a030';
+  renderGrokScenes(parseGrokScenes());
+}
+
+function renderGrokStyles(){
+  const el = document.getElementById('grokStyles');
+  if(!el) return;
+  el.innerHTML = Object.entries(GROK_STYLES).map(([k,v])=>`
+    <div onclick="selectGrokStyle('${k}',this)" style="padding:10px 6px;text-align:center;border-radius:8px;cursor:pointer;border:1px solid ${grokStyle===k?'#e8a030':'#2a2a34'};background:${grokStyle===k?'rgba(232,160,48,0.08)':'transparent'};transition:all 0.2s">
+      <div style="font-size:18px;margin-bottom:4px">${v.icon}</div>
+      <div style="font-size:10px;font-weight:700;color:${grokStyle===k?'#e8a030':'#8a8a94'}">${v.name}</div>
+    </div>
+  `).join('');
+}
+
+function selectGrokStyle(k){
+  grokStyle = k;
+  renderGrokStyles();
+  renderGrokScenes(parseGrokScenes());
+}
+
+function parseGrokScenes(){
+  const scenes = [];
+  // Try step 3 (image prompts) first
+  const src = S.step3Result || S.step2Result || '';
+  if(!src) return scenes;
+
+  // Parse scene blocks
+  const blocks = src.split(/(?=(?:S|씬|Scene|CUT|Cut|##)\s*\d)/gi).filter(b=>b.trim());
+  blocks.forEach((block,i)=>{
+    const lines = block.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(!lines.length) return;
+
+    // Try to find English prompt
+    let prompt = '';
+    const engLine = lines.find(l=>/^[A-Z]/.test(l) && l.length>20 && /\b(shot|scene|view|style|light|camera)\b/i.test(l));
+    if(engLine) prompt = engLine.replace(/^[\-•*>\s]+/,'').trim();
+
+    // Try to find description
+    if(!prompt){
+      const descLine = lines.find(l=>l.length>15 && !/^[#\d]/.test(l) && !/프롬프트|Prompt/i.test(l));
+      if(descLine) prompt = descLine.replace(/^[\-•*>\s]+/,'').trim();
+    }
+
+    if(!prompt && lines.length>1) prompt = lines.slice(1).join(' ').slice(0,150);
+    if(prompt) scenes.push({ num: scenes.length+1, prompt: prompt.slice(0,200) });
+  });
+
+  // Fallback: create from script sections
+  if(!scenes.length && S.step1Result){
+    const script = S.step1Result;
+    const parts = script.split(/\n\n+/).filter(p=>p.trim().length>20);
+    const count = Math.min(parts.length, 12);
+    const step = Math.max(1, Math.floor(parts.length/count));
+    for(let i=0;i<count;i++){
+      const idx = Math.min(i*step, parts.length-1);
+      scenes.push({ num:i+1, prompt: parts[idx].replace(/\n/g,' ').slice(0,100) });
+    }
+  }
+
+  return scenes;
+}
+
+function renderGrokScenes(scenes){
+  const el = document.getElementById('grokScenes');
+  if(!el) return;
+  const style = GROK_STYLES[grokStyle];
+  const ratio = grokRatio==='16:9'?'wide landscape 16:9 aspect ratio':grokRatio==='9:16'?'vertical portrait 9:16 aspect ratio for mobile/shorts':'square 1:1 aspect ratio';
+
+  el.innerHTML = scenes.map((sc,i)=>{
+    const fullPrompt = `${style.prefix}, ${ratio}. Scene: ${sc.prompt}`;
+    return `
+    <div style="background:#1a1a22;border:1px solid #2a2a34;border-radius:10px;padding:14px 16px;transition:all 0.2s" onmouseenter="this.style.borderColor='#3a3a48'" onmouseleave="this.style.borderColor='#2a2a34'">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="background:rgba(232,160,48,0.15);color:#e8a030;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace">Cut ${sc.num}</span>
+          <span style="font-size:10px;color:#8a8a94">${style.icon} ${style.name}</span>
+        </div>
+        <button onclick="copyGrokPrompt(this,'${i}')" data-prompt="${encodeURIComponent(fullPrompt)}" style="padding:5px 14px;background:rgba(255,255,255,0.06);border:1px solid #2a2a34;border-radius:6px;color:#a0a0ae;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;gap:4px">
+          📋 복사
+        </button>
+      </div>
+      <div style="font-size:12px;color:#c0c0b8;line-height:1.7;font-family:'JetBrains Mono',sans-serif;background:#111116;padding:10px 12px;border-radius:6px;border:1px solid #1e1e26;word-break:break-all">${fullPrompt}</div>
+    </div>`;
+  }).join('');
+}
+
+function copyGrokPrompt(btn,idx){
+  const prompt = decodeURIComponent(btn.getAttribute('data-prompt'));
+  navigator.clipboard.writeText(prompt);
+  btn.innerHTML='✅ 복사됨!';btn.style.color='#4ecca3';btn.style.borderColor='rgba(78,204,163,0.3)';
+  setTimeout(()=>{btn.innerHTML='📋 복사';btn.style.color='#a0a0ae';btn.style.borderColor='#2a2a34';},1500);
+}
+
+function copyAllGrok(){
+  const scenes = parseGrokScenes();
+  const style = GROK_STYLES[grokStyle];
+  const ratio = grokRatio==='16:9'?'wide landscape 16:9 aspect ratio':grokRatio==='9:16'?'vertical portrait 9:16 aspect ratio for mobile/shorts':'square 1:1 aspect ratio';
+  const all = scenes.map((sc,i)=>`[Cut ${sc.num}]\n${style.prefix}, ${ratio}. Scene: ${sc.prompt}`).join('\n\n---\n\n');
+  navigator.clipboard.writeText(all);
+  alert('전체 '+scenes.length+'개 씬 프롬프트가 복사되었습니다!\n\ngrok.com에서 하나씩 붙여넣기하여 이미지를 생성하세요.');
+}
+
+function closeGrokPanel(){
+  const el = document.getElementById('grokOverlay');
+  if(el) el.remove();
+  grokPanelOpen = false;
 }
 
 // ===== STORYBOARD EXPORT =====
