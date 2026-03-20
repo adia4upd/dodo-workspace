@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMN 수익 시뮬레이터</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --bg-card: #131316;
+  --bg-card2: #1a1a1f;
+  --bg-input: #222228;
+  --gold: #E5B820;
+  --gold-light: #F0C830;
+  --gold-dim: rgba(229,184,32,0.12);
+  --gold-glow: rgba(229,184,32,0.30);
+  --gold-deep: #C49A10;
+  --hermes: #F37021;
+  --hermes-light: #F68A4B;
+  --hermes-dim: rgba(243,112,33,0.10);
+  --text: #F5F5F5;
+  --text2: #C0C0C8;
+  --text3: #8888A0;
+  --text4: #606070;
+  --border: #1e1e24;
+  --border2: #2a2a32;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.bg-texture {
+  position: fixed; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 700px 500px at 10% 0%, rgba(212,168,67,0.03), transparent),
+    radial-gradient(ellipse 500px 400px at 90% 100%, rgba(243,112,33,0.02), transparent);
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* Header */
+header { text-align: center; padding: 2.5rem 0 1.5rem; }
+header .logo-row {
+  display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px;
+}
+header .logo-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--bg);
+}
+header .brand {
+  font-family: 'Outfit', sans-serif; font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text);
+}
+header .brand .alpha {
+  font-size: 0.4em; font-weight: 500; letter-spacing: 4px; color: var(--gold);
+  vertical-align: super; margin-left: 6px;
+}
+header .tagline {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; font-weight: 400;
+}
+header .line {
+  width: 50px; height: 2px; margin: 1rem auto 0;
+  background: var(--gold); border-radius: 2px;
+}
+
+/* Product guide cards */
+.product-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2.5rem 0;
+}
+@media (max-width: 680px) { .product-cards { grid-template-columns: 1fr; } }
+
+.p-card {
+  border-radius: 14px; overflow: hidden; background: var(--bg-card);
+}
+.p-card.card-a { border: 1px solid rgba(212,168,67,0.25); }
+.p-card.card-b { border: 1px solid rgba(243,112,33,0.25); }
+
+.p-header {
+  padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+}
+.card-a .p-header { background: linear-gradient(135deg, rgba(212,168,67,0.12), rgba(212,168,67,0.03)); }
+.card-b .p-header { background: linear-gradient(135deg, rgba(243,112,33,0.12), rgba(243,112,33,0.03)); }
+
+.p-badge {
+  font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.card-a .p-badge { color: var(--gold); }
+.card-b .p-badge { color: var(--hermes); }
+
+.p-gen {
+  font-size: 0.65rem; font-weight: 600; padding: 3px 12px; border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.card-a .p-gen { background: var(--gold-dim); color: var(--gold-light); }
+.card-b .p-gen { background: var(--hermes-dim); color: var(--hermes-light); }
+
+.p-body {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+}
+.p-cell { background: var(--bg-card); padding: 1rem 1.2rem; }
+.p-lbl {
+  font-size: 0.62rem; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 1.5px; font-weight: 500;
+}
+.p-val { font-family: 'Outfit', sans-serif; font-weight: 700; margin-top: 6px; color: var(--text); }
+.p-val.big { font-size: 1.8rem; }
+.p-val.sm { font-size: 0.9rem; color: var(--text2); }
+.p-val.sm2 { font-size: 0.82rem; margin-top: 3px; }
+.card-a .p-val.colored { color: var(--gold); }
+.card-b .p-val.colored { color: var(--hermes); }
+
+/* Info strip */
+.info-strip {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2.5rem;
+}
+.is-cell { background: var(--bg-card); padding: 0.9rem 1.2rem; }
+.is-lbl { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+.is-val { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600; margin-top: 4px; color: var(--text); }
+
+/* Example box */
+.example-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem; margin-bottom: 2.5rem;
+}
+.section-title {
+  font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 1rem; font-weight: 500;
+}
+.ex-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); font-size: 0.9rem; flex-wrap: wrap;
+}
+.ex-row:last-of-type { border-bottom: none; }
+.ex-arrow { color: var(--text4); font-size: 1.1rem; }
+.ex-tag {
+  display: inline-block; font-size: 0.65rem; padding: 3px 10px; border-radius: 20px;
+  font-weight: 700; letter-spacing: 0.5px;
+}
+.ex-tag.t-gold { background: var(--gold-dim); color: var(--gold); }
+.ex-tag.t-orange { background: var(--hermes-dim); color: var(--hermes); }
+.ex-m { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--text); }
+.ex-m.hi { color: var(--gold); }
+.ex-note {
+  margin-top: 14px; font-size: 0.82rem; color: var(--text2); line-height: 1.7;
+}
+
+/* Config */
+.config-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;
+}
+@media (max-width: 780px) { .config-grid { grid-template-columns: 1fr; } }
+
+.cfg-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;
+  transition: border-color 0.3s;
+}
+.cfg-card:hover { border-color: var(--border2); }
+
+/* Buttons */
+.tier-btns { display: flex; gap: 10px; }
+.tier-btn {
+  flex: 1; padding: 0.85rem 0.5rem; border: 1.5px solid var(--border); border-radius: 10px;
+  background: transparent; color: var(--text3); cursor: pointer; transition: all 0.3s; text-align: center;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.tier-btn:hover { border-color: var(--border2); background: var(--bg-card2); }
+.tier-btn .price { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; display: block; }
+.tier-btn .sub { font-size: 0.7rem; margin-top: 4px; opacity: 0.7; }
+.tier-btn.s1 { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+.tier-btn.s2 { border-color: var(--hermes); background: var(--hermes-dim); color: var(--hermes); }
+
+/* Slider */
+.slider-wrap label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.9rem; color: var(--text2); margin-bottom: 12px;
+}
+.slider-wrap label span {
+  font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--gold);
+}
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 5px;
+  background: var(--border2); border-radius: 3px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--gold); cursor: pointer; box-shadow: 0 0 10px var(--gold-glow);
+}
+.ticks {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--text4); margin-top: 8px;
+}
+
+/* Summary */
+.summary {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2.5rem;
+}
+@media (max-width: 680px) { .summary { grid-template-columns: repeat(2, 1fr); } }
+.sc { background: var(--bg-card); padding: 1.2rem 1rem; text-align: center; }
+.sc .sl { font-size: 0.62rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 500; }
+.sc .sv { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; }
+.sv.c-gold { color: var(--gold); }
+.sv.c-orange { color: var(--hermes); }
+.sv.c-white { color: var(--text); }
+
+/* Detail */
+.detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;
+}
+@media (max-width: 780px) { .detail-grid { grid-template-columns: 1fr; } }
+.dc {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;
+}
+
+/* Table */
+table { width: 100%; border-collapse: collapse; }
+table th {
+  font-size: 0.62rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+  text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); font-weight: 500;
+}
+table td { font-size: 0.85rem; padding: 9px 6px; border-bottom: 1px solid var(--border); color: var(--text2); }
+table tr:last-child td { border-bottom: none; }
+table tr.act td { color: var(--text); }
+table tr.off td { opacity: 0.25; }
+table tr.totr td {
+  border-top: 2px solid var(--gold); color: var(--gold);
+  font-weight: 700; font-family: 'Outfit', sans-serif; padding-top: 14px;
+}
+td.mono { font-family: 'Outfit', sans-serif; font-weight: 600; }
+.tag {
+  display: inline-block; font-size: 0.58rem; padding: 2px 8px; border-radius: 20px;
+  font-weight: 700; letter-spacing: 0.5px;
+}
+.tag-on { background: var(--gold-dim); color: var(--gold); }
+.tag-off { background: rgba(55,55,63,0.4); color: var(--text4); }
+
+/* Bar chart */
+.bar-chart {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 10px; height: 200px; padding-top: 20px;
+}
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 80px; }
+.bv { font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 700; color: var(--gold); }
+.bv.dim { color: var(--text4); }
+.br {
+  width: 100%; border-radius: 4px 4px 2px 2px; min-height: 4px;
+  transition: height 0.5s cubic-bezier(0.23,1,0.32,1);
+}
+.br.on { background: linear-gradient(180deg, var(--gold-light), var(--gold-deep)); box-shadow: 0 0 14px var(--gold-dim); }
+.br.dim { background: var(--border2); }
+.bl { font-size: 0.65rem; color: var(--text4); text-align: center; line-height: 1.3; }
+
+/* Footer */
+.footer {
+  text-align: center; font-size: 0.78rem; color: var(--text4); margin-top: 2rem;
+  padding: 1.5rem; border-top: 1px solid var(--border); line-height: 1.8;
+}
+.footer strong { color: var(--text3); }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.anim { animation: fadeUp 0.5s ease forwards; }
+
+/* Main Tabs */
+.main-tabs {
+  display: flex; gap: 0; margin: 0 0 2rem; border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.main-tab {
+  flex: 1; padding: 14px 16px; background: var(--bg-card); border: none;
+  color: var(--text3); font-family: 'Noto Sans KR', sans-serif; font-size: 0.88rem;
+  font-weight: 600; cursor: pointer; transition: all 0.3s; text-align: center;
+  border-right: 1px solid var(--border); letter-spacing: 0.5px;
+}
+.main-tab:last-child { border-right: none; }
+.main-tab:hover { background: var(--bg-card2); color: var(--text2); }
+.main-tab.active {
+  background: linear-gradient(135deg, rgba(229,184,32,0.15), rgba(229,184,32,0.05));
+  color: var(--gold); border-bottom: 2px solid var(--gold);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Checklist specific */
+.cl-date {
+  font-size: 0.75rem; color: var(--text3); margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem; border-bottom: 1px solid var(--border);
+}
+.cl-alert {
+  background: rgba(229,60,60,0.08); border: 1px solid rgba(229,60,60,0.2);
+  border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 2rem;
+  font-size: 0.85rem; color: #F06060; font-weight: 600; line-height: 1.6;
+}
+.cl-section {
+  margin-bottom: 2rem;
+}
+.cl-section-title {
+  font-size: 0.82rem; font-weight: 700; color: var(--gold); margin-bottom: 1rem;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+}
+.cl-info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem;
+}
+.cl-info-row {
+  display: contents;
+}
+.cl-info-label {
+  background: var(--bg-card2); padding: 10px 14px; font-size: 0.78rem;
+  font-weight: 600; color: var(--text2);
+}
+.cl-info-value {
+  background: var(--bg-card); padding: 10px 14px; font-size: 0.78rem; color: var(--text);
+}
+.cl-item {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 12px; overflow: hidden; transition: border-color 0.3s;
+}
+.cl-item:hover { border-color: var(--border2); }
+.cl-item-header {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  cursor: pointer; user-select: none;
+}
+.cl-num {
+  font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 800;
+  color: var(--gold); min-width: 28px; height: 28px; border-radius: 8px;
+  background: var(--gold-dim); display: flex; align-items: center; justify-content: center;
+}
+.cl-title { font-size: 0.88rem; font-weight: 600; color: var(--text); flex: 1; }
+.cl-status {
+  font-size: 0.6rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.cl-status.pending { background: rgba(229,184,32,0.12); color: var(--gold); }
+.cl-status.done { background: rgba(80,200,120,0.12); color: #50C878; }
+.cl-arrow {
+  font-size: 0.7rem; color: var(--text4); transition: transform 0.3s;
+}
+.cl-item.open .cl-arrow { transform: rotate(180deg); }
+.cl-item-body {
+  display: none; padding: 0 16px 14px 56px;
+  font-size: 0.8rem; color: var(--text2); line-height: 1.7;
+}
+.cl-item.open .cl-item-body { display: block; }
+.cl-example {
+  font-size: 0.75rem; color: var(--text3); margin-top: 6px;
+  padding: 8px 12px; background: var(--bg-card2); border-radius: 8px;
+}
+.cl-toggle-btn {
+  display: inline-block; margin-left: auto; padding: 3px 10px;
+  border: 1px solid var(--border); border-radius: 6px; background: transparent;
+  color: var(--text3); font-size: 0.65rem; cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+}
+.cl-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 480px) {
+  .wrap { padding: 1rem 0.8rem 3rem; }
+
+  header { padding: 1.5rem 0 1rem; }
+  header .logo-row { gap: 10px; }
+  header .logo-icon { width: 32px; height: 32px; font-size: 0.9rem; }
+  header .tagline { font-size: 0.65rem; letter-spacing: 2px; }
+
+  .product-cards { gap: 1rem; margin: 1.5rem 0; }
+  .p-header { padding: 10px 14px; }
+  .p-badge { font-size: 0.7rem !important; }
+  .p-gen { font-size: 0.58rem; padding: 2px 10px; }
+  .p-cell { padding: 0.8rem 1rem; }
+  .p-val.big { font-size: 1.5rem; }
+  .p-val.sm { font-size: 0.82rem; }
+  .p-val.sm2 { font-size: 0.75rem; }
+
+  .info-strip { margin-bottom: 1.5rem; }
+  .is-cell { padding: 0.7rem 1rem; }
+  .is-val { font-size: 0.82rem; }
+
+  .example-box { padding: 1rem; margin-bottom: 1.5rem; }
+  .section-title { font-size: 0.65rem; letter-spacing: 1px; }
+  .ex-row { font-size: 0.82rem; gap: 6px; padding: 8px 0; }
+  .ex-arrow { font-size: 0.9rem; }
+  .ex-tag { font-size: 0.6rem; padding: 2px 8px; }
+  .ex-note { font-size: 0.75rem; }
+
+  .config-grid { gap: 1rem; margin-bottom: 1.5rem; }
+  .cfg-card { padding: 1.2rem; }
+  .tier-btn { padding: 0.75rem 0.4rem; }
+  .tier-btn .price { font-size: 1.15rem; }
+  .tier-btn .sub { font-size: 0.62rem; }
+  .slider-wrap label { font-size: 0.82rem; }
+  .slider-wrap label span { font-size: 1.15rem; }
+
+  .summary { margin-bottom: 1.5rem; }
+  .sc { padding: 1rem 0.6rem; }
+  .sc .sl { font-size: 0.55rem; letter-spacing: 1px; }
+  .sc .sv { font-size: 1.2rem; }
+
+  .detail-grid { gap: 1rem; margin-bottom: 1.5rem; }
+  .dc { padding: 1rem; }
+
+  table th { font-size: 0.55rem; padding: 6px 4px; letter-spacing: 0.5px; }
+  table td { font-size: 0.75rem; padding: 7px 4px; }
+  td.mono { font-size: 0.75rem; }
+  .tag { font-size: 0.5rem; padding: 2px 6px; }
+
+  .bar-chart { gap: 6px; height: 170px; }
+  .bar-col { max-width: 60px; }
+  .bv { font-size: 0.58rem; }
+  .bl { font-size: 0.55rem; }
+
+  .footer { font-size: 0.68rem; padding: 1rem; }
+
+  .main-tabs { border-radius: 10px; }
+  .main-tab { font-size: 0.78rem; padding: 12px 8px; }
+  .cl-item-header { padding: 12px 12px; gap: 10px; }
+  .cl-title { font-size: 0.82rem; }
+  .cl-item-body { padding: 0 12px 12px 48px; font-size: 0.75rem; }
+  .cl-info-grid { grid-template-columns: 1fr; }
+  .cl-alert { font-size: 0.78rem; padding: 0.8rem 1rem; }
+}
+
+/* Tablet tweaks */
+@media (min-width: 481px) and (max-width: 780px) {
+  .wrap { padding: 1.5rem 1rem 3rem; }
+  .product-cards { gap: 1rem; }
+  .config-grid { gap: 1rem; }
+
+  .ex-row { font-size: 0.85rem; }
+
+  table th { font-size: 0.58rem; }
+  table td { font-size: 0.8rem; }
+}
+
+/* Table horizontal scroll on very small screens */
+@media (max-width: 400px) {
+  .dc { padding: 0.8rem; overflow-x: auto; }
+  table { min-width: 480px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-texture"></div>
+
+<div class="wrap">
+
+  <header class="anim">
+    <div class="logo-row">
+      <div class="logo-icon">N</div>
+      <div class="brand">PREMIUM NMN<span class="alpha">ALPHA</span></div>
+    </div>
+    <div class="tagline">항노화 NMN · 수익 구조 시뮬레이션</div>
+    <div class="line"></div>
+  </header>
+
+  <!-- Main Tabs -->
+  <div class="main-tabs anim" style="animation-delay:0.03s">
+    <button class="main-tab active" onclick="switchTab('sim')">수익 시뮬레이터</button>
+    <button class="main-tab" onclick="switchTab('checklist')">보상플랜 체크리스트</button>
+  </div>
+
+  <!-- Tab 1: 시뮬레이터 -->
+  <div id="tab-sim" class="tab-panel active">
+
+  <!-- 두 가지 매출 가이드 -->
+  <div class="product-cards anim" style="animation-delay:0.05s">
+    <div class="p-card card-a">
+      <div class="p-header">
+        <span class="p-badge">1 BOX</span>
+        <span class="p-gen">1대까지 수익</span>
+      </div>
+      <div class="p-body">
+        <div class="p-cell">
+          <div class="p-lbl">가격</div>
+          <div class="p-val big colored">$300</div>
+        </div>
+        <div class="p-cell">
+          <div class="p-lbl">배송</div>
+          <div class="p-val sm">일본→EMS 3일</div>
+          <div class="p-val sm2" style="color:var(--text3);">배송비 $20</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-card card-b">
+      <div class="p-header">
+        <span class="p-badge">10 BOX</span>
+        <span class="p-gen">5대까지 수익</span>
+      </div>
+      <div class="p-body">
+        <div class="p-cell">
+          <div class="p-lbl">가격</div>
+          <div class="p-val big colored">$3,000</div>
+        </div>
+        <div class="p-cell">
+          <div class="p-lbl">배송</div>
+          <div class="p-val sm">일본→EMS 3일</div>
+          <div class="p-val sm2 colored">배송비 무료</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-strip anim" style="animation-delay:0.08s">
+    <div class="is-cell"><span class="is-lbl">제품</span><div class="is-val">NMN 항노화 (JAPAN FAMILY CARE)</div></div>
+    <div class="is-cell"><span class="is-lbl">정산</span><div class="is-val" style="color:var(--gold);">USDT 익일지급</div></div>
+  </div>
+
+  <!-- 수익 구조 예시 -->
+  <div class="example-box anim" style="animation-delay:0.1s">
+    <div class="section-title">수익 구조 핵심 — 하부 1명당 매출 기준 수수료</div>
+    <div class="ex-row">
+      <span class="ex-tag t-orange">나 $3,000</span>
+      <span class="ex-arrow">→</span>
+      <span>하부가 <span class="ex-m">$300</span> 구매</span>
+      <span class="ex-arrow">→</span>
+      <span>1대 30% = <span class="ex-m hi">$90</span></span>
+    </div>
+    <div class="ex-row">
+      <span class="ex-tag t-orange">나 $3,000</span>
+      <span class="ex-arrow">→</span>
+      <span>하부가 <span class="ex-m">$3,000</span> 구매</span>
+      <span class="ex-arrow">→</span>
+      <span>1대 30% = <span class="ex-m hi">$900</span></span>
+    </div>
+    <div class="ex-row">
+      <span class="ex-tag t-gold">나 $300</span>
+      <span class="ex-arrow">→</span>
+      <span>하부가 <span class="ex-m">$300</span> 구매</span>
+      <span class="ex-arrow">→</span>
+      <span>1대 30% = <span class="ex-m hi">$90</span></span>
+    </div>
+    <div class="ex-row">
+      <span class="ex-tag t-gold">나 $300</span>
+      <span class="ex-arrow">→</span>
+      <span>하부가 <span class="ex-m">$3,000</span> 구매</span>
+      <span class="ex-arrow">→</span>
+      <span>1대 30% = <span class="ex-m hi">$900</span></span>
+    </div>
+    <div class="ex-note">
+      ※ 수수료 = <strong style="color:var(--gold)">하부의 매출금액 × 대수별 %</strong><br>
+      ※ 내 등급($300/$3,000)은 <strong style="color:var(--hermes)">수익 반영 대수만 결정</strong> ($300→1대 / $3,000→5대)
+    </div>
+  </div>
+
+  <!-- 설정 -->
+  <div class="config-grid anim" style="animation-delay:0.15s">
+    <div class="cfg-card">
+      <div class="section-title">내 사업자 등급 (대수 결정)</div>
+      <div class="tier-btns">
+        <button class="tier-btn s1" id="my300" onclick="setMe(300)">
+          <span class="price">$300</span>
+          <span class="sub">1대까지 수익</span>
+        </button>
+        <button class="tier-btn" id="my3000" onclick="setMe(3000)">
+          <span class="price">$3,000</span>
+          <span class="sub">5대까지 수익</span>
+        </button>
+      </div>
+    </div>
+    <div class="cfg-card">
+      <div class="section-title">하부 1인당 매출금액</div>
+      <div class="tier-btns">
+        <button class="tier-btn s1" id="sb300" onclick="setSub(300)">
+          <span class="price">$300</span>
+          <span class="sub">1 BOX</span>
+        </button>
+        <button class="tier-btn" id="sb3000" onclick="setSub(3000)">
+          <span class="price">$3,000</span>
+          <span class="sub">10 BOX</span>
+        </button>
+      </div>
+    </div>
+    <div class="cfg-card">
+      <div class="section-title">단계별 모집 인원</div>
+      <div class="slider-wrap">
+        <label>1인당 모집 <span id="rd">3명</span></label>
+        <input type="range" min="1" max="5" value="3" step="1" id="rec" oninput="calc()">
+        <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 요약 -->
+  <div class="summary anim" style="animation-delay:0.2s">
+    <div class="sc"><div class="sl">내 등급 (대수)</div><div class="sv c-gold" id="s1">1대까지</div></div>
+    <div class="sc"><div class="sl">하부 1인 매출</div><div class="sv c-orange" id="s2">$300</div></div>
+    <div class="sc"><div class="sl">총 하위 인원</div><div class="sv c-white" id="s3">3명</div></div>
+    <div class="sc"><div class="sl">월 예상 총 수익</div><div class="sv c-gold" id="s4">$270</div></div>
+  </div>
+
+  <!-- 상세 -->
+  <div class="detail-grid anim" style="animation-delay:0.25s">
+    <div class="dc">
+      <div class="section-title">단계별 수익 상세</div>
+      <table id="tbl"></table>
+    </div>
+    <div class="dc">
+      <div class="section-title">단계별 수익 차트</div>
+      <div class="bar-chart" id="bars"></div>
+    </div>
+  </div>
+
+  </div> <!-- end tab-sim -->
+
+  <!-- Tab 2: 보상플랜 체크리스트 -->
+  <div id="tab-checklist" class="tab-panel">
+
+    <div class="cl-date">24.03.18 이원재 - 신규법인 추가로 인한 보상플랜 내용 정리</div>
+
+    <!-- 65% 실시간 배분 게이지 -->
+    <div style="background:var(--bg-card);border:1.5px solid rgba(229,184,32,0.3);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;" id="gauge-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:0.72rem;color:var(--gold);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">매출 대비 배분 현황</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;" id="gauge-total">65%</div>
+      </div>
+      <!-- 게이지 바 -->
+      <div style="position:relative;height:36px;background:var(--border2);border-radius:8px;overflow:hidden;margin-bottom:8px;">
+        <div id="bar-commission" style="position:absolute;left:0;top:0;height:100%;background:var(--gold);transition:width 0.4s;border-radius:8px 0 0 8px;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:0.6rem;font-weight:700;color:var(--bg);"></div>
+        <div id="bar-center" style="position:absolute;top:0;height:100%;background:var(--hermes);transition:left 0.4s,width 0.4s;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:0.55rem;font-weight:700;color:#fff;"></div>
+        <div id="bar-withdraw" style="position:absolute;top:0;height:100%;background:#888;transition:left 0.4s,width 0.4s;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:0.55rem;font-weight:700;color:#fff;"></div>
+        <div id="bar-reserve" style="position:absolute;top:0;height:100%;background:rgba(255,255,255,0.06);transition:left 0.4s,width 0.4s;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:0.55rem;font-weight:700;color:var(--text3);border-radius:0 8px 8px 0;"></div>
+        <!-- 65% 마지노선 -->
+        <div style="position:absolute;left:65%;top:-2px;bottom:-2px;width:2px;background:#ff4444;z-index:2;"></div>
+        <div style="position:absolute;left:65%;top:-14px;font-size:0.5rem;color:#ff4444;font-weight:700;transform:translateX(-50%);">65%</div>
+      </div>
+      <!-- 수치 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;" id="gauge-cards">
+        <div style="background:var(--bg-card2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.5rem;color:var(--text3);letter-spacing:1px;">추천보너스</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);" id="g-comm">62%</div>
+        </div>
+        <div style="background:var(--bg-card2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.5rem;color:var(--text3);letter-spacing:1px;">센터 Fee</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--hermes);" id="g-center">3%</div>
+        </div>
+        <div style="background:var(--bg-card2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.5rem;color:var(--text3);letter-spacing:1px;">회사 유보</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text);" id="g-reserve">35%</div>
+        </div>
+        <div style="background:var(--bg-card2);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:0.5rem;color:var(--text3);letter-spacing:1px;">출금수수료</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;" id="g-remain">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 수수료율 슬라이더 -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;">
+      <div style="font-size:0.72rem;color:var(--gold);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;">대수별 추천보너스 수수료 조절</div>
+      <div id="rate-sliders"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:0.75rem;color:var(--text2);">추천보너스 합계: <strong style="color:var(--gold);" id="rate-sum">62%</strong></div>
+        <button onclick="resetRates()" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text3);font-size:0.65rem;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">기본값 초기화</button>
+      </div>
+    </div>
+
+    <!-- 센터 Fee + 출금수수료 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;">
+        <div style="font-size:0.72rem;color:var(--hermes);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;">센터 Fee</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="range" min="0" max="10" value="3" step="0.5" id="sl-center" oninput="updatePlan()" style="flex:1;">
+          <span style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--hermes);min-width:40px;text-align:right;" id="v-center">3%</span>
+        </div>
+        <div style="font-size:0.65rem;color:var(--text3);margin-top:8px;">매출에서 선차감 → 플랫폼 운영비</div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;">
+        <div style="font-size:0.72rem;color:var(--text2);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;">출금 수수료</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="range" min="0" max="5" value="1" step="0.5" id="sl-withdraw" oninput="updatePlan()" style="flex:1;">
+          <span style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);min-width:40px;text-align:right;" id="v-withdraw">1%</span>
+        </div>
+        <div style="font-size:0.65rem;color:var(--text3);margin-top:8px;">65% 배분에 포함</div>
+      </div>
+    </div>
+
+    <!-- $300 매출 시뮬 -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;">
+      <div style="font-size:0.72rem;color:var(--gold);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;">실제 배분 시뮬레이션</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:0.8rem;color:var(--text2);">하부 매출금액:</span>
+        <button onclick="setSimAmt(300)" id="sim300" class="tier-btn s1" style="flex:0;padding:8px 20px;font-size:0.8rem;">$300</button>
+        <button onclick="setSimAmt(3000)" id="sim3000" class="tier-btn" style="flex:0;padding:8px 20px;font-size:0.8rem;">$3,000</button>
+      </div>
+      <div id="sim-table"></div>
+    </div>
+
+    <!-- 나머지 체크리스트 -->
+    <div class="cl-section">
+      <div class="cl-section-title" style="display:flex;align-items:center;">
+        기타 전산개발 항목
+        <button class="cl-toggle-btn" onclick="toggleAllItems()">전체 펼치기/접기</button>
+      </div>
+
+      <div class="cl-item" onclick="toggleItem(this)">
+        <div class="cl-item-header">
+          <div class="cl-num">1</div>
+          <div class="cl-title">승급 볼륨 등 조건</div>
+          <span class="cl-status done">설계완료</span>
+          <span class="cl-arrow">▼</span>
+        </div>
+        <div class="cl-item-body">
+          Level = 수익 받는 대수. 올라갈수록 더 많은 대수에서 수익
+          <div class="cl-example" style="margin-top:10px;" id="cl-upgrade-table"></div>
+        </div>
+      </div>
+
+      <div class="cl-item" onclick="toggleItem(this)">
+        <div class="cl-item-header">
+          <div class="cl-num">2</div>
+          <div class="cl-title">유지 조건</div>
+          <span class="cl-status done">설계완료</span>
+          <span class="cl-arrow">▼</span>
+        </div>
+        <div class="cl-item-body">
+          승급 GV의 50%를 유지선으로 설정
+          <div class="cl-example" style="margin-top:10px;">
+            ① 개인 월 <strong style="color:var(--gold);">300 PV</strong> 이상<br>
+            ② 승급 GV의 <strong style="color:var(--gold);">50%</strong> 이상 유지<br><br>
+            <strong>미달 시:</strong> 1개월 경고 → 2개월 연속 시 1단계 강등<br>
+            재승급 → 원래 조건 100% 달성 시 즉시 복원
+          </div>
+        </div>
+      </div>
+
+      <div class="cl-item" onclick="toggleItem(this)">
+        <div class="cl-item-header">
+          <div class="cl-num">3</div>
+          <div class="cl-title">Level별 호칭</div>
+          <span class="cl-status done">설계완료</span>
+          <span class="cl-arrow">▼</span>
+        </div>
+        <div class="cl-item-body" id="cl-titles-body">
+        </div>
+      </div>
+
+      <div class="cl-item" onclick="toggleItem(this)">
+        <div class="cl-item-header">
+          <div class="cl-num">4</div>
+          <div class="cl-title">계보도 표시 내용</div>
+          <span class="cl-status done">설계완료</span>
+          <span class="cl-arrow">▼</span>
+        </div>
+        <div class="cl-item-body">
+          <div class="cl-example">
+            ① 이름 ② 등급+호칭 ③ 직추천 수 ④ 월 개인PV ⑤ 월 GV ⑥ 가입일<br><br>
+            ※ 트리 최대 내 수익 대수까지 펼쳐보기<br>
+            ※ 비활성(유지 미달) 회원 → 회색 처리
+          </div>
+        </div>
+      </div>
+
+      <div class="cl-item" onclick="toggleItem(this)">
+        <div class="cl-item-header">
+          <div class="cl-num">5</div>
+          <div class="cl-title">상위→하위 정보 열람 범위</div>
+          <span class="cl-status done">설계완료</span>
+          <span class="cl-arrow">▼</span>
+        </div>
+        <div class="cl-item-body">
+          <div class="cl-example">
+            <strong>직추천(1대):</strong> 이름, 연락처, 등급, PV, GV, 가입일<br>
+            <strong>2대~내 수익 대수:</strong> 이름, 등급, PV, GV (연락처 비공개)<br>
+            <strong>초과:</strong> 열람 불가 (GV 합산만 반영)<br><br>
+            ※ Lv.6+ → 리더 특권 전체 하위 열람<br>
+            ※ 출금·수당 내역은 본인만 확인
+          </div>
+        </div>
+      </div>
+
+      <div class="cl-item" onclick="toggleItem(this)">
+        <div class="cl-item-header">
+          <div class="cl-num">6</div>
+          <div class="cl-title">공유수당 유무</div>
+          <span class="cl-status done">설계완료</span>
+          <span class="cl-arrow">▼</span>
+        </div>
+        <div class="cl-item-body">
+          <strong style="color:var(--hermes);">미적용</strong> — 추천보너스 + 센터 Fee로 65% 한도 소진
+          <div class="cl-example" style="margin-top:8px;">
+            공유수당 추가 시 65% 초과 → 수익성 붕괴<br>
+            추후 브레이키지 여유분으로 리더십 보너스 검토 가능
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div> <!-- end tab-checklist -->
+
+  <div class="footer anim" style="animation-delay:0.3s">
+    <strong>PREMIUM NMN ALPHA · 수익 구조 요약</strong><br>
+    본인 $300 사업자 → 1대까지 / 본인 $3,000 사업자 → 5대까지 수수료 반영<br>
+    수수료 = <strong style="color:var(--gold)">하부 매출 × 대수별 %</strong> (1대 30% · 2대 15% · 3대 8% · 4대 4% · 5대 2% · 6~8대 1%)<br>
+    매출은 USDT(테더)로 익일 지급 · JAPAN FAMILY CARE · MADE IN JAPAN
+  </div>
+
+</div>
+
+<script>
+let me = 300, sub = 300;
+
+const R = [
+  {g:1,l:'1대',p:30},{g:2,l:'2대',p:15},{g:3,l:'3대',p:8},
+  {g:4,l:'4대',p:4},{g:5,l:'5대',p:2},{g:6,l:'6대',p:1},
+  {g:7,l:'7대',p:1},{g:8,l:'8대',p:1}
+];
+
+function setMe(v) {
+  me = v;
+  document.getElementById('my300').className = v===300?'tier-btn s1':'tier-btn';
+  document.getElementById('my3000').className = v===3000?'tier-btn s2':'tier-btn';
+  calc();
+}
+function setSub(v) {
+  sub = v;
+  document.getElementById('sb300').className = v===300?'tier-btn s1':'tier-btn';
+  document.getElementById('sb3000').className = v===3000?'tier-btn s2':'tier-btn';
+  calc();
+}
+
+function calc() {
+  const n = parseInt(document.getElementById('rec').value);
+  document.getElementById('rd').textContent = n + '명';
+  const maxG = me===300?1:5;
+  let rows=[], tot=0, ppl=0, mx=0;
+
+  for (const r of R) {
+    const cnt = Math.pow(n, r.g);
+    const per = Math.round(sub * r.p / 100);
+    const rev = r.g<=maxG ? cnt*per : 0;
+    const on = r.g<=maxG;
+    tot += rev;
+    if(on) ppl += cnt;
+    if(rev>mx) mx = rev;
+    rows.push({...r, cnt, per, rev, on});
+  }
+
+  document.getElementById('s1').textContent = maxG+'대까지';
+  document.getElementById('s2').textContent = '$'+sub.toLocaleString();
+  document.getElementById('s3').textContent = ppl.toLocaleString()+'명';
+  document.getElementById('s4').textContent = '$'+tot.toLocaleString();
+
+  let h = `<thead><tr><th>단계</th><th>%</th><th>인원</th><th>1인당</th><th>소계</th><th>누적</th><th></th></tr></thead><tbody>`;
+  let cumul = 0;
+  for(const r of rows){
+    cumul += r.rev;
+    const c = r.on?'act':'off';
+    const t = r.on?'<span class="tag tag-on">적용</span>':'<span class="tag tag-off">미적용</span>';
+    h += `<tr class="${c}"><td style="font-weight:700">${r.l}</td><td class="mono">${r.p}%</td><td class="mono">${r.cnt.toLocaleString()}</td><td class="mono">$${r.per.toLocaleString()}</td><td class="mono">${r.on?'$'+r.rev.toLocaleString():'-'}</td><td class="mono" style="color:var(--gold)">${r.on?'$'+cumul.toLocaleString():'-'}</td><td>${t}</td></tr>`;
+  }
+  h += `<tr class="totr"><td colspan="4">총 월 수익</td><td colspan="3">$${tot.toLocaleString()}</td></tr></tbody>`;
+  document.getElementById('tbl').innerHTML = h;
+
+  document.getElementById('bars').innerHTML = rows.map(r=>{
+    const ht = mx>0&&r.on ? Math.max(4,(r.rev/mx)*160) : 4;
+    return `<div class="bar-col"><div class="bv ${r.on?'':'dim'}">${r.on?'$'+r.rev.toLocaleString():'-'}</div><div class="br ${r.on?'on':'dim'}" style="height:${ht}px"></div><div class="bl">${r.l}<br>${r.p}%</div></div>`;
+  }).join('');
+}
+
+calc();
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const idx = tab === 'sim' ? 0 : 1;
+  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+}
+
+// Checklist accordion
+function toggleItem(el) {
+  el.classList.toggle('open');
+}
+function toggleAllItems() {
+  const items = document.querySelectorAll('.cl-item');
+  const allOpen = [...items].every(i => i.classList.contains('open'));
+  items.forEach(i => allOpen ? i.classList.remove('open') : i.classList.add('open'));
+}
+
+// ===== Interactive 65% Plan =====
+const DEFAULT_RATES = [30,15,8,4,2,1,1,1];
+let rates = [...DEFAULT_RATES];
+let simAmt = 300;
+const LIMIT = 65;
+
+const titles = ['Associate','Manager','Sr. Manager','Director','Sr. Director','Vice President','Executive VP','President'];
+const titlesKr = ['어소시에이트','매니저','시니어매니저','디렉터','시니어디렉터','부사장','수석부사장','프레지던트'];
+const upgradeReq = [3,5,10,20,35,50,80,120];
+const upgradeGV = [1500,5000,15000,50000,150000,500000,1500000,5000000];
+
+function buildSliders() {
+  const box = document.getElementById('rate-sliders');
+  let h = '';
+  for (let i = 0; i < 8; i++) {
+    h += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:0.72rem;color:var(--text2);min-width:32px;font-weight:600;">${i+1}대</span>
+      <input type="range" min="0" max="35" value="${rates[i]}" step="1" id="sl-r${i}" oninput="onRateChange(${i})" style="flex:1;">
+      <span style="font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:700;color:var(--gold);min-width:38px;text-align:right;" id="v-r${i}">${rates[i]}%</span>
+    </div>`;
+  }
+  box.innerHTML = h;
+}
+
+function onRateChange(idx) {
+  rates[idx] = parseInt(document.getElementById('sl-r'+idx).value);
+  const commSum = rates.reduce((a,b)=>a+b,0);
+  const centerFee = parseFloat(document.getElementById('sl-center').value);
+  const withdrawFee = parseFloat(document.getElementById('sl-withdraw').value);
+  const total = commSum + centerFee + withdrawFee;
+
+  // Auto-adjust: if over 65%, reduce this slider back
+  if (total > LIMIT) {
+    const maxAllowed = LIMIT - centerFee - withdrawFee - rates.reduce((a,b,i)=> i===idx? a : a+b, 0);
+    rates[idx] = Math.max(0, Math.floor(maxAllowed));
+    document.getElementById('sl-r'+idx).value = rates[idx];
+  }
+  updatePlan();
+}
+
+function resetRates() {
+  rates = [...DEFAULT_RATES];
+  for (let i=0;i<8;i++) {
+    document.getElementById('sl-r'+i).value = rates[i];
+  }
+  document.getElementById('sl-center').value = 3;
+  document.getElementById('sl-withdraw').value = 1;
+  updatePlan();
+}
+
+function setSimAmt(v) {
+  simAmt = v;
+  document.getElementById('sim300').className = v===300?'tier-btn s1':'tier-btn';
+  document.getElementById('sim3000').className = v===3000?'tier-btn s2':'tier-btn';
+  updatePlan();
+}
+
+function updatePlan() {
+  const commSum = rates.reduce((a,b)=>a+b,0);
+  const centerFee = parseFloat(document.getElementById('sl-center').value);
+  const withdrawFee = parseFloat(document.getElementById('sl-withdraw').value);
+  const total = commSum + centerFee + withdrawFee;
+  const reserve = 100 - total;
+  const remain = LIMIT - total;
+
+  // Update slider labels
+  for (let i=0;i<8;i++) {
+    document.getElementById('v-r'+i).textContent = rates[i]+'%';
+  }
+  document.getElementById('v-center').textContent = centerFee+'%';
+  document.getElementById('v-withdraw').textContent = withdrawFee+'%';
+  document.getElementById('rate-sum').textContent = commSum+'%';
+
+  // Gauge
+  const isOver = total > LIMIT;
+  const totalColor = isOver ? '#ff4444' : 'var(--gold)';
+  document.getElementById('gauge-total').style.color = totalColor;
+  document.getElementById('gauge-total').textContent = total.toFixed(1) + '%';
+  document.getElementById('gauge-box').style.borderColor = isOver ? 'rgba(255,68,68,0.5)' : 'rgba(229,184,32,0.3)';
+
+  // Bars
+  const commW = commSum;
+  const centerW = centerFee;
+  const withdrawW = withdrawFee;
+  document.getElementById('bar-commission').style.width = commW+'%';
+  document.getElementById('bar-commission').textContent = '추천 '+commSum+'%';
+  document.getElementById('bar-center').style.left = commW+'%';
+  document.getElementById('bar-center').style.width = centerW+'%';
+  document.getElementById('bar-center').textContent = centerFee > 1.5 ? centerFee+'%' : '';
+  document.getElementById('bar-withdraw').style.left = (commW+centerW)+'%';
+  document.getElementById('bar-withdraw').style.width = withdrawW+'%';
+  document.getElementById('bar-withdraw').textContent = withdrawFee > 0.5 ? withdrawFee+'%' : '';
+  document.getElementById('bar-reserve').style.left = (commW+centerW+withdrawW)+'%';
+  document.getElementById('bar-reserve').style.width = reserve+'%';
+  document.getElementById('bar-reserve').textContent = reserve > 5 ? '유보 '+reserve+'%' : '';
+
+  // Cards
+  document.getElementById('g-comm').textContent = commSum+'%';
+  document.getElementById('g-center').textContent = centerFee+'%';
+  document.getElementById('g-reserve').textContent = reserve+'%';
+  const remainEl = document.getElementById('g-remain');
+  remainEl.textContent = withdrawFee+'%';
+  remainEl.style.color = 'var(--text)';
+
+  // Sim table
+  let cumRate = 0;
+  let simH = `<table style="width:100%;min-width:auto;font-size:0.72rem;">
+    <tr style="border-bottom:1px solid var(--border);">
+      <th style="color:var(--gold);padding:6px 4px;font-size:0.58rem;">대수</th>
+      <th style="color:var(--gold);padding:6px 4px;font-size:0.58rem;">수수료</th>
+      <th style="color:var(--gold);padding:6px 4px;font-size:0.58rem;">1인당</th>
+      <th style="color:var(--gold);padding:6px 4px;font-size:0.58rem;">누적률</th>
+    </tr>`;
+  for (let i=0;i<8;i++) {
+    cumRate += rates[i];
+    const perPerson = Math.round(simAmt * rates[i] / 100);
+    simH += `<tr>
+      <td style="padding:5px 4px;font-weight:700;">${i+1}대</td>
+      <td style="padding:5px 4px;">${rates[i]}%</td>
+      <td style="padding:5px 4px;color:var(--gold);font-weight:700;">$${perPerson.toLocaleString()}</td>
+      <td style="padding:5px 4px;color:var(--text3);">${cumRate}%</td>
+    </tr>`;
+  }
+  const centerAmt = Math.round(simAmt * centerFee / 100);
+  const withdrawAmt = Math.round(simAmt * withdrawFee / 100);
+  const reserveAmt = simAmt - Math.round(simAmt*commSum/100) - centerAmt - withdrawAmt;
+  simH += `<tr style="border-top:2px solid var(--border);">
+    <td colspan="2" style="padding:6px 4px;font-weight:700;color:var(--hermes);">센터 Fee ${centerFee}%</td>
+    <td style="padding:6px 4px;color:var(--hermes);font-weight:700;">$${centerAmt}</td>
+    <td style="padding:6px 4px;color:var(--text3);">${(commSum+centerFee)}%</td>
+  </tr>`;
+  simH += `<tr style="border-top:1px solid var(--border);">
+    <td colspan="2" style="padding:6px 4px;font-weight:700;color:var(--text2);">출금 수수료 ${withdrawFee}%</td>
+    <td style="padding:6px 4px;color:var(--text2);font-weight:700;">$${withdrawAmt}</td>
+    <td style="padding:6px 4px;color:var(--text3);">${total}%</td>
+  </tr>`;
+  simH += `<tr style="border-top:1px solid var(--border);">
+    <td colspan="2" style="padding:6px 4px;font-weight:700;">회사 유보</td>
+    <td style="padding:6px 4px;font-weight:700;">$${reserveAmt}</td>
+    <td style="padding:6px 4px;color:var(--text3);">${reserve}%</td>
+  </tr></table>`;
+  document.getElementById('sim-table').innerHTML = simH;
+
+  // Upgrade table
+  let upH = `<table style="width:100%;min-width:auto;font-size:0.72rem;">
+    <tr style="border-bottom:1px solid var(--border);">
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">Level</th>
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">대수</th>
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">최대 수익률</th>
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">직추천</th>
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">월 GV</th>
+    </tr>`;
+  let cumR = 0;
+  for (let i=0;i<8;i++) {
+    cumR += rates[i];
+    const highlight = i===4 ? 'background:rgba(229,184,32,0.05);' : '';
+    const star = i===4 ? ' ★' : '';
+    upH += `<tr style="${highlight}">
+      <td style="padding:4px;${i===4?'font-weight:700':''}">Lv.${i+1}${star}</td>
+      <td style="padding:4px;">${i+1}대</td>
+      <td style="padding:4px;color:var(--gold);font-weight:700;">${cumR}%</td>
+      <td style="padding:4px;">${upgradeReq[i]}명</td>
+      <td style="padding:4px;">${upgradeGV[i].toLocaleString()} PV</td>
+    </tr>`;
+  }
+  upH += '</table>';
+  upH += `<div style="margin-top:8px;font-size:0.65rem;color:var(--text3);line-height:1.6;">
+    ※ 1 BOX($300) → Lv.1 자동 시작 | 10 BOX($3,000) → Lv.5 자동 시작</div>`;
+  document.getElementById('cl-upgrade-table').innerHTML = upH;
+
+  // Titles table
+  let tH = `<div class="cl-example"><table style="width:100%;min-width:auto;font-size:0.72rem;">
+    <tr style="border-bottom:1px solid var(--border);">
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">Level</th>
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">호칭</th>
+      <th style="color:var(--gold);padding:5px 4px;font-size:0.58rem;">대수 → 수익률</th>
+    </tr>`;
+  cumR = 0;
+  for (let i=0;i<8;i++) {
+    cumR += rates[i];
+    tH += `<tr>
+      <td style="padding:4px;">Lv.${i+1}</td>
+      <td style="padding:4px;">${titles[i]} (${titlesKr[i]})</td>
+      <td style="padding:4px;">${i+1}대 → <strong>${cumR}%</strong></td>
+    </tr>`;
+  }
+  tH += '</table></div>';
+  document.getElementById('cl-titles-body').innerHTML = '호칭에 수익률 병기 → 동기부여 극대화' + tH;
+}
+
+buildSliders();
+updatePlan();
+</script>
+</body>
+</html>
