@@ -173,11 +173,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="panel-header">📂 소스 & 씬 목록</div>
   <div class="panel-section">
     <div class="import-zone" id="izImages" onclick="document.getElementById('imgInput').click()">
-      <div class="iz-icon">🖼️</div>
-      <div class="iz-label">이미지 추가</div>
-      <div class="iz-hint">JPG, PNG (여러장 선택 가능)</div>
+      <div class="iz-icon">🎬</div>
+      <div class="iz-label">이미지 / 영상 추가</div>
+      <div class="iz-hint">JPG, PNG, MP4, MOV (여러개 선택 가능)</div>
     </div>
-    <input type="file" id="imgInput" accept="image/*" multiple hidden onchange="handleImages(this.files)">
+    <input type="file" id="imgInput" accept="image/*,video/mp4,video/quicktime,video/webm" multiple hidden onchange="handleMedia(this.files)">
     
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
       <div class="import-zone" id="izAudio" onclick="document.getElementById('audioInput').click()" style="padding:12px">
@@ -219,8 +219,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="preview-wrap">
     <div id="previewEmpty" class="empty-center">
       <div class="ec-icon">🎬</div>
-      <div class="ec-text">이미지를 추가하여 시작하세요</div>
-      <div class="ec-hint">좌측에서 이미지, 오디오, 자막을 업로드하세요</div>
+      <div class="ec-text">이미지/영상을 추가하여 시작하세요</div>
+      <div class="ec-hint">좌측에서 이미지, 영상, 오디오, 자막을 업로드하세요</div>
     </div>
     <div class="preview-container" id="previewBox" style="display:none">
       <canvas id="preview" width="1280" height="720"></canvas>
@@ -373,7 +373,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
   <div class="tl-body">
     <div class="tl-ruler" id="tlRuler"></div>
     <div class="tl-tracks" id="tlTracks">
-      <div class="tl-track"><div class="tl-track-label">🖼️ 씬</div><div class="tl-track-content" id="trackScene"></div></div>
+      <div class="tl-track"><div class="tl-track-label">🎬 씬</div><div class="tl-track-content" id="trackScene"></div></div>
       <div class="tl-track"><div class="tl-track-label">🎙️ 오디오</div><div class="tl-track-content" id="trackAudio"></div></div>
       <div class="tl-track"><div class="tl-track-label">📝 자막</div><div class="tl-track-content" id="trackSub"></div></div>
       <div class="tl-track"><div class="tl-track-label">🎵 BGM</div><div class="tl-track-content" id="trackBgm"></div></div>
@@ -388,22 +388,39 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
 <div class="modal-overlay" id="exportModal">
   <div class="modal">
     <h3>📥 영상 내보내기</h3>
-    <div class="modal-row">
-      <label>해상도</label>
-      <select id="exportRes">
-        <option value="1280x720">720p (1280×720)</option>
-        <option value="1920x1080" selected>1080p (1920×1080)</option>
-      </select>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="h-btn" id="tabBrowser" onclick="setExportTab('browser')" style="flex:1;padding:10px;border:1px solid var(--gold-br);background:var(--gold-bg);color:var(--gold);font-weight:700;border-radius:8px">🌐 브라우저 내보내기</button>
+      <button class="h-btn" id="tabClaude" onclick="setExportTab('claude')" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px;font-weight:700">🤖 Claude Code 내보내기</button>
     </div>
-    <div class="modal-row">
-      <label>프레임레이트</label>
-      <select id="exportFps"><option value="24">24fps</option><option value="30" selected>30fps</option></select>
+    <div id="exportBrowser">
+      <div class="modal-row">
+        <label>해상도</label>
+        <select id="exportRes">
+          <option value="1280x720">720p (1280×720)</option>
+          <option value="1920x1080" selected>1080p (1920×1080)</option>
+        </select>
+      </div>
+      <div class="modal-row">
+        <label>프레임레이트</label>
+        <select id="exportFps"><option value="24">24fps</option><option value="30" selected>30fps</option></select>
+      </div>
+      <div class="export-progress"><div class="export-fill" id="exportFill"></div></div>
+      <div class="export-status" id="exportStatus">준비됨</div>
+      <div class="modal-actions">
+        <button class="h-btn" onclick="closeExport()">취소</button>
+        <button class="h-btn primary" id="exportBtn" onclick="startExport()">🎬 내보내기 시작</button>
+      </div>
     </div>
-    <div class="export-progress"><div class="export-fill" id="exportFill"></div></div>
-    <div class="export-status" id="exportStatus">준비됨</div>
-    <div class="modal-actions">
-      <button class="h-btn" onclick="closeExport()">취소</button>
-      <button class="h-btn primary" id="exportBtn" onclick="startExport()">🎬 내보내기 시작</button>
+    <div id="exportClaude" style="display:none">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px">
+        씬 편집 결과를 Claude Code에 전달하면 FFmpeg로 고품질 병합합니다.
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;max-height:200px;overflow-y:auto;font-size:11px;font-family:var(--mono);color:var(--cyan);line-height:1.8;white-space:pre-wrap" id="claudeExportText"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="h-btn" onclick="closeExport()">취소</button>
+        <button class="h-btn primary" onclick="copyClaudeExport()">📋 복사</button>
+        <button class="h-btn" style="background:var(--green);color:#fff" onclick="downloadEditPlan()">📥 edit_plan.json 다운로드</button>
+      </div>
     </div>
   </div>
 </div>
@@ -414,7 +431,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 
 // ===== PROJECT STATE =====
 const P = {
   ratio: '16:9',
-  scenes: [],         // {id, img, imgUrl, name, start, dur, kb, kbI, trans, transD, bright, contrast, sat, overlay, overlayPos, overlaySize}
+  scenes: [],         // {id, file, url, name, type:'image'|'video', start, dur, kb, kbI, trans, transD, bright, contrast, sat, overlay, overlayPos, overlaySize, videoDur}
   audio: null,        // File
   audioUrl: null,
   audioDur: 0,
@@ -437,6 +454,7 @@ let bgmEl = null;
 const canvas = document.getElementById('preview');
 const ctx = canvas.getContext('2d');
 const imgCache = {};
+const videoCache = {};
 
 // ===== UTILS =====
 function uid(){ return 's'+Date.now()+Math.random().toString(36).slice(2,6); }
@@ -455,29 +473,69 @@ function setRatio(r, btn){
 }
 
 // ===== IMPORT HANDLERS =====
-function handleImages(files){
+function handleMedia(files){
   if(!files.length) return;
-  const startIdx = P.scenes.length;
+  let loadCount = 0;
+  const total = files.length;
+  
   Array.from(files).forEach((f,i)=>{
     const url = URL.createObjectURL(f);
-    const img = new Image();
-    img.onload = ()=>{ imgCache[url]=img; if(i===0)renderFrame(); };
-    img.src = url;
-    P.scenes.push({
-      id:uid(), img:f, imgUrl:url, name:f.name.replace(/\.[^.]+$/,''),
-      start:0, dur:3, kb:'zoom-in', kbI:30, trans:'fade', transD:500,
-      bright:0, contrast:0, sat:0, overlay:'', overlayPos:'bottom', overlaySize:32
-    });
+    const isVideo = f.type.startsWith('video/');
+    
+    if(isVideo){
+      // Video file
+      const vid = document.createElement('video');
+      vid.preload='metadata';
+      vid.muted=true;
+      vid.onloadedmetadata = ()=>{
+        videoCache[url] = vid;
+        P.scenes.push({
+          id:uid(), file:f, url:url, name:f.name.replace(/\.[^.]+$/,''),
+          type:'video', videoDur:vid.duration,
+          start:0, dur:Math.min(vid.duration,5), kb:'none', kbI:0, trans:'fade', transD:500,
+          bright:0, contrast:0, sat:0, overlay:'', overlayPos:'bottom', overlaySize:32
+        });
+        loadCount++;
+        if(loadCount===total) finishMediaLoad();
+      };
+      vid.src = url;
+    } else {
+      // Image file
+      const img = new Image();
+      img.onload = ()=>{
+        imgCache[url]=img;
+        P.scenes.push({
+          id:uid(), file:f, url:url, name:f.name.replace(/\.[^.]+$/,''),
+          type:'image',
+          start:0, dur:3, kb:'zoom-in', kbI:30, trans:'fade', transD:500,
+          bright:0, contrast:0, sat:0, overlay:'', overlayPos:'bottom', overlaySize:32
+        });
+        loadCount++;
+        if(loadCount===total) finishMediaLoad();
+      };
+      img.src = url;
+    }
   });
+}
+
+function finishMediaLoad(){
+  // Sort by filename to maintain order
+  P.scenes.sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}));
   autoDistribute();
+  const imgCount = P.scenes.filter(s=>s.type==='image').length;
+  const vidCount = P.scenes.filter(s=>s.type==='video').length;
+  const label = [];
+  if(vidCount) label.push(vidCount+'개 영상');
+  if(imgCount) label.push(imgCount+'장 이미지');
   document.getElementById('izImages').classList.add('has-file');
-  document.getElementById('izImages').querySelector('.iz-label').textContent = P.scenes.length+'장 로드됨';
+  document.getElementById('izImages').querySelector('.iz-label').textContent = label.join(' + ')+' 로드됨';
   document.getElementById('previewEmpty').style.display='none';
   document.getElementById('previewBox').style.display='block';
   renderSceneList();
   renderTimeline();
   updateStatus();
   if(P.scenes.length>0 && !P.activeScene) selectScene(P.scenes[0].id);
+  toast('🎬 '+P.scenes.length+'개 미디어 로드 완료!');
 }
 
 function handleAudio(file){
@@ -545,38 +603,76 @@ function srtTimeToSec(t){
   return (+h)*3600 + (+m)*60 + (+s) + (+ms)/1000;
 }
 
-// ===== AUTO DISTRIBUTE =====
+// ===== AUTO DISTRIBUTE (나레이션 기반 자동 컷편집) =====
 function autoDistribute(){
   if(!P.scenes.length) return;
   const totalDur = P.audioDur || P.scenes.length * 3;
-  const each = totalDur / P.scenes.length;
-  P.scenes.forEach((sc,i)=>{
-    sc.start = i * each;
-    sc.dur = each;
+  
+  // Smart distribute: videos keep their original duration (capped), images fill the rest
+  const videos = P.scenes.filter(s=>s.type==='video');
+  const images = P.scenes.filter(s=>s.type==='image');
+  
+  // Calculate video total time (each capped to fair share)
+  const maxPerClip = totalDur / P.scenes.length * 1.5; // allow 1.5x fair share
+  let videoDurTotal = 0;
+  videos.forEach(v => {
+    v._allocDur = Math.min(v.videoDur || 3, maxPerClip);
+    videoDurTotal += v._allocDur;
   });
+  
+  // If videos exceed total, scale them down
+  if(videoDurTotal > totalDur && videos.length > 0){
+    const scale = totalDur / videoDurTotal;
+    videos.forEach(v => { v._allocDur *= scale; });
+    videoDurTotal = totalDur;
+  }
+  
+  // Remaining time for images
+  const remainForImages = Math.max(0, totalDur - videoDurTotal);
+  const imgDur = images.length > 0 ? remainForImages / images.length : 0;
+  
+  // Assign durations
+  P.scenes.forEach(sc => {
+    if(sc.type === 'video') sc.dur = sc._allocDur || 3;
+    else sc.dur = imgDur || (totalDur / P.scenes.length);
+  });
+  
+  // Assign start times sequentially
+  let t = 0;
+  P.scenes.forEach(sc => {
+    sc.start = t;
+    t += sc.dur;
+  });
+  
   renderSceneList();
   renderTimeline();
+  if(P.audioDur) toast('🎬 나레이션 '+fmtTime(P.audioDur)+' 기준 자동 컷편집 완료!');
 }
 
 // ===== SCENE LIST =====
 function renderSceneList(){
   const el = document.getElementById('sceneList');
-  if(!P.scenes.length){ el.innerHTML='<div class="empty-center" style="padding:20px"><div class="ec-text" style="font-size:11px">이미지를 추가하세요</div></div>'; return; }
-  el.innerHTML = P.scenes.map((sc,i)=>`
+  if(!P.scenes.length){ el.innerHTML='<div class="empty-center" style="padding:20px"><div class="ec-text" style="font-size:11px">이미지/영상을 추가하세요</div></div>'; return; }
+  el.innerHTML = P.scenes.map((sc,i)=>{
+    const isVid = sc.type==='video';
+    const thumb = isVid 
+      ? `<div class="scene-thumb" style="display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg3)">🎬</div>`
+      : `<img class="scene-thumb" src="${sc.url}" alt="">`;
+    return `
     <div class="scene-item ${P.activeScene===sc.id?'active':''}" onclick="selectScene('${sc.id}')">
       <div class="scene-num">${i+1}</div>
-      <img class="scene-thumb" src="${sc.imgUrl}" alt="">
+      ${thumb}
       <div class="scene-info">
-        <div class="name">${sc.name}</div>
-        <div class="dur">${sc.dur.toFixed(1)}s · ${sc.kb!=='none'?sc.kb:'컷'}</div>
+        <div class="name">${isVid?'🎬 ':'🖼️ '}${sc.name}</div>
+        <div class="dur">${sc.dur.toFixed(1)}s · ${isVid?'영상':sc.kb!=='none'?sc.kb:'컷'}</div>
       </div>
       <div class="scene-actions">
         ${i>0?`<button onclick="event.stopPropagation();moveScene('${sc.id}',-1)" title="위로">▲</button>`:''}
         ${i<P.scenes.length-1?`<button onclick="event.stopPropagation();moveScene('${sc.id}',1)" title="아래로">▼</button>`:''}
         <button onclick="event.stopPropagation();removeScene('${sc.id}')" title="삭제" style="color:var(--red)">✕</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function selectScene(id){
@@ -626,7 +722,7 @@ function addBlankScene(){
   const cx=c.getContext('2d');cx.fillStyle='#111';cx.fillRect(0,0,1280,720);
   const url=c.toDataURL();
   const img=new Image();img.src=url;imgCache[url]=img;
-  P.scenes.push({id:uid(),img:null,imgUrl:url,name:'빈 씬',start:0,dur:3,kb:'none',kbI:0,trans:'fade',transD:500,bright:0,contrast:0,sat:0,overlay:'',overlayPos:'center',overlaySize:40});
+  P.scenes.push({id:uid(),file:null,url:url,name:'빈 씬',type:'image',start:0,dur:3,kb:'none',kbI:0,trans:'fade',transD:500,bright:0,contrast:0,sat:0,overlay:'',overlayPos:'center',overlaySize:40});
   autoDistribute();
   document.getElementById('previewEmpty').style.display='none';
   document.getElementById('previewBox').style.display='block';
@@ -669,50 +765,74 @@ function renderFrame(){
 
   const sc = getSceneAt(P.currentTime);
   if(!sc) return;
-  const img = imgCache[sc.imgUrl];
-  if(!img) return;
-
-  // Ken Burns calc
+  
   const progress = sc.dur>0 ? clamp((P.currentTime - sc.start)/sc.dur, 0, 1) : 0;
-  const intensity = (sc.kbI||30)/100 * 0.3;
-  let sx=0,sy=0,sw=img.width,sh=img.height;
+  
+  if(sc.type==='video'){
+    // Video scene
+    const vid = videoCache[sc.url];
+    if(!vid) return;
+    // Seek video to correct position
+    const vidTime = progress * (sc.videoDur||vid.duration||3);
+    if(Math.abs(vid.currentTime - vidTime) > 0.1) vid.currentTime = vidTime;
+    
+    // Draw video frame (cover fit)
+    const vw=vid.videoWidth||1280, vh=vid.videoHeight||720;
+    const vidRatio = vw/vh, canvasRatio = w/h;
+    let dx=0,dy=0,dw=w,dh=h;
+    if(vidRatio>canvasRatio){ dh=h; dw=h*vidRatio; dx=(w-dw)/2; }
+    else { dw=w; dh=w/vidRatio; dy=(h-dh)/2; }
+    
+    const bright = 100 + (+sc.bright||0), contrast = 100 + (+sc.contrast||0), sat = 100 + (+sc.sat||0);
+    ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`;
+    ctx.drawImage(vid, dx,dy,dw,dh);
+    ctx.filter = 'none';
+  } else {
+    // Image scene
+    const img = imgCache[sc.url];
+    if(!img) return;
 
-  if(sc.kb==='zoom-in'){
-    const z=1+intensity*progress;
-    const nw=img.width/z, nh=img.height/z;
-    sx=(img.width-nw)/2; sy=(img.height-nh)/2; sw=nw; sh=nh;
-  } else if(sc.kb==='zoom-out'){
-    const z=1+intensity*(1-progress);
-    const nw=img.width/z, nh=img.height/z;
-    sx=(img.width-nw)/2; sy=(img.height-nh)/2; sw=nw; sh=nh;
-  } else if(sc.kb==='pan-left'){
-    const off=intensity*img.width*progress;
-    sx=off; sw=img.width*(1-intensity);
-  } else if(sc.kb==='pan-right'){
-    const off=intensity*img.width*(1-progress);
-    sx=off; sw=img.width*(1-intensity);
-  } else if(sc.kb==='pan-up'){
-    const off=intensity*img.height*progress;
-    sy=off; sh=img.height*(1-intensity);
-  } else if(sc.kb==='pan-down'){
-    const off=intensity*img.height*(1-progress);
-    sy=off; sh=img.height*(1-intensity);
+    // Ken Burns calc
+    const intensity = (sc.kbI||30)/100 * 0.3;
+    let sx=0,sy=0,sw=img.width,sh=img.height;
+
+    if(sc.kb==='zoom-in'){
+      const z=1+intensity*progress;
+      const nw=img.width/z, nh=img.height/z;
+      sx=(img.width-nw)/2; sy=(img.height-nh)/2; sw=nw; sh=nh;
+    } else if(sc.kb==='zoom-out'){
+      const z=1+intensity*(1-progress);
+      const nw=img.width/z, nh=img.height/z;
+      sx=(img.width-nw)/2; sy=(img.height-nh)/2; sw=nw; sh=nh;
+    } else if(sc.kb==='pan-left'){
+      const off=intensity*img.width*progress;
+      sx=off; sw=img.width*(1-intensity);
+    } else if(sc.kb==='pan-right'){
+      const off=intensity*img.width*(1-progress);
+      sx=off; sw=img.width*(1-intensity);
+    } else if(sc.kb==='pan-up'){
+      const off=intensity*img.height*progress;
+      sy=off; sh=img.height*(1-intensity);
+    } else if(sc.kb==='pan-down'){
+      const off=intensity*img.height*(1-progress);
+      sy=off; sh=img.height*(1-intensity);
+    }
+
+    // Filters
+    const bright = 100 + (+sc.bright||0);
+    const contrast = 100 + (+sc.contrast||0);
+    const sat = 100 + (+sc.sat||0);
+    ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`;
+
+    // Draw image (cover fit)
+    const imgRatio = sw/sh;
+    const canvasRatio = w/h;
+    let dx=0,dy=0,dw=w,dh=h;
+    if(imgRatio>canvasRatio){ dh=h; dw=h*imgRatio; dx=(w-dw)/2; }
+    else { dw=w; dh=w/imgRatio; dy=(h-dh)/2; }
+    ctx.drawImage(img, sx,sy,sw,sh, dx,dy,dw,dh);
+    ctx.filter = 'none';
   }
-
-  // Filters
-  const bright = 100 + (+sc.bright||0);
-  const contrast = 100 + (+sc.contrast||0);
-  const sat = 100 + (+sc.sat||0);
-  ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`;
-
-  // Draw image (cover fit)
-  const imgRatio = sw/sh;
-  const canvasRatio = w/h;
-  let dx=0,dy=0,dw=w,dh=h;
-  if(imgRatio>canvasRatio){ dh=h; dw=h*imgRatio; dx=(w-dw)/2; }
-  else { dw=w; dh=w/imgRatio; dy=(h-dh)/2; }
-  ctx.drawImage(img, sx,sy,sw,sh, dx,dy,dw,dh);
-  ctx.filter = 'none';
 
   // Transition fade
   if(sc.trans==='fade' && progress<0.15){
@@ -843,7 +963,10 @@ function renderTimeline(){
   // Scene track
   const ts=document.getElementById('trackScene');
   ts.style.width=(totalW-80)+'px';
-  ts.innerHTML=P.scenes.map(sc=>`<div class="tl-clip scene" style="left:${sc.start*pps}px;width:${Math.max(sc.dur*pps-2,20)}px" onclick="selectScene('${sc.id}')" title="${sc.name}">${sc.name.slice(0,8)}</div>`).join('');
+  ts.innerHTML=P.scenes.map(sc=>{
+    const icon=sc.type==='video'?'🎬':'🖼️';
+    return `<div class="tl-clip scene" style="left:${sc.start*pps}px;width:${Math.max(sc.dur*pps-2,20)}px" onclick="selectScene('${sc.id}')" title="${sc.name}">${icon}${sc.name.slice(0,6)}</div>`;
+  }).join('');
 
   // Audio track
   const ta=document.getElementById('trackAudio');
@@ -946,13 +1069,88 @@ async function startExport(){
   renderFrame();
 }
 
+function setExportTab(tab){
+  document.getElementById('exportBrowser').style.display=tab==='browser'?'block':'none';
+  document.getElementById('exportClaude').style.display=tab==='claude'?'block':'none';
+  document.getElementById('tabBrowser').style.borderColor=tab==='browser'?'var(--gold-br)':'var(--border)';
+  document.getElementById('tabBrowser').style.background=tab==='browser'?'var(--gold-bg)':'transparent';
+  document.getElementById('tabBrowser').style.color=tab==='browser'?'var(--gold)':'var(--t2)';
+  document.getElementById('tabClaude').style.borderColor=tab==='claude'?'var(--gold-br)':'var(--border)';
+  document.getElementById('tabClaude').style.background=tab==='claude'?'var(--gold-bg)':'transparent';
+  document.getElementById('tabClaude').style.color=tab==='claude'?'var(--gold)':'var(--t2)';
+  if(tab==='claude') generateClaudeExport();
+}
+
+function generateClaudeExport(){
+  const lines=[];
+  lines.push('=== DODO 편집 플랜 ===');
+  lines.push('비율: '+P.ratio);
+  lines.push('총 씬: '+P.scenes.length+'개');
+  lines.push('나레이션: '+(P.audio?P.audio.name+' ('+fmtTime(P.audioDur)+')':'없음'));
+  lines.push('BGM: '+(P.bgm?P.bgm.name:'없음'));
+  lines.push('자막: '+(P.srt.length?P.srt.length+'개':'없음'));
+  lines.push('');
+  lines.push('=== 씬별 편집 ===');
+  P.scenes.forEach((sc,i)=>{
+    lines.push(`[씬 ${i+1}] ${sc.name}`);
+    lines.push(`  파일: ${sc.file?sc.file.name:'빈 씬'}`);
+    lines.push(`  타입: ${sc.type==='video'?'영상':'이미지'}`);
+    lines.push(`  시작: ${sc.start.toFixed(1)}s → 끝: ${(sc.start+sc.dur).toFixed(1)}s (${sc.dur.toFixed(1)}s)`);
+    if(sc.type==='image') lines.push(`  효과: ${sc.kb!=='none'?'Ken Burns '+sc.kb+' '+sc.kbI+'%':'없음'}`);
+    lines.push(`  트랜지션: ${sc.trans} ${sc.transD}ms`);
+    if(sc.overlay) lines.push(`  자막 오버레이: "${sc.overlay}"`);
+    lines.push('');
+  });
+  lines.push('=== Claude Code 명령어 ===');
+  lines.push('이 폴더에서 "영상 합쳐줘"라고 말하세요.');
+  document.getElementById('claudeExportText').textContent=lines.join('\n');
+}
+
+function getEditPlanJSON(){
+  return {
+    ratio: P.ratio,
+    total_duration: P.audioDur||(P.scenes.length?P.scenes[P.scenes.length-1].start+P.scenes[P.scenes.length-1].dur:0),
+    narration: P.audio?{name:P.audio.name, duration:P.audioDur}:null,
+    bgm: P.bgm?{name:P.bgm.name, volume:Math.round(P.volBgm*100)}:null,
+    subtitle: {style:P.subStyle.preset||'youtube', count:P.srt.length},
+    ducking: P.ducking||'auto',
+    scenes: P.scenes.map((sc,i)=>({
+      num: i+1,
+      file: sc.file?sc.file.name:'blank',
+      type: sc.type,
+      start: +sc.start.toFixed(2),
+      duration: +sc.dur.toFixed(2),
+      effect: sc.type==='image'?{ken_burns:sc.kb,intensity:sc.kbI}:null,
+      transition: sc.trans,
+      transition_ms: sc.transD,
+      overlay: sc.overlay||null,
+      filters: {bright:sc.bright,contrast:sc.contrast,saturation:sc.sat}
+    })),
+    created: new Date().toISOString().slice(0,10),
+    tool: 'DODO VideoStudio'
+  };
+}
+
+function copyClaudeExport(){
+  const text=document.getElementById('claudeExportText').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('📋 편집 플랜 복사됨!'));
+}
+
+function downloadEditPlan(){
+  const json=getEditPlanJSON();
+  const blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='edit_plan.json';a.click();
+  toast('📥 edit_plan.json 다운로드 완료!');
+}
+
 function resetProject(){
   if(!confirm('프로젝트를 초기화할까요?')) return;
   P.scenes=[];P.audio=null;P.audioUrl=null;P.audioDur=0;P.srt=[];P.bgm=null;P.bgmUrl=null;P.activeScene=null;P.currentTime=0;
   if(audioEl){audioEl.pause();audioEl=null;}
   if(bgmEl){bgmEl.pause();bgmEl=null;}
   document.querySelectorAll('.import-zone').forEach(z=>{z.classList.remove('has-file');});
-  document.getElementById('izImages').querySelector('.iz-label').textContent='이미지 추가';
+  document.getElementById('izImages').querySelector('.iz-label').textContent='이미지 / 영상 추가';
   document.getElementById('izAudio').querySelector('.iz-label').textContent='나레이션';
   document.getElementById('izSrt').querySelector('.iz-label').textContent='자막';
   document.getElementById('izBgm').querySelector('.iz-label').textContent='🎵 BGM (선택사항)';
