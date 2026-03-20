@@ -3,2293 +3,1235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ DODO WORKSPACE</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>NMN 수익 시뮬레이터</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg-primary: #0d0d0f;
-    --bg-secondary: #141418;
-    --bg-card: #18181e;
-    --bg-card-hover: #1e1e26;
-    --bg-modal: #18181e;
-    --gold: #d4a01e;
-    --gold-light: #e8b330;
-    --gold-dim: #a07a15;
-    --gold-glow: rgba(212,160,30,0.12);
-    --gold-glow-strong: rgba(212,160,30,0.25);
-    --gold-border: rgba(212,160,30,0.25);
-    --gold-border-dim: rgba(212,160,30,0.10);
-    --border: rgba(255,255,255,0.06);
-    --border-hover: rgba(255,255,255,0.10);
-    --text-primary: #f0ece4;
-    --text-secondary: #8a8680;
-    --text-dim: #5a5650;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  .ambient {
-    position: fixed;
-    width: 500px; height: 500px;
-    border-radius: 50%;
-    filter: blur(150px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .ambient-1 { top: -250px; left: 50%; transform: translateX(-50%); background: var(--gold); opacity: 0.06; }
-  .ambient-2 { bottom: -300px; right: -100px; background: var(--gold); opacity: 0.03; }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 60px 32px 80px;
-  }
-
-  /* Header */
-  .header {
-    margin-bottom: 56px;
-    text-align: center;
-    animation: fadeUp 0.8s ease-out;
-  }
-
-  .header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 18px;
-    background: transparent;
-    border: 1px solid var(--gold-border);
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gold);
-    letter-spacing: 1.5px;
-    margin-bottom: 24px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    text-transform: uppercase;
-  }
-
-  .header-badge .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--gold);
-    animation: pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 8px var(--gold-glow-strong);
-  }
-
-  .header h1 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 44px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1.1;
-    margin-bottom: 14px;
-    color: var(--gold);
-    text-shadow: 0 0 60px var(--gold-glow);
-  }
-
-  .header p {
-    font-size: 15px;
-    color: var(--text-secondary);
-    font-weight: 300;
-    line-height: 1.7;
-  }
-
-  .stats-bar {
-    display: flex;
-    gap: 40px;
-    margin-top: 32px;
-    padding-top: 24px;
-    justify-content: center;
-    animation: fadeUp 0.8s ease-out 0.1s both;
-  }
-
-  .stat-item { display: flex; align-items: baseline; gap: 8px; }
-
-  .stat-number {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 26px; font-weight: 700; color: var(--gold-light);
-  }
-
-  .stat-label { font-size: 13px; color: var(--text-dim); font-weight: 400; }
-
-  /* Edit mode toggle */
-  .edit-bar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    animation: fadeUp 0.6s ease-out 0.12s both;
-  }
-
-  .edit-hint {
-    font-size: 12px;
-    color: var(--text-dim);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .edit-hint.visible { opacity: 1; }
-
-  .edit-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.02);
-    color: var(--text-dim);
-    font-size: 12px;
-    font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    letter-spacing: 0.3px;
-  }
-
-  .edit-toggle svg { width: 14px; height: 14px; stroke: currentColor; transition: all 0.3s ease; }
-
-  .edit-toggle:hover { border-color: var(--gold-border-dim); color: var(--gold-dim); }
-
-  .edit-toggle.active {
-    border-color: var(--gold-border);
-    background: var(--gold-glow);
-    color: var(--gold);
-  }
-
-  .reset-btn {
-    padding: 7px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-dim);
-    font-size: 12px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .reset-btn.visible { opacity: 1; pointer-events: all; }
-  .reset-btn:hover { border-color: rgba(255,100,100,0.3); color: #ff7b7b; }
-
-  /* Grid */
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-  }
-
-  /* Card */
-  .tool-card {
-    position: relative;
-    background: linear-gradient(165deg, #1a1a22 0%, #15151c 100%);
-    border: 1px solid rgba(212,160,30,0.12);
-    border-radius: 16px;
-    padding: 30px 26px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    overflow: hidden;
-    animation: fadeUp 0.6s ease-out both;
-    text-decoration: none;
-    user-select: none;
-  }
-
-  .tool-card:nth-child(1) { animation-delay: 0.15s; }
-  .tool-card:nth-child(2) { animation-delay: 0.22s; }
-  .tool-card:nth-child(3) { animation-delay: 0.29s; }
-  .tool-card:nth-child(4) { animation-delay: 0.36s; }
-  .tool-card:nth-child(5) { animation-delay: 0.43s; }
-  .tool-card:nth-child(6) { animation-delay: 0.50s; }
-
-  /* Top gold line */
-  .tool-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent 10%, var(--gold) 50%, transparent 90%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  /* Corner glow */
-  .tool-card::after {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 140px; height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(212,160,30,0.08) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.5s ease, transform 0.5s ease;
-    pointer-events: none;
-  }
-
-  .tool-card:hover {
-    border-color: var(--gold-border);
-    background: linear-gradient(165deg, #1e1e28 0%, #18181f 100%);
-    transform: translateY(-6px) scale(1.01);
-    box-shadow:
-      0 12px 40px rgba(212,160,30,0.12),
-      0 4px 16px rgba(0,0,0,0.3),
-      inset 0 1px 0 rgba(212,160,30,0.1);
-  }
-
-  .tool-card:hover::before { opacity: 1; }
-  .tool-card:hover::after { opacity: 1; transform: translate(-10px, 10px); }
-
-  .tool-card:active {
-    transform: translateY(-2px) scale(0.99);
-    transition-duration: 0.1s;
-  }
-
-  /* Drag states */
-  .tool-card.dragging {
-    opacity: 0.4;
-    transform: scale(0.97);
-    border-color: var(--gold-border);
-    box-shadow: 0 0 30px var(--gold-glow-strong);
-  }
-
-  .tool-card.drag-over {
-    border-color: var(--gold) !important;
-    box-shadow: 0 0 20px var(--gold-glow-strong), inset 0 0 20px var(--gold-glow) !important;
-    transform: translateY(-2px);
-  }
-
-  /* Edit mode: drag handle */
-  .drag-handle {
-    position: absolute;
-    top: 12px; left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 4px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .drag-handle span {
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: var(--gold-dim);
-  }
-
-  body.edit-mode .drag-handle { opacity: 1; }
-
-  body.edit-mode .tool-card {
-    cursor: grab;
-    animation: cardWiggle 0.4s ease;
-  }
-
-  body.edit-mode .tool-card:active { cursor: grabbing; }
-
-  body.edit-mode .tool-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .card-top { display: flex; align-items: flex-start; justify-content: space-between; }
-
-  .card-icon {
-    width: 50px; height: 50px; border-radius: 13px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 23px; flex-shrink: 0;
-    background: linear-gradient(135deg, rgba(212,160,30,0.12), rgba(212,160,30,0.05));
-    border: 1px solid var(--gold-border-dim);
-    transition: all 0.4s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-
-  .tool-card:hover .card-icon {
-    background: linear-gradient(135deg, rgba(212,160,30,0.22), rgba(212,160,30,0.10));
-    border-color: var(--gold-border);
-    box-shadow: 0 4px 20px rgba(212,160,30,0.15);
-    transform: scale(1.08);
-  }
-
-  .card-actions { display: flex; align-items: center; gap: 6px; }
-
-  .card-btn {
-    width: 30px; height: 30px; border-radius: 7px;
-    background: rgba(255,255,255,0.03);
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s ease; flex-shrink: 0;
-    border: 1px solid transparent; cursor: pointer; color: var(--text-dim);
-  }
-
-  .card-btn svg { width: 13px; height: 13px; stroke: var(--text-dim); transition: all 0.3s ease; }
-  .card-btn:hover { background: var(--gold-glow); border-color: var(--gold-border-dim); transform: scale(1.1); }
-  .card-btn:hover svg { stroke: var(--gold); }
-  .card-btn-guide:hover { background: rgba(78,204,163,0.12); border-color: rgba(78,204,163,0.25); }
-  .card-btn-guide:hover svg { stroke: #4ecca3; }
-  .tool-card:hover .card-btn-open { background: var(--gold-glow); border-color: var(--gold-border-dim); }
-  .tool-card:hover .card-btn-open svg { stroke: var(--gold-light); transform: translate(2px, -2px); }
-
-  .card-body h3 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px;
-    color: var(--text-primary);
-    transition: color 0.3s ease;
-  }
-
-  .tool-card:hover .card-body h3 { color: var(--gold-light); }
-
-  .card-body p {
-    font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; font-weight: 300;
-    transition: color 0.3s ease;
-  }
-
-  .tool-card:hover .card-body p { color: #a8a49e; }
-
-  .card-meta { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
-
-  .version-badge {
-    font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 5px;
-    font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.3px;
-    background: var(--gold-glow); color: var(--gold); border: 1px solid var(--gold-border-dim);
-    transition: all 0.3s ease;
-  }
-
-  .tool-card:hover .version-badge {
-    background: rgba(212,160,30,0.2);
-    border-color: var(--gold-border);
-    box-shadow: 0 0 10px rgba(212,160,30,0.1);
-  }
-
-  .modified-date {
-    font-size: 11px; color: var(--text-dim); font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-
-  .card-footer {
-    display: flex; align-items: center; gap: 10px;
-    margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border);
-    transition: border-color 0.3s ease;
-  }
-
-  .tool-card:hover .card-footer { border-color: var(--gold-border-dim); }
-
-  .card-tag {
-    font-size: 10.5px; font-weight: 500; padding: 3px 9px; border-radius: 5px;
-    background: rgba(255,255,255,0.03); color: var(--text-dim);
-    letter-spacing: 0.3px; font-family: 'Plus Jakarta Sans', sans-serif;
-    border: 1px solid var(--border);
-    transition: all 0.3s ease;
-  }
-
-  .tool-card:hover .card-tag {
-    background: rgba(212,160,30,0.06);
-    border-color: var(--gold-border-dim);
-    color: var(--text-secondary);
-  }
-
-  .card-file {
-    font-size: 11px; color: var(--text-dim); margin-left: auto;
-    font-family: 'Plus Jakarta Sans', monospace; opacity: 0.5;
-    transition: opacity 0.3s ease;
-  }
-
-  .tool-card:hover .card-file { opacity: 0.8; }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 32px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    padding: 10px 22px;
-    border-radius: 10px;
-    background: var(--bg-card);
-    border: 1px solid var(--gold-border);
-    color: var(--gold-light);
-    font-size: 13px;
-    font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.35s ease;
-    z-index: 2000;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Modal */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(10px); z-index: 1000;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-  }
-
-  .modal-overlay.active { opacity: 1; pointer-events: all; }
-
-  .modal {
-    background: var(--bg-modal); border: 1px solid var(--gold-border);
-    border-radius: 18px; width: 90%; max-width: 520px; max-height: 80vh;
-    display: flex; flex-direction: column;
-    transform: translateY(20px) scale(0.97);
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--gold-border-dim);
-  }
-
-  .modal-overlay.active .modal { transform: translateY(0) scale(1); }
-
-  .modal-header {
-    padding: 26px 26px 18px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-
-  .modal-header-left { display: flex; align-items: center; gap: 12px; }
-  .modal-icon { font-size: 22px; }
-
-  .modal-header h2 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--gold-light);
-  }
-
-  .modal-header h2 span { font-size: 12px; font-weight: 500; color: var(--text-dim); margin-left: 8px; }
-
-  .modal-close {
-    width: 34px; height: 34px; border-radius: 8px;
-    border: 1px solid var(--border); background: transparent;
-    color: var(--text-secondary); font-size: 18px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s ease;
-  }
-
-  .modal-close:hover { background: var(--gold-glow); border-color: var(--gold-border-dim); color: var(--gold); }
-
-  .modal-body { padding: 22px 26px; overflow-y: auto; flex: 1; }
-
-  .changelog-list { position: relative; padding-left: 24px; }
-
-  .changelog-list::before {
-    content: ''; position: absolute; left: 5px; top: 8px; bottom: 8px;
-    width: 1px; background: var(--gold-border-dim);
-  }
-
-  .changelog-item { position: relative; margin-bottom: 22px; }
-  .changelog-item:last-child { margin-bottom: 0; }
-
-  .changelog-item::before {
-    content: ''; position: absolute; left: -22px; top: 7px;
-    width: 9px; height: 9px; border-radius: 50%;
-    background: var(--text-dim); border: 2px solid var(--bg-modal);
-  }
-
-  .changelog-item:first-child::before { background: var(--gold); box-shadow: 0 0 8px var(--gold-glow-strong); }
-
-  .changelog-date {
-    font-size: 11px; font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 600; color: var(--text-dim); margin-bottom: 5px; letter-spacing: 0.3px;
-  }
-
-  .changelog-ver {
-    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
-    background: var(--gold-glow); color: var(--gold); margin-left: 8px;
-    border: 1px solid var(--gold-border-dim);
-  }
-
-  .changelog-text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
-  .changelog-empty { text-align: center; padding: 32px 0; color: var(--text-dim); font-size: 14px; }
-
-  /* Updates Section */
-  /* API Key Center */
-  .apikey-section {
-    margin-bottom: 24px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    animation: fadeUp 0.6s ease-out 0.14s both;
-  }
-
-  .apikey-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 24px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-
-  .apikey-header:hover { background: rgba(255,255,255,0.02); }
-
-  .apikey-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .apikey-title span {
-    font-size: 12px;
-    color: var(--text-dim);
-    font-weight: 400;
-  }
-
-  .apikey-toggle {
-    font-size: 10px;
-    color: var(--text-dim);
-    transition: transform 0.3s ease;
-  }
-
-  .apikey-toggle.open { transform: rotate(180deg); }
-
-  .apikey-body {
-    padding: 0 24px 24px;
-  }
-
-  .apikey-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .apikey-item {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 18px;
-  }
-
-  .apikey-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .apikey-icon { font-size: 16px; }
-
-  .apikey-status {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 6px;
-    margin-left: auto;
-  }
-
-  .apikey-status.saved {
-    background: rgba(78,204,163,0.1);
-    color: var(--green);
-    border: 1px solid rgba(78,204,163,0.2);
-  }
-
-  .apikey-status.empty {
-    background: rgba(255,255,255,0.03);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-  }
-
-  .apikey-input-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .apikey-input {
-    flex: 1;
-    padding: 10px 14px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-family: 'JetBrains Mono', monospace;
-    outline: none;
-    transition: all 0.3s;
-  }
-
-  .apikey-input:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold-glow);
-  }
-
-  .apikey-input::placeholder { color: var(--text-muted); }
-
-  .apikey-vis {
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-dim);
-    font-size: 11px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .apikey-vis:hover { border-color: var(--gold-border-dim); color: var(--gold-dim); }
-
-  .apikey-hint {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 8px;
-  }
-
-  .apikey-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 18px;
-  }
-
-  .apikey-save {
-    padding: 10px 24px;
-    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
-    color: #0d0d0f;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.25s;
-    box-shadow: 0 4px 16px var(--gold-glow);
-  }
-
-  .apikey-save:hover { box-shadow: 0 6px 24px rgba(212,160,30,0.2); transform: translateY(-1px); }
-
-  .apikey-clear {
-    padding: 10px 18px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-dim);
-    font-size: 12px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .apikey-clear:hover { border-color: rgba(224,112,80,0.3); color: #e07050; }
-
-  .apikey-notice {
-    margin-top: 12px;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .apikey-notice.ok {
-    background: rgba(78,204,163,0.08);
-    border: 1px solid rgba(78,204,163,0.15);
-    color: var(--green);
-  }
-
-  .apikey-notice.err {
-    background: rgba(224,112,80,0.08);
-    border: 1px solid rgba(224,112,80,0.15);
-    color: #e07050;
-  }
-
-  @media (max-width: 640px) {
-    .apikey-title span { display: none; }
-  }
-
-  /* Changelog Section */
-  .updates-section {
-    margin-bottom: 28px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px 24px;
-    animation: fadeUp 0.6s ease-out 0.12s both;
-  }
-
-  .updates-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-
-  .updates-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .updates-title span {
-    font-size: 12px;
-    color: var(--text-dim);
-    font-weight: 400;
-  }
-
-  .changelog-timeline {
-    position: relative;
-    padding-left: 22px;
-  }
-
-  .changelog-timeline::before {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 6px;
-    bottom: 6px;
-    width: 1px;
-    background: var(--gold-border-dim);
-  }
-
-  .cl-item {
-    position: relative;
-    margin-bottom: 14px;
-    display: flex;
-    gap: 14px;
-  }
-
-  .cl-item:last-child { margin-bottom: 0; }
-
-  .cl-item::before {
-    content: '';
-    position: absolute;
-    left: -21px;
-    top: 6px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--text-muted);
-    border: 2px solid var(--bg-card);
-  }
-
-  .cl-item:first-child::before {
-    background: var(--gold);
-    box-shadow: 0 0 8px rgba(212,160,30,0.3);
-  }
-
-  .cl-meta {
-    flex-shrink: 0;
-    min-width: 78px;
-  }
-
-  .cl-ver {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    background: var(--gold-glow);
-    color: var(--gold);
-    border: 1px solid var(--gold-border-dim);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    display: inline-block;
-    margin-bottom: 3px;
-  }
-
-  .cl-item:first-child .cl-ver {
-    background: rgba(212,160,30,0.2);
-    border-color: var(--gold-border);
-  }
-
-  .cl-date {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-
-  .cl-body { flex: 1; min-width: 0; }
-
-  .cl-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 2px;
-  }
-
-  .cl-item:first-child .cl-name { color: var(--gold-light); }
-
-  .cl-desc {
-    font-size: 12px;
-    color: var(--text-dim);
-    line-height: 1.5;
-  }
-
-  .cl-empty {
-    text-align: center;
-    padding: 20px;
-    color: var(--text-dim);
-    font-size: 13px;
-  }
-
-  /* Guides Section */
-  .guides-section {
-    margin-top: 56px;
-    animation: fadeUp 0.6s ease-out 0.55s both;
-  }
-
-  .guides-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-  }
-
-  .guides-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .guides-title span {
-    font-size: 13px;
-    color: var(--text-dim);
-    font-weight: 400;
-  }
-
-  .guides-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 10px;
-  }
-
-  .guide-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    text-decoration: none;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-  }
-
-  .guide-link:hover {
-    border-color: var(--gold-border-dim);
-    background: var(--gold-glow);
-    color: var(--text-primary);
-    transform: translateY(-2px);
-  }
-
-  .guide-link-icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
-    background: rgba(78,204,163,0.08);
-    border: 1px solid rgba(78,204,163,0.12);
-    transition: all 0.3s ease;
-  }
-
-  .guide-link:hover .guide-link-icon {
-    background: rgba(78,204,163,0.15);
-    border-color: rgba(78,204,163,0.25);
-  }
-
-  .guide-link-text {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .guide-link-name {
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 2px;
-  }
-
-  .guide-link-sub {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-
-  .guide-link-arrow {
-    color: var(--text-dim);
-    font-size: 12px;
-    transition: all 0.3s ease;
-  }
-
-  .guide-link:hover .guide-link-arrow {
-    color: var(--gold);
-    transform: translateX(3px);
-  }
-
-  /* Support Center Card */
-  .support-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 24px;
-    margin-top: 28px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.3s ease;
-    animation: fadeUp 0.6s ease-out 0.6s both;
-  }
-
-  .support-card:hover {
-    border-color: var(--gold-border-dim);
-    background: var(--bg-card-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.2);
-  }
-
-  .support-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .support-icon {
-    font-size: 22px;
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    background: var(--gold-glow);
-    border: 1px solid var(--gold-border-dim);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-  }
-
-  .support-card:hover .support-icon {
-    background: rgba(212,160,30,0.2);
-    border-color: var(--gold-border);
-  }
-
-  .support-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 2px;
-    transition: color 0.3s ease;
-  }
-
-  .support-card:hover .support-title { color: var(--gold-light); }
-
-  .support-desc {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  .support-arrow {
-    font-size: 16px;
-    color: var(--text-dim);
-    transition: all 0.3s ease;
-  }
-
-  .support-card:hover .support-arrow {
-    color: var(--gold);
-    transform: translateX(4px);
-  }
-
-  .footer {
-    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-    animation: fadeUp 0.6s ease-out 0.5s both;
-  }
-
-  .footer-left { font-size: 12px; color: var(--text-dim); font-weight: 300; }
-  .footer-right { display: flex; gap: 16px; }
-
-  .footer-link {
-    font-size: 12px; color: var(--text-dim); text-decoration: none;
-    transition: color 0.2s ease; font-weight: 400; cursor: pointer;
-    background: none; border: none; font-family: inherit;
-  }
-
-  .footer-link:hover { color: var(--gold-dim); }
-
-  /* Top Notice Banners */
-  .banner-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 40px;
-    animation: fadeUp 0.6s ease-out 0.05s both;
-  }
-
-  .top-banner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, rgba(212,160,30,0.08) 0%, rgba(212,160,30,0.03) 100%);
-    border: 1px solid var(--gold-border-dim);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .top-banner:hover {
-    border-color: var(--gold-border);
-    background: linear-gradient(135deg, rgba(212,160,30,0.12) 0%, rgba(212,160,30,0.05) 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(212,160,30,0.08);
-  }
-
-  .banner-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  .banner-text {
-    font-size: 13.5px;
-    color: var(--text-secondary);
-    font-weight: 400;
-    line-height: 1.5;
-  }
-
-  .banner-text strong {
-    color: var(--gold-light);
-    font-weight: 600;
-  }
-
-  .banner-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 7px;
-    background: var(--gold-glow);
-    border: 1px solid var(--gold-border-dim);
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-  }
-
-  .banner-arrow svg {
-    width: 12px; height: 12px;
-    stroke: var(--gold);
-    transition: transform 0.3s ease;
-  }
-
-  .top-banner:hover .banner-arrow {
-    background: var(--gold-glow-strong);
-  }
-
-  .top-banner:hover .banner-arrow svg {
-    transform: translateX(2px);
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  @keyframes cardWiggle {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(-0.5deg); }
-    50% { transform: rotate(0.5deg); }
-    75% { transform: rotate(-0.3deg); }
-    100% { transform: rotate(0deg); }
-  }
-
-  @media (max-width: 768px) {
-    .container { padding: 40px 20px 60px; }
-    .header h1 { font-size: 30px; }
-    .tools-grid { grid-template-columns: 1fr; }
-    .stats-bar { gap: 24px; flex-wrap: wrap; }
-    .modal { width: 95%; }
-    .banner-group { grid-template-columns: 1fr; }
-  }
-  /* ===== Lock Screen ===== */
-  .lock-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: var(--bg-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-  }
-
-  .lock-overlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .lock-box {
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-  }
-
-  .lock-logo {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    background: conic-gradient(from 220deg, #111116, #1e1e26, #3a3a44, #1e1e26, #111116);
-    border: 2px solid #2a2a34;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-    box-shadow: 0 0 40px var(--gold-glow);
-  }
-
-  .lock-logo-inner {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, var(--gold), var(--gold-dim));
-  }
-
-  .lock-badge {
-    display: inline-block;
-    padding: 5px 16px;
-    background: rgba(212,160,30,0.08);
-    border: 1px solid rgba(212,160,30,0.15);
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gold);
-    margin-bottom: 16px;
-    letter-spacing: 0.5px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-
-  .lock-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--gold);
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
-  }
-
-  .lock-sub {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 32px;
-  }
-
-  .lock-card {
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    box-shadow: 0 8px 48px rgba(0,0,0,0.4);
-  }
-
-  .lock-input {
-    width: 100%;
-    padding: 16px 20px;
-    font-size: 16px;
-    font-family: inherit;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text-primary);
-    outline: none;
-    text-align: center;
-    letter-spacing: 4px;
-    transition: all 0.3s;
-  }
-
-  .lock-input:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px var(--gold-glow);
-  }
-
-  .lock-btn {
-    width: 100%;
-    margin-top: 16px;
-    padding: 16px;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: inherit;
-    background: linear-gradient(135deg, var(--gold-dim), var(--gold));
-    color: #0d0d0f;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.25s;
-    box-shadow: 0 4px 20px var(--gold-glow);
-  }
-
-  .lock-btn:hover {
-    box-shadow: 0 6px 28px rgba(212,160,30,0.25);
-    transform: translateY(-1px);
-  }
-
-  .lock-btn:disabled {
-    background: var(--text-dim);
-    color: #333;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-  }
-
-  .lock-error {
-    font-size: 12px;
-    color: #e07050;
-    margin-top: 10px;
-    display: none;
-  }
-
-  .lock-remember {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 14px;
-    font-size: 12px;
-    color: var(--text-dim);
-    cursor: pointer;
-  }
-
-  .lock-remember input {
-    accent-color: var(--gold);
-  }
-
-  .lock-footer {
-    margin-top: 20px;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
+:root {
+  --bg: #0a0a0c;
+  --bg-card: #131316;
+  --bg-card2: #1a1a1f;
+  --bg-input: #222228;
+  --gold: #E5B820;
+  --gold-light: #F0C830;
+  --gold-dim: rgba(229,184,32,0.12);
+  --gold-glow: rgba(229,184,32,0.30);
+  --gold-deep: #C49A10;
+  --hermes: #F37021;
+  --hermes-light: #F68A4B;
+  --hermes-dim: rgba(243,112,33,0.10);
+  --text: #F5F5F5;
+  --text2: #C0C0C8;
+  --text3: #8888A0;
+  --text4: #606070;
+  --border: #1e1e24;
+  --border2: #2a2a32;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.bg-texture {
+  position: fixed; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 700px 500px at 10% 0%, rgba(212,168,67,0.03), transparent),
+    radial-gradient(ellipse 500px 400px at 90% 100%, rgba(243,112,33,0.02), transparent);
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* Header */
+header { text-align: center; padding: 2.5rem 0 1.5rem; }
+header .logo-row {
+  display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px;
+}
+header .logo-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--bg);
+}
+header .brand {
+  font-family: 'Outfit', sans-serif; font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text);
+}
+header .brand .alpha {
+  font-size: 0.4em; font-weight: 500; letter-spacing: 4px; color: var(--gold);
+  vertical-align: super; margin-left: 6px;
+}
+header .tagline {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem; color: var(--text3); letter-spacing: 3px; text-transform: uppercase; font-weight: 400;
+}
+header .line {
+  width: 50px; height: 2px; margin: 1rem auto 0;
+  background: var(--gold); border-radius: 2px;
+}
+
+/* Product guide cards */
+.product-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2.5rem 0;
+}
+@media (max-width: 680px) { .product-cards { grid-template-columns: 1fr; } }
+
+.p-card {
+  border-radius: 14px; overflow: hidden; background: var(--bg-card);
+}
+.p-card.card-a { border: 1px solid rgba(212,168,67,0.25); }
+.p-card.card-b { border: 1px solid rgba(243,112,33,0.25); }
+
+.p-header {
+  padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+}
+.card-a .p-header { background: linear-gradient(135deg, rgba(212,168,67,0.12), rgba(212,168,67,0.03)); }
+.card-b .p-header { background: linear-gradient(135deg, rgba(243,112,33,0.12), rgba(243,112,33,0.03)); }
+
+.p-badge {
+  font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.card-a .p-badge { color: var(--gold); }
+.card-b .p-badge { color: var(--hermes); }
+
+.p-gen {
+  font-size: 0.65rem; font-weight: 600; padding: 3px 12px; border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.card-a .p-gen { background: var(--gold-dim); color: var(--gold-light); }
+.card-b .p-gen { background: var(--hermes-dim); color: var(--hermes-light); }
+
+.p-body {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+}
+.p-cell { background: var(--bg-card); padding: 1rem 1.2rem; }
+.p-lbl {
+  font-size: 0.62rem; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 1.5px; font-weight: 500;
+}
+.p-val { font-family: 'Outfit', sans-serif; font-weight: 700; margin-top: 6px; color: var(--text); }
+.p-val.big { font-size: 1.8rem; }
+.p-val.sm { font-size: 0.9rem; color: var(--text2); }
+.p-val.sm2 { font-size: 0.82rem; margin-top: 3px; }
+.card-a .p-val.colored { color: var(--gold); }
+.card-b .p-val.colored { color: var(--hermes); }
+
+/* Info strip */
+.info-strip {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2.5rem;
+}
+.is-cell { background: var(--bg-card); padding: 0.9rem 1.2rem; }
+.is-lbl { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+.is-val { font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600; margin-top: 4px; color: var(--text); }
+
+/* Example box */
+.example-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem; margin-bottom: 2.5rem;
+}
+.section-title {
+  font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 1rem; font-weight: 500;
+}
+.ex-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); font-size: 0.9rem; flex-wrap: wrap;
+}
+.ex-row:last-of-type { border-bottom: none; }
+.ex-arrow { color: var(--text4); font-size: 1.1rem; }
+.ex-tag {
+  display: inline-block; font-size: 0.65rem; padding: 3px 10px; border-radius: 20px;
+  font-weight: 700; letter-spacing: 0.5px;
+}
+.ex-tag.t-gold { background: var(--gold-dim); color: var(--gold); }
+.ex-tag.t-orange { background: var(--hermes-dim); color: var(--hermes); }
+.ex-m { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--text); }
+.ex-m.hi { color: var(--gold); }
+.ex-note {
+  margin-top: 14px; font-size: 0.82rem; color: var(--text2); line-height: 1.7;
+}
+
+/* Config */
+.config-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;
+}
+@media (max-width: 780px) { .config-grid { grid-template-columns: 1fr; } }
+
+.cfg-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;
+  transition: border-color 0.3s;
+}
+.cfg-card:hover { border-color: var(--border2); }
+
+/* Buttons */
+.tier-btns { display: flex; gap: 10px; }
+.tier-btn {
+  flex: 1; padding: 0.85rem 0.5rem; border: 1.5px solid var(--border); border-radius: 10px;
+  background: transparent; color: var(--text3); cursor: pointer; transition: all 0.3s; text-align: center;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.tier-btn:hover { border-color: var(--border2); background: var(--bg-card2); }
+.tier-btn .price { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; display: block; }
+.tier-btn .sub { font-size: 0.7rem; margin-top: 4px; opacity: 0.7; }
+.tier-btn.s1 { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+.tier-btn.s2 { border-color: var(--hermes); background: var(--hermes-dim); color: var(--hermes); }
+
+/* Slider */
+.slider-wrap label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.9rem; color: var(--text2); margin-bottom: 12px;
+}
+.slider-wrap label span {
+  font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--gold);
+}
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 5px;
+  background: var(--border2); border-radius: 3px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--gold); cursor: pointer; box-shadow: 0 0 10px var(--gold-glow);
+}
+.ticks {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; color: var(--text4); margin-top: 8px;
+}
+
+/* Summary */
+.summary {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 1px; background: var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2.5rem;
+}
+@media (max-width: 680px) { .summary { grid-template-columns: repeat(2, 1fr); } }
+.sc { background: var(--bg-card); padding: 1.2rem 1rem; text-align: center; }
+.sc .sl { font-size: 0.62rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; font-weight: 500; }
+.sc .sv { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; }
+.sv.c-gold { color: var(--gold); }
+.sv.c-orange { color: var(--hermes); }
+.sv.c-white { color: var(--text); }
+
+/* Detail */
+.detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;
+}
+@media (max-width: 780px) { .detail-grid { grid-template-columns: 1fr; } }
+.dc {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;
+}
+
+/* Table */
+table { width: 100%; border-collapse: collapse; }
+table th {
+  font-size: 0.62rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+  text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); font-weight: 500;
+}
+table td { font-size: 0.85rem; padding: 9px 6px; border-bottom: 1px solid var(--border); color: var(--text2); }
+table tr:last-child td { border-bottom: none; }
+table tr.act td { color: var(--text); }
+table tr.off td { opacity: 0.25; }
+table tr.totr td {
+  border-top: 2px solid var(--gold); color: var(--gold);
+  font-weight: 700; font-family: 'Outfit', sans-serif; padding-top: 14px;
+}
+td.mono { font-family: 'Outfit', sans-serif; font-weight: 600; }
+.tag {
+  display: inline-block; font-size: 0.58rem; padding: 2px 8px; border-radius: 20px;
+  font-weight: 700; letter-spacing: 0.5px;
+}
+.tag-on { background: var(--gold-dim); color: var(--gold); }
+.tag-off { background: rgba(55,55,63,0.4); color: var(--text4); }
+
+/* Bar chart - horizontal rows */
+.bar-chart {
+  display: flex; flex-direction: column; gap: 8px; padding: 0;
+}
+.bar-col {
+  display: flex; align-items: center; gap: 10px;
+}
+.bl {
+  font-size: 0.7rem; color: var(--text2); min-width: 50px; text-align: right; line-height: 1.2; font-weight: 600;
+}
+.br {
+  height: 24px; border-radius: 4px; min-width: 4px;
+  transition: width 0.5s cubic-bezier(0.23,1,0.32,1);
+}
+.br.on { background: linear-gradient(90deg, var(--gold-deep), var(--gold-light)); box-shadow: 0 0 14px var(--gold-dim); }
+.br.dim { background: var(--border2); }
+.bv { font-family: 'Outfit', sans-serif; font-size: 0.68rem; font-weight: 700; color: var(--gold); white-space: nowrap; }
+.bv.dim { color: var(--text4); }
+
+/* Footer */
+.footer {
+  text-align: center; font-size: 0.78rem; color: var(--text4); margin-top: 2rem;
+  padding: 1.5rem; border-top: 1px solid var(--border); line-height: 1.8;
+}
+.footer strong { color: var(--text3); }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.anim { animation: fadeUp 0.5s ease forwards; }
+
+/* Main Tabs */
+.main-tabs {
+  display: flex; gap: 0; margin: 0 0 2rem; border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.main-tab {
+  flex: 1; padding: 14px 16px; background: var(--bg-card); border: none;
+  color: var(--text3); font-family: 'Noto Sans KR', sans-serif; font-size: 0.88rem;
+  font-weight: 600; cursor: pointer; transition: all 0.3s; text-align: center;
+  border-right: 1px solid var(--border); letter-spacing: 0.5px;
+}
+.main-tab:last-child { border-right: none; }
+.main-tab:hover { background: var(--bg-card2); color: var(--text2); }
+.main-tab.active {
+  background: linear-gradient(135deg, rgba(229,184,32,0.15), rgba(229,184,32,0.05));
+  color: var(--gold); border-bottom: 2px solid var(--gold);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+
+/* Landing Page */
+.hero {
+  text-align: center; padding: 3rem 0 2.5rem; position: relative;
+}
+.hero-badge {
+  display: inline-block; padding: 6px 18px; border-radius: 30px;
+  background: var(--gold-dim); color: var(--gold); font-size: 0.65rem;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.5rem;
+}
+.hero-title {
+  font-family: 'Outfit', sans-serif; font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 800; letter-spacing: 1px; line-height: 1.15; margin-bottom: 1rem;
+  color: var(--text);
+}
+.hero-title .accent { color: var(--gold); }
+.hero-title .sub-accent { color: var(--hermes); }
+.hero-sub {
+  font-size: 1rem; color: var(--text2); line-height: 1.7; max-width: 600px;
+  margin: 0 auto 2rem; font-weight: 400;
+}
+.hero-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 2.5rem;
+}
+.hero-stat {
+  background: var(--bg-card); padding: 1.5rem 1rem; text-align: center;
+}
+.hero-stat .hs-num {
+  font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800;
+}
+.hero-stat .hs-label {
+  font-size: 0.65rem; color: var(--text3); margin-top: 4px;
+  text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;
+}
+.hero-cta {
+  display: inline-block; padding: 14px 40px; border-radius: 12px;
+  background: var(--gold); color: var(--bg); font-family: 'Outfit', sans-serif;
+  font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
+  letter-spacing: 1px; transition: all 0.3s;
+}
+.hero-cta:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+.features {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;
+}
+.feat-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem; transition: border-color 0.3s;
+}
+.feat-card:hover { border-color: var(--border2); }
+.feat-icon {
+  width: 44px; height: 44px; border-radius: 12px; display: flex;
+  align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 14px;
+}
+.feat-card h4 {
+  font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: var(--text);
+}
+.feat-card p {
+  font-size: 0.78rem; color: var(--text2); line-height: 1.6;
+}
+
+.science-section {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 2rem; margin-bottom: 2.5rem;
+}
+.science-section h3 {
+  font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700;
+  color: var(--gold); margin-bottom: 1.2rem;
+}
+.science-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+}
+.sci-item h5 {
+  font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 6px;
+}
+.sci-item p {
+  font-size: 0.75rem; color: var(--text2); line-height: 1.6;
+}
+
+.trust-bar {
+  display: flex; justify-content: center; gap: 2rem; padding: 1.5rem 0;
+  margin-bottom: 2rem; flex-wrap: wrap;
+}
+.trust-item {
+  font-size: 0.68rem; color: var(--text3); font-weight: 500;
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.trust-item strong { color: var(--text2); }
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 480px) {
+  .wrap { padding: 1rem 0.8rem 3rem; }
+
+  header { padding: 1.5rem 0 1rem; }
+  header .logo-row { gap: 10px; }
+  header .logo-icon { width: 32px; height: 32px; font-size: 0.9rem; }
+  header .tagline { font-size: 0.65rem; letter-spacing: 2px; }
+
+  .product-cards { gap: 1rem; margin: 1.5rem 0; }
+  .p-header { padding: 10px 14px; }
+  .p-badge { font-size: 0.7rem !important; }
+  .p-gen { font-size: 0.58rem; padding: 2px 10px; }
+  .p-cell { padding: 0.8rem 1rem; }
+  .p-val.big { font-size: 1.5rem; }
+  .p-val.sm { font-size: 0.82rem; }
+  .p-val.sm2 { font-size: 0.75rem; }
+
+  .info-strip { margin-bottom: 1.5rem; }
+  .is-cell { padding: 0.7rem 1rem; }
+  .is-val { font-size: 0.82rem; }
+
+  .example-box { padding: 1rem; margin-bottom: 1.5rem; }
+  .section-title { font-size: 0.65rem; letter-spacing: 1px; }
+  .ex-row { font-size: 0.82rem; gap: 6px; padding: 8px 0; }
+  .ex-arrow { font-size: 0.9rem; }
+  .ex-tag { font-size: 0.6rem; padding: 2px 8px; }
+  .ex-note { font-size: 0.75rem; }
+
+  .config-grid { gap: 1rem; margin-bottom: 1.5rem; }
+  .cfg-card { padding: 1.2rem; }
+  .tier-btn { padding: 0.75rem 0.4rem; }
+  .tier-btn .price { font-size: 1.15rem; }
+  .tier-btn .sub { font-size: 0.62rem; }
+  .slider-wrap label { font-size: 0.82rem; }
+  .slider-wrap label span { font-size: 1.15rem; }
+
+  .summary { margin-bottom: 1.5rem; }
+  .sc { padding: 1rem 0.6rem; }
+  .sc .sl { font-size: 0.55rem; letter-spacing: 1px; }
+  .sc .sv { font-size: 1.2rem; }
+
+  .detail-grid { gap: 1rem; margin-bottom: 1.5rem; }
+  .dc { padding: 1rem; }
+
+  table th { font-size: 0.55rem; padding: 6px 4px; letter-spacing: 0.5px; }
+  table td { font-size: 0.75rem; padding: 7px 4px; }
+  td.mono { font-size: 0.75rem; }
+  .tag { font-size: 0.5rem; padding: 2px 6px; }
+
+  .bar-chart { gap: 6px; }
+  .bar-col { gap: 6px; }
+  .bl { font-size: 0.6rem; min-width: 42px; }
+  .bv { font-size: 0.58rem; }
+  .br { height: 20px; }
+
+  .footer { font-size: 0.68rem; padding: 1rem; }
+
+  .hero { padding: 2rem 0 1.5rem; }
+  .hero-title { font-size: 2rem; }
+  .hero-sub { font-size: 0.88rem; }
+  .hero-stats { grid-template-columns: repeat(3, 1fr); }
+  .hero-stat { padding: 1rem 0.5rem; }
+  .hero-stat .hs-num { font-size: 1.3rem; }
+  .features { grid-template-columns: 1fr; gap: 1rem; }
+  .science-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .science-section { padding: 1.2rem; }
+  .trust-bar { gap: 1rem; }
+
+  .main-tabs { border-radius: 10px; }
+  .main-tab { font-size: 0.78rem; padding: 12px 8px; }
+}
+
+/* Tablet tweaks */
+@media (min-width: 481px) and (max-width: 780px) {
+  .wrap { padding: 1.5rem 1rem 3rem; }
+  .product-cards { gap: 1rem; }
+  .config-grid { gap: 1rem; }
+
+  .ex-row { font-size: 0.85rem; }
+
+  table th { font-size: 0.58rem; }
+  table td { font-size: 0.8rem; }
+}
+
+/* Table horizontal scroll on very small screens */
+@media (max-width: 400px) {
+  .dc { padding: 0.8rem; overflow-x: auto; }
+  table { min-width: 640px; }
+}
 </style>
 </head>
 <body>
 
-<!-- Lock Screen -->
-<div class="lock-overlay" id="lockOverlay">
-  <div class="lock-box">
-    <div class="lock-logo"><div class="lock-logo-inner"></div></div>
-    <div class="lock-badge">DODO · Workspace</div>
-    <div class="lock-title">⚡ DODO WORKSPACE</div>
-    <div class="lock-sub">비밀번호를 입력하세요</div>
-    <div class="lock-card">
-      <input type="password" class="lock-input" id="lockInput" placeholder="••••" autocomplete="off" maxlength="20">
-      <button class="lock-btn" id="lockBtn" onclick="tryUnlock()">잠금 해제</button>
-      <div class="lock-error" id="lockError">비밀번호가 올바르지 않습니다.</div>
-      <label class="lock-remember">
-        <input type="checkbox" id="lockRemember" checked> 이 브라우저에서 기억하기
-      </label>
-    </div>
-    <div class="lock-footer">
-      Powered by DODO · SHA-256 Encrypted<br>
-      <a id="lockEmail" href="#" onclick="window.location='mai'+'lto:'+'aha7'+'kim'+'@naver'+'.com';return false;" style="color:var(--gold-dim);text-decoration:none;font-size:11px;margin-top:6px;display:inline-block;transition:color 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)'">✉️ 문의하기</a>
-    </div>
-  </div>
-</div>
+<div class="bg-texture"></div>
 
-<!-- Main App (hidden until unlocked) -->
-<div id="mainApp" style="display:none">
+<div class="wrap">
 
-<div class="ambient ambient-1"></div>
-<div class="ambient ambient-2"></div>
-
-<div class="container">
-  <!-- Top Notice Banners -->
-  <div class="banner-group">
-    <a class="top-banner" href="API_Key_Guide.html" target="_blank" rel="noopener noreferrer">
-      <span class="banner-icon">🔑</span>
-      <span class="banner-text"><strong>API 키 발급 가이드</strong><br>Apify & Anthropic API 설정 안내</span>
-      <span class="banner-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </span>
-    </a>
-    <a class="top-banner" href="YouTube_API_Guide.html" target="_blank" rel="noopener noreferrer">
-      <span class="banner-icon">🎬</span>
-      <span class="banner-text"><strong>YouTube API 키 발급 가이드</strong><br>YouTube Data API v3 설정 안내</span>
-      <span class="banner-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </span>
-    </a>
-  </div>
-
-  <header class="header">
-    <div class="header-badge">
-      <span class="dot"></span>
-      DODO · Workspace
-    </div>
-    <h1>⚡ DODO WORKSPACE</h1>
-    <p>콘텐츠 제작 파이프라인을 위한 통합 워크스페이스.<br>각 도구를 클릭하면 새 탭에서 실행됩니다.</p>
-
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-number" id="toolCount">5</span>
-        <span class="stat-label">Tools</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number">v1.0</span>
-        <span class="stat-label">Version</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number" id="dateDisplay">—</span>
-        <span class="stat-label">Updated</span>
-      </div>
+  <header class="anim">
+    <div class="logo-row">
+      <div class="logo-icon">N</div>
+      <div class="brand">PREMIUM NMN<span class="alpha">ALPHA</span></div>
     </div>
   </header>
 
-  <!-- Updates Section -->
-  <div class="updates-section" id="updatesSection"></div>
+  <!-- Main Tabs -->
+  <div class="main-tabs anim" style="animation-delay:0.03s">
+    <button class="main-tab active" onclick="switchTab('landing')">제품소개</button>
+    <button class="main-tab" onclick="switchTab('sim')">수익 시뮬레이터</button>
 
-  <!-- API Key Center -->
-  <div class="apikey-section" id="apiKeySection">
-    <div class="apikey-header" onclick="toggleApiCenter()">
-      <div class="apikey-title">🔐 API 키 관리 <span>각 도구에서 사용할 API 키를 한곳에서 관리</span></div>
-      <div class="apikey-toggle" id="apiToggleIcon">▼</div>
-    </div>
-    <div class="apikey-body" id="apiKeyBody" style="display:none">
-      <div class="apikey-grid">
-        <div class="apikey-item">
-          <div class="apikey-label">
-            <span class="apikey-icon">🎬</span>
-            YouTube Data API v3
-            <span class="apikey-status" id="yt-status"></span>
-          </div>
-          <div class="apikey-input-row">
-            <input type="password" class="apikey-input" id="yt-key" placeholder="AIzaSy..." autocomplete="off">
-            <button class="apikey-vis" onclick="toggleVis('yt-key',this)">보기</button>
-          </div>
-          <div class="apikey-hint">서치 트렌드에서 사용</div>
-        </div>
-        <div class="apikey-item">
-          <div class="apikey-label">
-            <span class="apikey-icon">🧠</span>
-            Anthropic Claude API
-            <span class="apikey-status" id="cl-status"></span>
-          </div>
-          <div class="apikey-input-row">
-            <input type="password" class="apikey-input" id="cl-key" placeholder="sk-ant-api03-..." autocomplete="off">
-            <button class="apikey-vis" onclick="toggleVis('cl-key',this)">보기</button>
-          </div>
-          <div class="apikey-hint">스크립트·플레이리스트·쇼핑숏츠·채널스타트·틱톡에서 사용</div>
-        </div>
-        <div class="apikey-item">
-          <div class="apikey-label">
-            <span class="apikey-icon">🔥</span>
-            Apify API Token
-            <span class="apikey-status" id="ap-status"></span>
-          </div>
-          <div class="apikey-input-row">
-            <input type="password" class="apikey-input" id="ap-key" placeholder="apify_api_..." autocomplete="off">
-            <button class="apikey-vis" onclick="toggleVis('ap-key',this)">보기</button>
-          </div>
-          <div class="apikey-hint">틱톡 트렌드 수집기에서 사용</div>
-        </div>
-      </div>
-      <div class="apikey-actions">
-        <button class="apikey-save" onclick="saveApiKeys()">💾 저장</button>
-        <button class="apikey-clear" onclick="clearApiKeys()">초기화</button>
-      </div>
-      <div class="apikey-notice" id="apiNotice" style="display:none"></div>
-    </div>
   </div>
 
-  <!-- Edit mode bar -->
-  <div class="edit-bar">
-    <span class="edit-hint" id="editHint">드래그하여 순서를 변경하세요</span>
-    <button class="reset-btn" id="resetBtn" title="기본 순서로 초기화">순서 초기화</button>
-    <button class="edit-toggle" id="editToggle">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/>
-        <path d="M8 12h4m-2-2v4"/>
+  <!-- Tab 0: 랜딩페이지 -->
+  <div id="tab-landing" class="tab-panel active">
+
+    <div class="hero">
+      <div class="hero-badge">JAPAN FAMILY CARE · MADE IN JAPAN</div>
+      <div class="hero-title">
+        세포부터 다시<br><span class="accent">젊어지는</span> 시간<br>
+        <span style="font-size:0.5em;color:var(--text2);font-weight:400;">NMN 니코틴아미드 모노뉴클레오타이드</span>
+      </div>
+      <div class="hero-sub">
+        NAD+ 전구체 NMN으로 세포 에너지를 회복하고,<br>
+        노화의 시계를 되돌리는 프리미엄 항노화 솔루션
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hs-num" style="color:var(--gold);">99%</div>
+          <div class="hs-label">순도</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-num" style="color:var(--hermes);">10,000mg</div>
+          <div class="hs-label">1박스 함량</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-num" style="color:var(--text);">NAD+</div>
+          <div class="hs-label">부스터</div>
+        </div>
+      </div>
+      <button class="hero-cta" onclick="switchTab('sim')">수익 시뮬레이터 바로가기 →</button>
+    </div>
+
+    <!-- 나이별 NAD+ 감소 그래프 -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2.5rem;">
+      <h3 style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;">나이가 들수록 줄어드는 NAD+</h3>
+      <p style="font-size:0.78rem;color:var(--text2);margin-bottom:1.5rem;">40대부터 급격히 감소하여 60대에는 20대의 절반 이하로 떨어집니다</p>
+      <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+        <defs>
+          <linearGradient id="nadGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E5B820" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#E5B820" stop-opacity="0.02"/>
+          </linearGradient>
+          <linearGradient id="nmnGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#50C878" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#50C878" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="70" y1="40" x2="70" y2="250" stroke="#1e1e24" stroke-width="1"/>
+        <line x1="70" y1="250" x2="660" y2="250" stroke="#1e1e24" stroke-width="1"/>
+        <line x1="70" y1="82" x2="660" y2="82" stroke="#1e1e24" stroke-width="0.5" stroke-dasharray="4"/>
+        <line x1="70" y1="124" x2="660" y2="124" stroke="#1e1e24" stroke-width="0.5" stroke-dasharray="4"/>
+        <line x1="70" y1="166" x2="660" y2="166" stroke="#1e1e24" stroke-width="0.5" stroke-dasharray="4"/>
+        <line x1="70" y1="208" x2="660" y2="208" stroke="#1e1e24" stroke-width="0.5" stroke-dasharray="4"/>
+        <!-- Y axis labels -->
+        <text x="60" y="45" fill="#606070" font-size="11" text-anchor="end" font-family="Outfit,sans-serif">100%</text>
+        <text x="60" y="87" fill="#606070" font-size="11" text-anchor="end" font-family="Outfit,sans-serif">80%</text>
+        <text x="60" y="129" fill="#606070" font-size="11" text-anchor="end" font-family="Outfit,sans-serif">60%</text>
+        <text x="60" y="171" fill="#606070" font-size="11" text-anchor="end" font-family="Outfit,sans-serif">40%</text>
+        <text x="60" y="213" fill="#606070" font-size="11" text-anchor="end" font-family="Outfit,sans-serif">20%</text>
+        <!-- Y axis title -->
+        <text x="18" y="150" fill="#8888A0" font-size="10" text-anchor="middle" font-family="Noto Sans KR,sans-serif" transform="rotate(-90,18,150)">NAD+ 수치</text>
+        <!-- X axis labels -->
+        <text x="120" y="272" fill="#8888A0" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif">20대</text>
+        <text x="218" y="272" fill="#8888A0" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif">30대</text>
+        <text x="316" y="272" fill="#8888A0" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif">40대</text>
+        <text x="414" y="272" fill="#8888A0" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif">50대</text>
+        <text x="512" y="272" fill="#8888A0" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif">60대</text>
+        <text x="610" y="272" fill="#8888A0" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif">70대</text>
+        <!-- NAD+ decline area fill -->
+        <path d="M120,50 Q170,52 218,70 Q270,95 316,130 Q365,168 414,188 Q465,208 512,220 Q560,230 610,238 L610,250 L120,250 Z" fill="url(#nadGrad)"/>
+        <!-- NAD+ decline line -->
+        <path d="M120,50 Q170,52 218,70 Q270,95 316,130 Q365,168 414,188 Q465,208 512,220 Q560,230 610,238" fill="none" stroke="#E5B820" stroke-width="3" stroke-linecap="round"/>
+        <!-- NMN supplemented line (recovery) -->
+        <path d="M316,130 Q365,118 414,108 Q465,100 512,96 Q560,93 610,90" fill="none" stroke="#50C878" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="8,4"/>
+        <!-- NMN recovery area -->
+        <path d="M316,130 Q365,118 414,108 Q465,100 512,96 Q560,93 610,90 L610,238 Q560,230 512,220 Q465,208 414,188 Q365,168 316,130 Z" fill="url(#nmnGrad)"/>
+        <!-- Data points - decline -->
+        <circle cx="120" cy="50" r="6" fill="#E5B820"/>
+        <circle cx="218" cy="70" r="5" fill="#E5B820"/>
+        <circle cx="316" cy="130" r="5" fill="#E5B820"/>
+        <circle cx="414" cy="188" r="5" fill="#E5B820"/>
+        <circle cx="512" cy="220" r="5" fill="#E5B820"/>
+        <circle cx="610" cy="238" r="5" fill="#E5B820"/>
+        <!-- Data points - NMN recovery -->
+        <circle cx="316" cy="130" r="5" fill="#50C878"/>
+        <circle cx="414" cy="108" r="4" fill="#50C878"/>
+        <circle cx="512" cy="96" r="4" fill="#50C878"/>
+        <circle cx="610" cy="90" r="4" fill="#50C878"/>
+        <!-- Value labels on decline -->
+        <text x="120" y="40" fill="#E5B820" font-size="12" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="700">100%</text>
+        <text x="218" y="60" fill="#E5B820" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="600">85%</text>
+        <text x="316" y="120" fill="#E5B820" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="600">60%</text>
+        <text x="414" y="202" fill="#E5B820" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="600">35%</text>
+        <text x="512" y="236" fill="#E5B820" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="600">22%</text>
+        <text x="610" y="252" fill="#E5B820" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="600">15%</text>
+        <!-- NMN recovery label -->
+        <text x="610" y="80" fill="#50C878" font-size="11" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="700">85%</text>
+        <!-- Annotation: NMN arrow -->
+        <text x="380" y="100" fill="#50C878" font-size="11" font-family="Noto Sans KR,sans-serif" font-weight="700">NMN 보충 시</text>
+        <path d="M350,105 L340,115" stroke="#50C878" stroke-width="1.5" fill="none" marker-end="none"/>
+        <!-- Annotation: decline point -->
+        <rect x="280" y="140" width="72" height="20" rx="4" fill="rgba(243,112,33,0.15)"/>
+        <text x="316" y="154" fill="#F37021" font-size="10" text-anchor="middle" font-family="Noto Sans KR,sans-serif" font-weight="700">급격한 감소</text>
+        <!-- Legend -->
+        <rect x="180" y="292" width="12" height="3" rx="1.5" fill="#E5B820"/>
+        <text x="198" y="296" fill="#C0C0C8" font-size="10" font-family="Noto Sans KR,sans-serif">자연 NAD+ 감소</text>
+        <rect x="340" y="292" width="12" height="3" rx="1.5" fill="#50C878" stroke-dasharray="4,2"/>
+        <line x1="340" y1="293.5" x2="352" y2="293.5" stroke="#50C878" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="360" y="296" fill="#C0C0C8" font-size="10" font-family="Noto Sans KR,sans-serif">NMN 보충 시 회복</text>
       </svg>
-      배치 편집
-    </button>
-  </div>
-
-  <div class="tools-grid" id="toolsGrid"></div>
-
-  <!-- Guides Section -->
-  <div class="guides-section">
-    <div class="guides-header">
-      <div class="guides-title">📖 사용법 가이드 <span>각 도구의 상세 사용법</span></div>
     </div>
-    <div class="guides-grid">
-      <a class="guide-link" href="Guide_SearchTrend.html" target="_blank">
-        <div class="guide-link-icon">🎯</div>
-        <div class="guide-link-text"><div class="guide-link-name">서치 트렌드</div><div class="guide-link-sub">트렌드 검색 & 바이럴 분석</div></div>
-        <span class="guide-link-arrow">→</span>
-      </a>
-      <a class="guide-link" href="Guide_ScriptStudio.html" target="_blank">
-        <div class="guide-link-icon">🎬</div>
-        <div class="guide-link-text"><div class="guide-link-name">스크립트 AI 스튜디오</div><div class="guide-link-sub">5단계 스크립트 자동 생성</div></div>
-        <span class="guide-link-arrow">→</span>
-      </a>
-      <a class="guide-link" href="Guide_Playlist.html" target="_blank">
-        <div class="guide-link-icon">🎵</div>
-        <div class="guide-link-text"><div class="guide-link-name">플레이리스트 AI 스튜디오</div><div class="guide-link-sub">9단계 음악 프롬프트 생성</div></div>
-        <span class="guide-link-arrow">→</span>
-      </a>
-      <a class="guide-link" href="Guide_ShoppingShortz.html" target="_blank">
-        <div class="guide-link-icon">🛒</div>
-        <div class="guide-link-text"><div class="guide-link-name">쇼핑숏츠 스튜디오</div><div class="guide-link-sub">쇼핑 숏폼 스크립트 제작</div></div>
-        <span class="guide-link-arrow">→</span>
-      </a>
-      <a class="guide-link" href="Guide_ChannelStart.html" target="_blank">
-        <div class="guide-link-icon">🚀</div>
-        <div class="guide-link-text"><div class="guide-link-name">채널스타트 글로벌번역</div><div class="guide-link-sub">채널 세팅 & 다국어 번역</div></div>
-        <span class="guide-link-arrow">→</span>
-      </a>
-      <a class="guide-link" href="Guide_TikTokTrend.html" target="_blank">
-        <div class="guide-link-icon">🔥</div>
-        <div class="guide-link-text"><div class="guide-link-name">틱톡 트렌드 수집기</div><div class="guide-link-sub">틱톡 데이터 수집 & AI 분석</div></div>
-        <span class="guide-link-arrow">→</span>
-      </a>
-    </div>
-  </div>
 
-  <!-- Support Center -->
-  <a class="support-card" href="Support_Center.html" target="_blank">
-    <div class="support-left">
-      <span class="support-icon">📞</span>
-      <div>
-        <div class="support-title">고객센터</div>
-        <div class="support-desc">공지사항 · FAQ · 문의하기</div>
+    <!-- 핵심 특징 3가지 -->
+    <div class="features">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:var(--gold-dim);color:var(--gold);">⚡</div>
+        <h4>NAD+ 직접 전환</h4>
+        <p>NMN은 체내에서 NAD+로 가장 효율적으로 전환되는 전구체입니다. 세포 에너지 생산과 DNA 복구를 돕습니다.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:var(--hermes-dim);color:var(--hermes);">🧬</div>
+        <h4>시르투인 유전자 활성화</h4>
+        <p>장수 유전자로 불리는 시르투인(SIRT1~7)을 활성화시켜 세포 노화를 억제하고 대사 기능을 개선합니다.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(80,200,120,0.1);color:#50C878;">🛡️</div>
+        <h4>임상 안전성 확인</h4>
+        <p>일본 게이오대 연구팀이 8주간 인체 임상에서 안전성을 확인했으며, 심각한 부작용이 보고되지 않았습니다.</p>
       </div>
     </div>
-    <span class="support-arrow">→</span>
-  </a>
 
-  <footer class="footer">
-    <span class="footer-left">© 2026 ⚡ DODO WORKSPACE — Built for the content pipeline</span>
-    <div class="footer-right">
-      <a class="footer-link" href="Support_Center.html" target="_blank" style="text-decoration:none">📞 고객센터</a>
-      <button class="footer-link" onclick="location.reload()">Refresh</button>
-    </div>
-  </footer>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- Changelog Modal -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-header-left">
-        <span class="modal-icon" id="modalIcon"></span>
-        <h2 id="modalTitle"></h2>
-      </div>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-
-<script>
-// =========================================================
-//  ★ 설정 영역 — 이 배열만 수정하면 됩니다! ★
-//
-//  [파일 업그레이드 방법]
-//  1. 같은 폴더에서 해당 .html 파일을 새 버전으로 덮어씌움
-//  2. 아래 배열에서 해당 프로그램의:
-//     - version  → 새 버전으로 변경 (예: "v1.0" → "v1.1")
-//     - modified → 오늘 날짜로 변경 (예: "2026-03-20")
-//     - changelog → 맨 앞에 새 항목 추가
-//  3. 저장 → 끝!
-//
-//  ※ 카드 순서는 각 사용자가 "배치 편집" 모드에서
-//    드래그앤드롭으로 자유롭게 변경할 수 있습니다.
-//    순서는 브라우저에 자동 저장됩니다.
-// =========================================================
-const TOOLS = [
-  {
-    id: "script-studio",
-    guide: "Guide_ScriptStudio.html",
-    name: "스크립트 AI 스튜디오",
-    desc: "Claude AI 기반 유튜브 스크립트 자동 생성. 프리셋 선택으로 길이·콘셉트·스타일을 맞춤 설정. 스토리보드 내보내기 + Grok 프롬프트 생성기.",
-    file: "ScriptStudio-DODO.html",
-    icon: "🎬",
-    tags: ["스크립트", "AI"],
-    version: "v1.1",
-    modified: "2026-03-20",
-    changelog: [
-      { date: "2026-03-20", ver: "v1.1", text: "스토리보드 내보내기 + Grok 프롬프트 생성기 추가" },
-      { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
-    ]
-  },
-  {
-    id: "search-trend",
-    name: "서치 트렌드",
-    desc: "뜨는 유튜브 채널과 트렌드 키워드를 발견하는 분석 도구. 실시간 검색 데이터 기반.",
-    file: "SearchTrend-DODO.html",
-    icon: "🎯",
-    tags: ["트렌드", "분석"],
-    guide: "Guide_SearchTrend.html",
-    version: "v1.0",
-    modified: "2026-03-17",
-    changelog: [
-      { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
-    ]
-  },
-  {
-    id: "playlist-studio",
-    guide: "Guide_Playlist.html",
-    name: "플레이리스트 AI 스튜디오",
-    desc: "채널 프리셋 기반 AI 플레이리스트 음악 자동 생성. 9단계 복수 선택으로 맞춤 제작.",
-    file: "Playlist-DODO.html",
-    icon: "🎵",
-    tags: ["음악", "AI"],
-    version: "v1.0",
-    modified: "2026-03-17",
-    changelog: [
-      { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
-    ]
-  },
-  {
-    id: "shopping-shorts",
-    guide: "Guide_ShoppingShortz.html",
-    name: "쇼핑숏츠 스튜디오",
-    desc: "쇼핑 숏폼 콘텐츠 스크립트 제작 도구. 다양한 훅·감성 스타일로 숏츠 대본 생성.",
-    file: "ShoppingShortz-DODO.html",
-    icon: "🛒",
-    tags: ["쇼핑", "숏폼"],
-    version: "v1.0",
-    modified: "2026-03-17",
-    changelog: [
-      { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
-    ]
-  },
-  {
-    id: "channel-start",
-    guide: "Guide_ChannelStart.html",
-    name: "채널스타트 글로벌번역",
-    desc: "유튜브 채널 초기 세팅 체크리스트 & 글로벌 다국어 번역 지원 도구.",
-    file: "ChannelStart-DODO.html",
-    icon: "🚀",
-    tags: ["채널", "번역"],
-    version: "v1.0",
-    modified: "2026-03-17",
-    changelog: [
-      { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
-    ]
-  },
-  {
-    id: "tiktok-trend",
-    guide: "Guide_TikTokTrend.html",
-    name: "틱톡 트렌드 수집기",
-    desc: "실제 틱톡 트렌딩 영상을 국가별로 수집하고 바이럴 스코어를 AI로 분석.",
-    file: "TikTokTrend-DODO.html",
-    icon: "🔥",
-    tags: ["틱톡", "수집"],
-    version: "v1.1",
-    modified: "2026-03-20",
-    changelog: [
-      { date: "2026-03-20", ver: "v1.1", text: "검색 키워드/카테고리/세부주제 필터 추가, 영상 링크 수정" },
-      { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
-    ]
-  },
-  {
-    id: "plan-studio",
-    name: "영상 기획 스튜디오",
-    desc: "YouTube 실제 트렌드 기반 주제 선정, 스타일·캐릭터 선택, AI 대본 생성까지. Claude Code 연동으로 완성 영상 제작.",
-    file: "PlanStudio-DODO.html",
-    icon: "📋",
-    tags: ["기획", "AI"],
-    version: "v1.0",
-    modified: "2026-03-20",
-    changelog: [
-      { date: "2026-03-20", ver: "v1.0", text: "최초 배포 — YouTube/Claude API 연동, 10종 스타일, 10종 캐릭터, 하몬서클 대본 생성" }
-    ]
-  },
-  {
-    id: "video-studio",
-    guide: "Guide_CapCut.html",
-    name: "영상제작 스튜디오",
-    desc: "이미지/영상 클립 타임라인 편집, Ken Burns, 트랜지션, 자막 프리셋, 오디오 믹서. 미리보기 및 내보내기.",
-    file: "VideoStudio-DODO.html",
-    icon: "🎞️",
-    tags: ["영상", "편집"],
-    version: "v1.0",
-    modified: "2026-03-20",
-    changelog: [
-      { date: "2026-03-20", ver: "v1.0", text: "최초 배포 — 3패널+타임라인 에디터, Ken Burns, 자막 3종 프리셋, 오디오 믹서" }
-    ]
-  }
-];
-// =========================================================
-
-// =========================================================
-//  ★ 변경 로그 설정 — 파일을 수정했을 때 여기에 추가! ★
-//
-//  [사용법]
-//  1. GitHub에서 파일 수정/업로드 후
-//  2. 아래 CHANGELOG 배열 맨 앞에 새 항목 추가:
-//     { name: "프로그램 이름", ver: "v1.1",
-//       date: "2026-03-20", desc: "변경 내용" }
-//  3. 저장 → 끝! 사이트에 자동 반영됩니다.
-// =========================================================
-const CHANGELOG = [
-  { name: "📋 영상 기획 스튜디오 추가", ver: "v1.0", date: "2026-03-20", desc: "YouTube 실제 트렌드 + AI 대본 생성 + Grok 프롬프트 + Claude Code 연동" },
-  { name: "🎞️ 영상제작 스튜디오 추가", ver: "v1.0", date: "2026-03-20", desc: "타임라인 에디터 + Ken Burns + 자막 프리셋 + 오디오 믹서" },
-  { name: "🔥 틱톡 트렌드 업데이트", ver: "v1.1", date: "2026-03-20", desc: "검색 키워드/카테고리/세부주제 필터 추가, 영상 링크 수정" },
-  { name: "🎬 스크립트 스튜디오 업데이트", ver: "v1.1", date: "2026-03-20", desc: "스토리보드 내보내기 + Grok 프롬프트 생성기 추가" },
-  { name: "📖 CapCut 연동 가이드 추가", ver: "v1.0", date: "2026-03-20", desc: "DODO 스튜디오 → CapCut 워크플로우 가이드" },
-  { name: "⚡ DODO WORKSPACE v1.0", ver: "v1.0", date: "2026-03-17", desc: "워크스페이스 최초 배포 — 6개 도구 + 가이드 + 고객센터" },
-  // 새 항목은 이 위에 추가하세요:
-  // { name: "서치 트렌드 업데이트", ver: "v1.1", date: "2026-03-20", desc: "검색 필터 UI 개선" },
-];
-// =========================================================
-
-// --- Render Changelog ---
-function renderUpdates() {
-  const sec = document.getElementById('updatesSection');
-
-  let html = `
-    <div class="updates-header">
-      <div class="updates-title">
-        🕐 최근 업데이트 이력
-        <span>변경 사항을 확인하세요</span>
+    <!-- 과학적 근거 -->
+    <div class="science-section">
+      <h3>과학이 증명하는 NMN</h3>
+      <div class="science-grid">
+        <div class="sci-item">
+          <h5>하버드 의대 연구 (데이비드 싱클레어 교수)</h5>
+          <p>NMN을 투여한 실험쥐가 젊은 개체 수준의 체력과 대사 기능을 유지. 생물학적 나이 지표에서 극적인 역전을 보여줌.</p>
+        </div>
+        <div class="sci-item">
+          <h5>워싱턴 의대 연구 (이마이 신이치로 교수)</h5>
+          <p>생후 22개월(인간 60세) 쥐에 NMN 투여 → 세포가 생후 6개월(인간 20세) 수준으로 회복. 수명 16% 연장 확인.</p>
+        </div>
+        <div class="sci-item">
+          <h5>혈당 · 인슐린 개선</h5>
+          <p>NMN 보충이 혈중 인슐린 수치와 NAD+ 수치를 증가시켜 포도당 관리를 개선. 당뇨병 예방 가능성 시사.</p>
+        </div>
+        <div class="sci-item">
+          <h5>뇌 건강 · 혈관 탄성</h5>
+          <p>시르투인 활성화를 통해 알츠하이머 등 퇴행성 뇌질환에 긍정적 영향. 모세혈관 밀도 회복과 혈관 탄성 유지 효과.</p>
+        </div>
       </div>
     </div>
-  `;
 
-  if (!CHANGELOG.length) {
-    html += '<div class="cl-empty">아직 변경 이력이 없습니다.</div>';
-  } else {
-    html += '<div class="changelog-timeline">';
-    CHANGELOG.forEach((c, i) => {
-      html += `
-        <div class="cl-item">
-          <div class="cl-meta">
-            <div class="cl-ver">${c.ver}</div>
-            <div class="cl-date">${c.date}</div>
+    <!-- NMN 작용 메커니즘 -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2.5rem;">
+      <h3 style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:1.5rem;">NMN이 작용하는 원리</h3>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
+        <div style="background:var(--gold-dim);border:1px solid rgba(229,184,32,0.2);border-radius:10px;padding:12px 18px;text-align:center;">
+          <div style="font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:700;color:var(--gold);">NMN</div>
+          <div style="font-size:0.6rem;color:var(--text3);">섭취</div>
+        </div>
+        <div style="color:var(--text4);font-size:1.2rem;">→</div>
+        <div style="background:var(--hermes-dim);border:1px solid rgba(243,112,33,0.2);border-radius:10px;padding:12px 18px;text-align:center;">
+          <div style="font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:700;color:var(--hermes);">NAD+</div>
+          <div style="font-size:0.6rem;color:var(--text3);">전환</div>
+        </div>
+        <div style="color:var(--text4);font-size:1.2rem;">→</div>
+        <div style="background:rgba(80,200,120,0.08);border:1px solid rgba(80,200,120,0.2);border-radius:10px;padding:12px 18px;text-align:center;">
+          <div style="font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:700;color:#50C878;">시르투인</div>
+          <div style="font-size:0.6rem;color:var(--text3);">활성화</div>
+        </div>
+        <div style="color:var(--text4);font-size:1.2rem;">→</div>
+        <div style="background:rgba(100,149,237,0.08);border:1px solid rgba(100,149,237,0.2);border-radius:10px;padding:12px 18px;text-align:center;">
+          <div style="font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:700;color:#6495ED;">세포 회복</div>
+          <div style="font-size:0.6rem;color:var(--text3);">항노화</div>
+        </div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text2);line-height:1.7;text-align:center;">
+        나이가 들면 NAD+ 수치가 자연적으로 감소합니다.<br>
+        NMN 보충으로 NAD+ 수치를 회복시키면, 세포 에너지 생산 · DNA 복구 · 미토콘드리아 기능이 개선됩니다.
+      </div>
+    </div>
+
+    <!-- 자연 식품 속 NMN -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:2.5rem;">
+      <h3 style="font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:1rem;">자연 식품 속 NMN 함유량</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div style="text-align:center;padding:10px;background:var(--bg-card2);border-radius:10px;">
+          <div style="font-size:1.2rem;margin-bottom:4px;">🥦</div>
+          <div style="font-size:0.72rem;font-weight:600;color:var(--text);">브로콜리</div>
+          <div style="font-size:0.6rem;color:var(--text3);">0.25~1.12mg</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg-card2);border-radius:10px;">
+          <div style="font-size:1.2rem;margin-bottom:4px;">🥑</div>
+          <div style="font-size:0.72rem;font-weight:600;color:var(--text);">아보카도</div>
+          <div style="font-size:0.6rem;color:var(--text3);">0.36~1.60mg</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg-card2);border-radius:10px;">
+          <div style="font-size:1.2rem;margin-bottom:4px;">🥬</div>
+          <div style="font-size:0.72rem;font-weight:600;color:var(--text);">양배추</div>
+          <div style="font-size:0.6rem;color:var(--text3);">0.0~0.9mg</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg-card2);border-radius:10px;">
+          <div style="font-size:1.2rem;margin-bottom:4px;">🍅</div>
+          <div style="font-size:0.72rem;font-weight:600;color:var(--text);">토마토</div>
+          <div style="font-size:0.6rem;color:var(--text3);">0.26~0.30mg</div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:0.7rem;color:var(--text3);margin-top:12px;line-height:1.6;">
+        ※ 100g당 함유량 (mg) — 식품만으로는 유의미한 효과 기대 어려움<br>
+        <strong style="color:var(--gold);">프리미엄 NMN 1캡슐 = 브로콜리 약 40kg</strong>에 해당하는 NMN 함유
+      </div>
+    </div>
+
+    <!-- 제품 라인업 -->
+    <div style="margin-bottom:2.5rem;">
+      <h3 style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:1.2rem;text-align:center;">제품 라인업</h3>
+      <div class="product-cards" style="margin:0;">
+        <div class="p-card card-a">
+          <div class="p-header">
+            <span class="p-badge">1 BOX</span>
+            <span class="p-gen">후원 롤업 1대</span>
           </div>
-          <div class="cl-body">
-            <div class="cl-name">${c.name}</div>
-            <div class="cl-desc">${c.desc}</div>
-          </div>
-        </div>
-      `;
-    });
-    html += '</div>';
-  }
-
-  sec.innerHTML = html;
-}
-
-const STORAGE_KEY = 'dodo-tools-order';
-
-// --- Order management ---
-function getSavedOrder() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch(e) {}
-  return null;
-}
-
-function saveOrder(orderIds) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orderIds));
-  } catch(e) {}
-}
-
-function getOrderedTools() {
-  const savedOrder = getSavedOrder();
-  if (!savedOrder) return [...TOOLS];
-
-  const toolMap = {};
-  TOOLS.forEach(t => toolMap[t.id] = t);
-
-  const ordered = [];
-  savedOrder.forEach(id => {
-    if (toolMap[id]) {
-      ordered.push(toolMap[id]);
-      delete toolMap[id];
-    }
-  });
-  // Append any new tools not in saved order
-  Object.values(toolMap).forEach(t => ordered.push(t));
-  return ordered;
-}
-
-// --- Toast ---
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
-}
-
-// --- Render ---
-const now = new Date();
-document.getElementById('dateDisplay').textContent =
-  `${now.getMonth()+1}.${String(now.getDate()).padStart(2,'0')}`;
-document.getElementById('toolCount').textContent = TOOLS.length;
-
-const grid = document.getElementById('toolsGrid');
-let isEditMode = false;
-let dragSrcEl = null;
-
-function renderCards() {
-  grid.innerHTML = '';
-  const tools = getOrderedTools();
-
-  tools.forEach((tool, i) => {
-    const card = document.createElement('div');
-    card.className = 'tool-card';
-    card.setAttribute('data-id', tool.id);
-
-    const tagsHTML = tool.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
-    const md = tool.modified ? tool.modified.replace(/^\d{4}-/, '').replace('-', '/') : '';
-    const idx = TOOLS.findIndex(t => t.id === tool.id);
-
-    const guideBtn = tool.guide ? `
-          <button class="card-btn card-btn-guide" title="사용법 가이드" data-guide="${tool.guide}">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-            </svg>
-          </button>` : '';
-
-    card.innerHTML = `
-      <div class="drag-handle"><span></span><span></span><span></span></div>
-      <div class="card-top">
-        <div class="card-icon">${tool.icon}</div>
-        <div class="card-actions">
-          <button class="card-btn card-btn-log" title="변경이력 보기" data-idx="${idx}">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </button>${guideBtn}
-          <button class="card-btn card-btn-open" title="새 탭에서 열기" data-file="${tool.file}">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="card-body">
-        <h3>${tool.name}</h3>
-        <p>${tool.desc}</p>
-        <div class="card-meta">
-          <span class="version-badge">${tool.version}</span>
-          <span class="modified-date">수정 ${md}</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        ${tagsHTML}
-        <span class="card-file">${tool.file}</span>
-      </div>
-    `;
-
-    // Card click → open
-    card.addEventListener('click', (e) => {
-      if (isEditMode) return;
-      if (e.target.closest('.card-btn')) return;
-      window.open(tool.file, '_blank', 'noopener,noreferrer');
-    });
-
-    // Drag events
-    card.addEventListener('dragstart', handleDragStart);
-    card.addEventListener('dragend', handleDragEnd);
-    card.addEventListener('dragover', handleDragOver);
-    card.addEventListener('dragenter', handleDragEnter);
-    card.addEventListener('dragleave', handleDragLeave);
-    card.addEventListener('drop', handleDrop);
-
-    grid.appendChild(card);
-  });
-
-  // Button listeners
-  document.querySelectorAll('.card-btn-open').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isEditMode) return;
-      window.open(btn.dataset.file, '_blank', 'noopener,noreferrer');
-    });
-  });
-
-  document.querySelectorAll('.card-btn-log').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isEditMode) return;
-      openModal(parseInt(btn.dataset.idx));
-    });
-  });
-
-  document.querySelectorAll('.card-btn-guide').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isEditMode) return;
-      window.open(btn.dataset.guide, '_blank', 'noopener,noreferrer');
-    });
-  });
-
-  updateDraggable();
-}
-
-function updateDraggable() {
-  document.querySelectorAll('.tool-card').forEach(card => {
-    card.draggable = isEditMode;
-  });
-}
-
-// --- Drag & Drop ---
-function handleDragStart(e) {
-  if (!isEditMode) return;
-  dragSrcEl = this;
-  this.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', this.dataset.id);
-}
-
-function handleDragEnd(e) {
-  this.classList.remove('dragging');
-  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('drag-over'));
-}
-
-function handleDragOver(e) {
-  if (!isEditMode) return;
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-}
-
-function handleDragEnter(e) {
-  if (!isEditMode) return;
-  this.classList.add('drag-over');
-}
-
-function handleDragLeave(e) {
-  this.classList.remove('drag-over');
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  this.classList.remove('drag-over');
-
-  if (!isEditMode || !dragSrcEl || dragSrcEl === this) return;
-
-  const srcId = dragSrcEl.dataset.id;
-  const destId = this.dataset.id;
-
-  // Get current order
-  const cards = [...grid.querySelectorAll('.tool-card')];
-  const ids = cards.map(c => c.dataset.id);
-
-  const srcIdx = ids.indexOf(srcId);
-  const destIdx = ids.indexOf(destId);
-
-  // Swap
-  ids.splice(srcIdx, 1);
-  ids.splice(destIdx, 0, srcId);
-
-  saveOrder(ids);
-  renderCards();
-  showToast('✓ 순서가 저장되었습니다');
-}
-
-// --- Touch Drag (mobile) ---
-let touchDragEl = null;
-let touchClone = null;
-let touchStartY = 0;
-let touchStartX = 0;
-
-grid.addEventListener('touchstart', (e) => {
-  if (!isEditMode) return;
-  const card = e.target.closest('.tool-card');
-  if (!card || e.target.closest('.card-btn')) return;
-
-  touchDragEl = card;
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-
-  setTimeout(() => {
-    if (touchDragEl) {
-      touchDragEl.classList.add('dragging');
-    }
-  }, 150);
-}, { passive: true });
-
-grid.addEventListener('touchmove', (e) => {
-  if (!isEditMode || !touchDragEl) return;
-
-  const touch = e.touches[0];
-  const el = document.elementFromPoint(touch.clientX, touch.clientY);
-  const card = el ? el.closest('.tool-card') : null;
-
-  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('drag-over'));
-  if (card && card !== touchDragEl) {
-    card.classList.add('drag-over');
-  }
-}, { passive: true });
-
-grid.addEventListener('touchend', (e) => {
-  if (!isEditMode || !touchDragEl) return;
-
-  const overCard = document.querySelector('.tool-card.drag-over');
-
-  if (overCard && overCard !== touchDragEl) {
-    const cards = [...grid.querySelectorAll('.tool-card')];
-    const ids = cards.map(c => c.dataset.id);
-
-    const srcIdx = ids.indexOf(touchDragEl.dataset.id);
-    const destIdx = ids.indexOf(overCard.dataset.id);
-
-    const srcId = ids[srcIdx];
-    ids.splice(srcIdx, 1);
-    ids.splice(destIdx, 0, srcId);
-
-    saveOrder(ids);
-    renderCards();
-    showToast('✓ 순서가 저장되었습니다');
-  }
-
-  document.querySelectorAll('.tool-card').forEach(c => {
-    c.classList.remove('dragging');
-    c.classList.remove('drag-over');
-  });
-
-  touchDragEl = null;
-}, { passive: true });
-
-// --- Edit Toggle ---
-const editToggle = document.getElementById('editToggle');
-const editHint = document.getElementById('editHint');
-const resetBtn = document.getElementById('resetBtn');
-
-editToggle.addEventListener('click', () => {
-  isEditMode = !isEditMode;
-  document.body.classList.toggle('edit-mode', isEditMode);
-  editToggle.classList.toggle('active', isEditMode);
-  editHint.classList.toggle('visible', isEditMode);
-  resetBtn.classList.toggle('visible', isEditMode);
-  editToggle.innerHTML = isEditMode
-    ? `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> 편집 완료`
-    : `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><path d="M8 12h4m-2-2v4"/></svg> 배치 편집`;
-  updateDraggable();
-
-  if (!isEditMode) showToast('편집 모드 종료');
-});
-
-resetBtn.addEventListener('click', () => {
-  localStorage.removeItem(STORAGE_KEY);
-  renderCards();
-  showToast('기본 순서로 초기화되었습니다');
-});
-
-// --- Changelog Modal ---
-const overlay = document.getElementById('modalOverlay');
-
-function openModal(idx) {
-  const tool = TOOLS[idx];
-  document.getElementById('modalIcon').textContent = tool.icon;
-  document.getElementById('modalTitle').innerHTML =
-    `${tool.name} <span>${tool.version}</span>`;
-
-  const body = document.getElementById('modalBody');
-
-  if (!tool.changelog || tool.changelog.length === 0) {
-    body.innerHTML = '<div class="changelog-empty">변경 이력이 없습니다.</div>';
-  } else {
-    body.innerHTML = `
-      <div class="changelog-list">
-        ${tool.changelog.map(log => `
-          <div class="changelog-item">
-            <div class="changelog-date">
-              ${log.date}
-              <span class="changelog-ver">${log.ver}</span>
+          <div class="p-body">
+            <div class="p-cell">
+              <div class="p-lbl">가격</div>
+              <div class="p-val big colored">$300</div>
             </div>
-            <div class="changelog-text">${log.text}</div>
+            <div class="p-cell">
+              <div class="p-lbl">배송</div>
+              <div class="p-val sm">일본→EMS 3일</div>
+              <div class="p-val sm2" style="color:var(--text3);">배송비 $20</div>
+            </div>
           </div>
-        `).join('')}
+        </div>
+        <div class="p-card card-b">
+          <div class="p-header">
+            <span class="p-badge">10 BOX</span>
+            <span class="p-gen">후원 롤업 1~5대</span>
+          </div>
+          <div class="p-body">
+            <div class="p-cell">
+              <div class="p-lbl">가격</div>
+              <div class="p-val big colored">$3,000</div>
+            </div>
+            <div class="p-cell">
+              <div class="p-lbl">배송</div>
+              <div class="p-val sm">일본→EMS 3일</div>
+              <div class="p-val sm2 colored">배송비 무료</div>
+            </div>
+          </div>
+        </div>
       </div>
-    `;
-  }
+    </div>
 
-  overlay.classList.add('active');
-}
+    <!-- Trust -->
+    <div class="trust-bar">
+      <div class="trust-item"><strong>99%</strong> Pure NMN</div>
+      <div class="trust-item"><strong>Made in</strong> Japan</div>
+      <div class="trust-item"><strong>USDT</strong> 익일지급</div>
+      <div class="trust-item"><strong>GMP</strong> 인증 시설</div>
+    </div>
 
-function closeModal() { overlay.classList.remove('active'); }
-overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    <div style="text-align:center;margin-bottom:2rem;">
+      <button class="hero-cta" onclick="switchTab('sim')">수익 시뮬레이터 확인하기 →</button>
+    </div>
 
-// --- API Key Center ---
-const API_KEYS_STORAGE = 'dodo-ws-api-keys';
+  </div> <!-- end tab-landing -->
 
-function toggleApiCenter() {
-  const body = document.getElementById('apiKeyBody');
-  const icon = document.getElementById('apiToggleIcon');
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  icon.classList.toggle('open', !isOpen);
-}
+  <!-- Tab 1: 시뮬레이터 -->
+  <div id="tab-sim" class="tab-panel">
 
-function toggleVis(inputId, btn) {
-  const inp = document.getElementById(inputId);
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    btn.textContent = '숨기기';
-    setTimeout(() => { inp.type = 'password'; btn.textContent = '보기'; }, 3000);
-  } else {
-    inp.type = 'password';
-    btn.textContent = '보기';
-  }
-}
+  <!-- 두 가지 매출 가이드 -->
+  <div class="product-cards anim" style="animation-delay:0.05s">
+    <div class="p-card card-a">
+      <div class="p-header">
+        <span class="p-badge">1 BOX</span>
+        <span class="p-gen">롤업 1대까지</span>
+      </div>
+      <div class="p-body">
+        <div class="p-cell">
+          <div class="p-lbl">가격</div>
+          <div class="p-val big colored">$300</div>
+        </div>
+        <div class="p-cell">
+          <div class="p-lbl">배송</div>
+          <div class="p-val sm">일본→EMS 3일</div>
+          <div class="p-val sm2" style="color:var(--text3);">배송비 $20</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-card card-b">
+      <div class="p-header">
+        <span class="p-badge">10 BOX</span>
+        <span class="p-gen">롤업 1~5대까지</span>
+      </div>
+      <div class="p-body">
+        <div class="p-cell">
+          <div class="p-lbl">가격</div>
+          <div class="p-val big colored">$3,000</div>
+        </div>
+        <div class="p-cell">
+          <div class="p-lbl">배송</div>
+          <div class="p-val sm">일본→EMS 3일</div>
+          <div class="p-val sm2 colored">배송비 무료</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-function loadApiKeys() {
-  try {
-    const data = JSON.parse(localStorage.getItem(API_KEYS_STORAGE) || '{}');
-    if (data.youtube) document.getElementById('yt-key').value = data.youtube;
-    if (data.claude) document.getElementById('cl-key').value = data.claude;
-    if (data.apify) document.getElementById('ap-key').value = data.apify;
-  } catch(e) {}
-  updateApiStatuses();
-}
+  <div class="info-strip anim" style="animation-delay:0.08s">
+    <div class="is-cell"><span class="is-lbl">제품</span><div class="is-val">NMN 항노화 (JAPAN FAMILY CARE)</div></div>
+    <div class="is-cell"><span class="is-lbl">정산</span><div class="is-val" style="color:var(--gold);">USDT 익일지급</div></div>
+  </div>
 
-function updateApiStatuses() {
-  const yt = document.getElementById('yt-key').value;
-  const cl = document.getElementById('cl-key').value;
-  const ap = document.getElementById('ap-key').value;
+  <!-- 마케팅 수익 분배표 -->
+  <div class="example-box anim" style="animation-delay:0.1s">
+    <div class="section-title">마케팅 수익 분배표</div>
+    <div style="overflow-x:auto;">
+      <table style="min-width:680px;">
+        <thead><tr>
+          <th>본인매출</th><th>직접추천</th><th>롤업조건</th><th>팀누적매출달성시</th><th>팀누적매출</th><th>추천인원</th><th>직급</th><th>후원대수</th><th>롤업보너스</th><th>공유수당1%</th><th>시상</th>
+        </tr></thead>
+        <tbody>
+          <tr class="act">
+            <td class="mono" style="font-weight:700;">$300</td>
+            <td class="mono" rowspan="2" style="color:var(--gold);font-weight:700;vertical-align:middle;">30%</td>
+            <td class="mono">1대까지</td>
+            <td></td>
+            <td class="mono">$300</td><td>1명이상</td>
+            <td class="mono" style="font-weight:700;">L1</td><td class="mono">1대</td>
+            <td class="mono">5%</td>
+            <td>-</td><td>-</td>
+          </tr>
+          <tr class="act">
+            <td class="mono" style="font-weight:700;">$3,000</td>
+            <td class="mono">5대까지</td>
+            <td></td>
+            <td class="mono">$3,000</td><td>1명이상</td>
+            <td class="mono" style="font-weight:700;">L2</td><td class="mono">2대</td>
+            <td class="mono">5%</td>
+            <td>-</td><td>-</td>
+          </tr>
+          <tr class="act">
+            <td></td><td></td><td></td><td></td>
+            <td class="mono">$30,000</td><td>1명이상</td>
+            <td class="mono" style="font-weight:700;">L3</td><td class="mono">3대</td>
+            <td class="mono">5%</td>
+            <td class="mono" style="color:var(--gold);">20%, n/1</td>
+            <td style="color:var(--text4);">-</td>
+          </tr>
+          <tr class="act">
+            <td></td><td></td><td></td><td></td>
+            <td class="mono">$100,000</td><td>1명이상</td>
+            <td class="mono" style="font-weight:700;">L4</td><td class="mono">4대</td>
+            <td class="mono">5%</td>
+            <td class="mono" style="color:var(--gold);">20%, n/1</td>
+            <td style="color:var(--text4);">-</td>
+          </tr>
+          <tr class="act">
+            <td></td><td></td><td></td>
+            <td></td>
+            <td class="mono">$300,000</td><td>1명이상</td>
+            <td class="mono" style="font-weight:700;">L5</td><td class="mono">5대</td>
+            <td class="mono">5%</td>
+            <td class="mono" style="color:var(--gold);">20%, n/1</td>
+            <td style="color:var(--text4);">-</td>
+          </tr>
+          <tr class="act">
+            <td></td><td></td><td></td>
+            <td style="font-size:0.7rem;color:var(--text3);">롤업보너스</td>
+            <td class="mono">$500,000</td><td>2명이상</td>
+            <td class="mono" style="font-weight:700;">L6</td><td class="mono">6대</td>
+            <td class="mono">3%</td>
+            <td class="mono" style="color:var(--gold);">20%, n/1</td>
+            <td style="color:var(--text4);">-</td>
+          </tr>
+          <tr class="act">
+            <td></td><td></td><td></td>
+            <td style="font-size:0.7rem;color:var(--text3);">롤업보너스</td>
+            <td class="mono">$700,000</td><td>3명이상</td>
+            <td class="mono" style="font-weight:700;">L7</td><td class="mono">7대</td>
+            <td class="mono">3%</td>
+            <td class="mono" style="color:var(--gold);">20%, n/1</td>
+            <td style="color:var(--text4);">-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ex-note">
+      ※ 직접추천 30% = 하부 매출금액 × 30% (누구에게나 고정)<br>
+      ※ 후원수당: 2대~7대 (5%/5%/5%/5%/3%/3%) 직급별 적용 대수 확대<br>
+      ※ 롤업보너스 조건: $300가입=1대까지, $3,000가입=5대까지<br>
+      ※ 공유수당 1%: L3~L7 자격자에게 100분율 계산, 각 20% 배분 (n/1)<br>
+      ※ 최다추천시상: 총 매출의 1%를 100분율 배분 50:30:20 (1등:2등:3등)<br>
+      ※ 최대매출시상: 총 매출의 1%를 100분율 배분 50:30:20 (1등:2등:3등)
+    </div>
+  </div>
 
-  setApiStatus('yt-status', yt);
-  setApiStatus('cl-status', cl);
-  setApiStatus('ap-status', ap);
-}
+  <!-- 설정 -->
+  <div class="config-grid anim" style="animation-delay:0.15s">
+    <div class="cfg-card">
+      <div class="section-title">본인 매출 (롤업 범위 결정)</div>
+      <div class="tier-btns">
+        <button class="tier-btn s1" id="my300" onclick="setMe(300)">
+          <span class="price">$300</span>
+          <span class="sub">후원 롤업 1대까지</span>
+        </button>
+        <button class="tier-btn" id="my3000" onclick="setMe(3000)">
+          <span class="price">$3,000</span>
+          <span class="sub">후원 롤업 1~5대까지</span>
+        </button>
+      </div>
+    </div>
+    <div class="cfg-card">
+      <div class="section-title">하부 1인당 매출금액</div>
+      <div class="tier-btns">
+        <button class="tier-btn s1" id="sb300" onclick="setSub(300)">
+          <span class="price">$300</span>
+          <span class="sub">1 BOX</span>
+        </button>
+        <button class="tier-btn" id="sb3000" onclick="setSub(3000)">
+          <span class="price">$3,000</span>
+          <span class="sub">10 BOX</span>
+        </button>
+      </div>
+    </div>
+    <div class="cfg-card">
+      <div class="section-title">단계별 모집 인원</div>
+      <div class="slider-wrap">
+        <label>1인당 모집 <span id="rd">3명</span></label>
+        <input type="range" min="1" max="5" value="3" step="1" id="rec" oninput="calc()">
+        <div class="ticks"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+      </div>
+    </div>
+  </div>
 
-function setApiStatus(id, value) {
-  const el = document.getElementById(id);
-  if (value && value.length > 5) {
-    el.textContent = '✓ 저장됨';
-    el.className = 'apikey-status saved';
-  } else {
-    el.textContent = '미입력';
-    el.className = 'apikey-status empty';
-  }
-}
+  <!-- 요약 -->
+  <div class="summary anim" style="animation-delay:0.2s">
+    <div class="sc"><div class="sl">롤업 범위</div><div class="sv c-gold" id="s1">L1</div></div>
+    <div class="sc"><div class="sl">하부 1인 매출</div><div class="sv c-orange" id="s2">$300</div></div>
+    <div class="sc"><div class="sl">총 하위 인원</div><div class="sv c-white" id="s3">3명</div></div>
+    <div class="sc"><div class="sl">총 매출</div><div class="sv c-white" id="s5">$900</div></div>
+    <div class="sc"><div class="sl">월 예상 총 수익</div><div class="sv c-gold" id="s4">$270</div></div>
+  </div>
 
-function saveApiKeys() {
-  const data = {
-    youtube: document.getElementById('yt-key').value.trim(),
-    claude: document.getElementById('cl-key').value.trim(),
-    apify: document.getElementById('ap-key').value.trim()
-  };
+  <!-- 1. 추천 계산기 -->
+  <div class="dc anim" style="margin-bottom:1.5rem;">
+    <div class="section-title" style="color:var(--gold);">① 추천 계산기 (직접추천 30%)</div>
+    <div id="calc-referral"></div>
+  </div>
 
-  try {
-    localStorage.setItem(API_KEYS_STORAGE, JSON.stringify(data));
-  } catch(e) {}
+  <!-- 2. 후원 계산기 -->
+  <div class="dc anim" style="margin-bottom:1.5rem;overflow-x:auto;">
+    <div class="section-title" style="color:var(--hermes);">② 후원 계산기 (2대~7대 롤업보너스)</div>
+    <table id="calc-sponsor"></table>
+    <div style="font-size:0.7rem;color:var(--text2);margin-top:10px;padding:10px 12px;background:var(--bg-card2);border-radius:8px;line-height:1.6;" id="spon-note"></div>
+    <div class="bar-chart" id="bars" style="margin-top:1rem;"></div>
+  </div>
 
-  updateApiStatuses();
-  showApiNotice('ok', '✓ API 키가 저장되었습니다. 각 도구에서 자동으로 사용됩니다.');
-}
+  <!-- 3. 공유 계산기 -->
+  <div class="dc anim" style="margin-bottom:1.5rem;">
+    <div class="section-title" style="color:#50C878;">③ 공유 계산기 (1% · L3~L7 · 20% n/1)</div>
+    <div id="calc-share"></div>
+  </div>
 
-function clearApiKeys() {
-  if (!confirm('저장된 모든 API 키를 삭제할까요?')) return;
-  try { localStorage.removeItem(API_KEYS_STORAGE); } catch(e) {}
-  document.getElementById('yt-key').value = '';
-  document.getElementById('cl-key').value = '';
-  document.getElementById('ap-key').value = '';
-  updateApiStatuses();
-  showApiNotice('err', 'API 키가 모두 삭제되었습니다.');
-}
+  <!-- 4. 시상 -->
+  <div class="dc anim" style="margin-bottom:1.5rem;">
+    <div class="section-title" style="color:var(--hermes);">④ 시상 (매출의 각 1%)</div>
+    <div id="calc-awards"></div>
+  </div>
 
-function showApiNotice(type, msg) {
-  const el = document.getElementById('apiNotice');
-  el.className = 'apikey-notice ' + type;
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 3000);
-}
+  <!-- 종합 수익 -->
+  <div class="dc anim" style="margin-bottom:2.5rem;">
+    <div class="section-title" style="color:var(--gold);">종합 수익 요약</div>
+    <div id="calc-total"></div>
+  </div>
 
-// Load saved keys on init
-setTimeout(loadApiKeys, 100);
+  </div> <!-- end tab-sim -->
 
-// --- Init ---
-renderCards();
-renderUpdates();
-</script>
 
-</div> <!-- end mainApp -->
+
+  <div class="footer anim" style="animation-delay:0.3s">
+    <strong>PREMIUM NMN ALPHA · 수익 구조 요약</strong><br>
+    직접추천 30%(고정) + 후원 롤업 1~7대(5/5/5/5/5/3/3%) · $300→1대 / $3,000→5대 / 6~7대 조건부<br>
+    롤업보너스 3~5% · 공유수당 1%(L3~L7 20% n/1) · 시상 각 1% 100분율 배분(50:30:20)<br>
+    매출은 USDT(테더)로 익일 지급 · JAPAN FAMILY CARE · MADE IN JAPAN
+  </div>
+
+</div>
 
 <script>
-// =========================================================
-//  ★ 대시보드 비밀번호 설정 ★
-//  아래 해시값을 변경하여 비밀번호를 설정하세요.
-//  기본 비밀번호: "dodo" (변경 권장!)
-//
-//  새 비밀번호 해시 생성법:
-//  브라우저 콘솔에서 아래 실행:
-//  crypto.subtle.digest('SHA-256', new TextEncoder().encode('새비밀번호'))
-//    .then(h => console.log(Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')))
-// =========================================================
-// =========================================================
-//  ★ 대시보드 비밀번호 설정 (SHA-256 해시 보안) ★
-//
-//  비밀번호 변경 방법:
-//  1. 브라우저 콘솔(F12)에서 아래 실행:
-//     crypto.subtle.digest('SHA-256', new TextEncoder().encode('새비밀번호'))
-//       .then(h => console.log(Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')))
-//  2. 출력된 해시값을 아래 PW_HASH에 붙여넣기
-//  3. 저장 → 끝!
-//
-//  현재 비밀번호: "dodo" (반드시 변경 권장!)
-// =========================================================
-const PW_HASH = 'c2ba348d1ffd70736f32541d3e1e9e1f253287cd4668a5659ab22aac9d474abe'; // "dodo"의 SHA-256
-const LOCK_KEY = 'dodo-ws-session';
-const FAIL_KEY = 'dodo-ws-fails';
-const MAX_FAILS = 5;
-const LOCKOUT_MS = 60000; // 5회 실패 시 1분 잠금
+let me = 300, sub = 300;
 
-async function hashStr(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+const R = [
+  {g:1,l:'1대',p:5},{g:2,l:'2대',p:5},{g:3,l:'3대',p:5},
+  {g:4,l:'4대',p:5},{g:5,l:'5대',p:5},{g:6,l:'6대',p:3},
+  {g:7,l:'7대',p:3}
+];
+
+// 마케팅표 데이터
+
+function setMe(v) {
+  me = v;
+  document.getElementById('my300').className = v===300?'tier-btn s1':'tier-btn';
+  document.getElementById('my3000').className = v===3000?'tier-btn s2':'tier-btn';
+  calc();
+}
+function setSub(v) {
+  sub = v;
+  document.getElementById('sb300').className = v===300?'tier-btn s1':'tier-btn';
+  document.getElementById('sb3000').className = v===3000?'tier-btn s2':'tier-btn';
+  calc();
 }
 
-function getFailData() {
-  try {
-    return JSON.parse(localStorage.getItem(FAIL_KEY) || '{"count":0,"time":0}');
-  } catch(e) { return { count: 0, time: 0 }; }
-}
+function calc() {
+  const n = parseInt(document.getElementById('rec').value);
+  document.getElementById('rd').textContent = n + '명';
+  const rollupMaxGen = me===300 ? 1 : 5; // 롤업조건: $300=1대, $3000=5대
 
-function isLockedOut() {
-  const d = getFailData();
-  if (d.count >= MAX_FAILS && Date.now() - d.time < LOCKOUT_MS) {
-    const remain = Math.ceil((LOCKOUT_MS - (Date.now() - d.time)) / 1000);
-    return remain;
-  }
-  if (d.count >= MAX_FAILS && Date.now() - d.time >= LOCKOUT_MS) {
-    localStorage.removeItem(FAIL_KEY);
-  }
-  return 0;
-}
+  // Build generation data
+  const genRates = [5,5,5,5,5,3,3]; // 후원 롤업 1대~7대
+  let rows=[], totRef=0, totSponsor=0, ppl=0, tSales=0;
 
-function recordFail() {
-  const d = getFailData();
-  d.count++;
-  d.time = Date.now();
-  try { localStorage.setItem(FAIL_KEY, JSON.stringify(d)); } catch(e) {}
-  return d.count;
-}
-
-async function tryUnlock() {
-  const input = document.getElementById('lockInput').value;
-  const errEl = document.getElementById('lockError');
-  const btn = document.getElementById('lockBtn');
-
-  // Check lockout
-  const lockSec = isLockedOut();
-  if (lockSec > 0) {
-    errEl.textContent = `너무 많은 시도. ${lockSec}초 후 다시 시도하세요.`;
-    errEl.style.display = 'block';
-    return;
+  for (let i=0; i<7; i++) {
+    const g = i+1;
+    const cnt = Math.pow(n, g);
+    const perRef = g===1 ? Math.round(sub * 30 / 100) : 0;
+    const refRev = g===1 ? cnt * perRef : 0;
+    const sponRate = genRates[i]; // 1대부터 후원 롤업 적용
+    const perSpon = Math.round(sub * sponRate / 100);
+    // 롤업 조건: 기본대수 내 = 자동, 6~7대 = L6/L7 조건부
+    let sponOn = false;
+    let cond = 'locked';
+    if (g <= baseMax) { sponOn = true; cond = 'auto'; }
+    else if (g <= 5) { sponOn = false; cond = 'locked'; }
+    else { sponOn = true; cond = 'level'; } // 6,7대 조건부 (값은 표시)
+    const sponRev = sponOn ? cnt * perSpon : 0;
+    const sales = cnt * sub;
+    ppl += cnt;
+    tSales += sales;
+    totRef += refRev;
+    totSponsor += sponRev;
+    rows.push({g, cnt, sales, perRef, refRev, sponRate, perSpon, sponRev, sponOn, cond, label: g+'대'});
   }
 
-  if (!input) return;
+  // 공유수당: 매출 1%, L3~L7 자격자에게 20%씩 (n/1)
+  const sharePool = Math.round(tSales * 0.01);
+  const sharePerLevel = Math.round(sharePool * 0.20);
 
-  btn.disabled = true;
-  btn.textContent = '확인 중...';
+  const totAll = totRef + totSponsor;
 
-  const inputHash = await hashStr(input);
+  // Summary cards
+  document.getElementById('s1').textContent = (me===300?'롤업 1대':'롤업 1~5대');
+  document.getElementById('s2').textContent = '$'+sub.toLocaleString();
+  document.getElementById('s3').textContent = ppl.toLocaleString()+'명';
+  document.getElementById('s5').textContent = '$'+tSales.toLocaleString();
 
-  if (inputHash === PW_HASH) {
-    // Success — generate session token
-    errEl.style.display = 'none';
-    localStorage.removeItem(FAIL_KEY);
+  // ===== ① 추천 계산기 =====
+  const refEl = document.getElementById('calc-referral');
+  const directCnt = Math.pow(n, 1);
+  const directPer = Math.round(sub * 30 / 100);
+  const directTotal = directCnt * directPer;
+  refEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+      <div style="background:var(--bg-card2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">직접추천 인원</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-top:4px;">${directCnt}명</div>
+      </div>
+      <div style="background:var(--bg-card2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">1인당 수익</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--gold);margin-top:4px;">$${directPer.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg-card2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">추천 수익 합계</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--gold);margin-top:4px;">$${directTotal.toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text2);line-height:1.7;">
+      직접추천 30%는 <strong style="color:var(--gold);">누구에게나 고정</strong> (가입금액 무관)<br>
+      하부 매출 $${sub.toLocaleString()} × 30% = <strong style="color:var(--gold);">$${directPer.toLocaleString()}</strong> × ${directCnt}명 = <strong style="color:var(--gold);">$${directTotal.toLocaleString()}</strong>
+    </div>`;
 
-    if (document.getElementById('lockRemember').checked) {
-      const token = await hashStr(PW_HASH + navigator.userAgent + 'dodo-salt');
-      try { localStorage.setItem(LOCK_KEY, token); } catch(e) {}
-    }
-
-    document.getElementById('lockOverlay').classList.add('hidden');
-    document.getElementById('mainApp').style.display = 'block';
-  } else {
-    // Fail
-    const fails = recordFail();
-    const remaining = MAX_FAILS - fails;
-
-    if (remaining > 0) {
-      errEl.textContent = `비밀번호가 올바르지 않습니다. (${remaining}회 남음)`;
-    } else {
-      errEl.textContent = '5회 실패. 1분간 잠금됩니다.';
-    }
-    errEl.style.display = 'block';
-    document.getElementById('lockInput').value = '';
-    document.getElementById('lockInput').focus();
+  // ===== ② 후원 계산기 =====
+  let sh = `<thead><tr><th>대수</th><th>롤업%</th><th>인원</th><th>매출</th><th>누적매출</th><th>인당수익</th><th>총수익</th><th>누적수익</th><th>상태</th></tr></thead><tbody>`;
+  let cumSales=0, cumSpon=0, mx=0;
+  for (const r of rows) {
+    cumSales += r.sales;
+    cumSpon += r.sponRev;
+    if(r.sponRev > mx) mx = r.sponRev;
+    let statusTag = '';
+    if (r.cond === 'auto') statusTag = '<span class="tag tag-on">자동적용</span>';
+    else if (r.cond === 'locked') statusTag = '<span class="tag tag-off">미해당</span>';
+    else statusTag = '<span class="tag" style="background:rgba(243,112,33,0.12);color:var(--hermes);">조건부</span>';
+    const cls = r.sponOn ? 'act' : (r.cond==='level' ? 'act' : 'off');
+    const showVal = r.sponOn || r.cond==='level';
+    const potSpon = r.cnt * r.perSpon;
+    if(showVal && !r.sponOn) cumSales += r.sales;
+    sh += `<tr class="${cls}" style="${r.cond==='level'?'opacity:0.5;':''}"><td style="font-weight:700">${r.label}</td><td class="mono">${r.sponRate}%</td><td class="mono">${r.cnt.toLocaleString()}</td><td class="mono" style="color:var(--text2)">${showVal?'$'+r.sales.toLocaleString():'-'}</td><td class="mono" style="color:var(--hermes)">${showVal?'$'+cumSales.toLocaleString():'-'}</td><td class="mono">${showVal?'$'+r.perSpon.toLocaleString():'-'}</td><td class="mono">${showVal?(r.sponOn?'$'+r.sponRev.toLocaleString():'($'+potSpon.toLocaleString()+')'):'-'}</td><td class="mono" style="color:var(--gold)">${r.sponOn?'$'+cumSpon.toLocaleString():'-'}</td><td>${statusTag}</td></tr>`;
   }
+  sh += `<tr class="totr"><td colspan="6">후원 수익 합계</td><td colspan="3" style="color:var(--gold);">$${totSponsor.toLocaleString()}</td></tr></tbody>`;
+  document.getElementById('calc-sponsor').innerHTML = sh;
+  
+  // 조건 안내
+  const condNote = me===300 
+    ? '<strong style="color:var(--gold);">$300 가입 → 후원 롤업 1대까지 자동적용</strong><br>2~5대: 미해당<br>6대: L6 조건 (팀누적매출 $500,000 + 추천 2명이상) 달성 시 적용<br>7대: L7 조건 (팀누적매출 $700,000 + 추천 3명이상) 달성 시 적용<br><span style="color:var(--text3);">※ 괄호( ) 금액은 조건 달성 시 예상 수익</span>'
+    : '<strong style="color:var(--gold);">$3,000 가입 → 후원 롤업 1대~5대까지 자동적용</strong><br>6대: L6 조건 (팀누적매출 $500,000 + 추천 2명이상) 달성 시 적용<br>7대: L7 조건 (팀누적매출 $700,000 + 추천 3명이상) 달성 시 적용<br><span style="color:var(--text3);">※ 괄호( ) 금액은 조건 달성 시 예상 수익</span>';
+  document.getElementById('spon-note').innerHTML = condNote;
 
-  btn.disabled = false;
-  btn.textContent = '잠금 해제';
+  // Bar chart
+  document.getElementById('bars').innerHTML = rows.map(r=>{
+    const w = mx>0 && r.sponOn ? Math.max(4,(r.sponRev/mx)*100) : 4;
+    const barCls = r.sponOn ? 'on' : 'dim';
+    const valCls = r.sponOn ? '' : 'dim';
+    return `<div class="bar-col"><div class="bl">${r.label} ${r.sponRate}%</div><div class="br ${barCls}" style="width:${w}%"></div><div class="bv ${valCls}">${r.sponOn?'$'+r.sponRev.toLocaleString():'-'}</div></div>`;
+  }).join('');
+
+  // ===== ③ 공유 계산기 =====
+  const shareEl = document.getElementById('calc-share');
+  shareEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+      <div style="background:var(--bg-card2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">총 매출의 1%</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:#50C878;margin-top:4px;">$${sharePool.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg-card2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">대상</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-top:4px;">L3~L7</div>
+      </div>
+      <div style="background:var(--bg-card2);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">레벨당 배분</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:#50C878;margin-top:4px;">20%</div>
+      </div>
+    </div>
+    <div style="background:var(--bg-card2);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:0.72rem;color:var(--text2);line-height:1.8;">
+        총 매출 $${tSales.toLocaleString()} × 1% = <strong style="color:#50C878;">$${sharePool.toLocaleString()}</strong> (공유수당 풀)<br>
+        각 레벨(L3~L7)에 20%씩 배분 → 레벨당 <strong style="color:#50C878;">$${sharePerLevel.toLocaleString()}</strong><br>
+        해당 레벨 자격자 n명이 균등 배분 (1/n)
+      </div>
+    </div>
+    <table style="width:100%;font-size:0.75rem;">
+      <thead><tr>
+        <th>직급</th><th>배분율</th><th>레벨별 금액</th><th>자격자 1명일때</th><th>자격자 5명일때</th>
+      </tr></thead>
+      <tbody>
+        ${['L3','L4','L5','L6','L7'].map(lv => `<tr class="act">
+          <td style="font-weight:700;">${lv}</td>
+          <td class="mono">20%</td>
+          <td class="mono" style="color:#50C878;">$${sharePerLevel.toLocaleString()}</td>
+          <td class="mono" style="color:var(--gold);">$${sharePerLevel.toLocaleString()}</td>
+          <td class="mono" style="color:var(--text2);">$${Math.round(sharePerLevel/5).toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  // ===== ④ 시상 계산기 =====
+  const awardRefPool = Math.round(tSales * 0.01);
+  const awardSalesPool = Math.round(tSales * 0.01);
+  const awEl = document.getElementById('calc-awards');
+  awEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:0.7rem;color:var(--hermes);font-weight:700;margin-bottom:10px;">최다추천시상 (총 매출의 1%를 100분율 배분)</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--hermes);margin-bottom:10px;">$${awardRefPool.toLocaleString()}</div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:50;background:var(--hermes);border-radius:4px;padding:6px;text-align:center;font-size:0.62rem;font-weight:700;color:#fff;">1등 50%<br>$${Math.round(awardRefPool*0.5).toLocaleString()}</div>
+          <div style="flex:30;background:rgba(243,112,33,0.6);border-radius:4px;padding:6px;text-align:center;font-size:0.62rem;font-weight:700;color:#fff;">2등 30%<br>$${Math.round(awardRefPool*0.3).toLocaleString()}</div>
+          <div style="flex:20;background:rgba(243,112,33,0.35);border-radius:4px;padding:6px;text-align:center;font-size:0.62rem;font-weight:700;color:#fff;">3등 20%<br>$${Math.round(awardRefPool*0.2).toLocaleString()}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:0.7rem;color:var(--gold);font-weight:700;margin-bottom:10px;">최대매출시상 (총 매출의 1%를 100분율 배분)</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:10px;">$${awardSalesPool.toLocaleString()}</div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:50;background:var(--gold);border-radius:4px;padding:6px;text-align:center;font-size:0.62rem;font-weight:700;color:var(--bg);">1등 50%<br>$${Math.round(awardSalesPool*0.5).toLocaleString()}</div>
+          <div style="flex:30;background:rgba(229,184,32,0.6);border-radius:4px;padding:6px;text-align:center;font-size:0.62rem;font-weight:700;color:var(--bg);">2등 30%<br>$${Math.round(awardSalesPool*0.3).toLocaleString()}</div>
+          <div style="flex:20;background:rgba(229,184,32,0.35);border-radius:4px;padding:6px;text-align:center;font-size:0.62rem;font-weight:700;color:var(--bg);">3등 20%<br>$${Math.round(awardSalesPool*0.2).toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.68rem;color:var(--text3);line-height:1.6;">
+      ※ 각 시상 = 총 매출의 1%를 100분율로 배분 | 1등 50% : 2등 30% : 3등 20%
+    </div>`;
+
+  const totalAwards = awardRefPool + awardSalesPool;
+
+  // ===== 종합 수익 =====
+  const grandTotal = totAll + sharePool + totalAwards;
+  document.getElementById('s4').textContent = '$'+grandTotal.toLocaleString();
+  const totalEl = document.getElementById('calc-total');
+  totalEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:var(--bg-card2);padding:12px;text-align:center;">
+        <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">① 추천 30%</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);margin-top:4px;">$${directTotal.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg-card2);padding:12px;text-align:center;">
+        <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">② 후원 2~7대</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--hermes);margin-top:4px;">$${totSponsor.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg-card2);padding:12px;text-align:center;">
+        <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">③ 공유 1%</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:#50C878;margin-top:4px;">$${sharePool.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg-card2);padding:12px;text-align:center;">
+        <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">④ 시상 2%</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--hermes);margin-top:4px;">$${totalAwards.toLocaleString()}</div>
+      </div>
+      <div style="background:var(--bg-card2);padding:12px;text-align:center;">
+        <div style="font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">총 수익</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--gold);margin-top:4px;">$${grandTotal.toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="font-size:0.7rem;color:var(--text3);line-height:1.6;">
+      총 매출 $${tSales.toLocaleString()} 대비 배분률: <strong style="color:var(--gold);">${(tSales>0?((grandTotal)/tSales*100).toFixed(1):0)}%</strong>
+    </div>`;
 }
 
-// Enter key support
-document.getElementById('lockInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') tryUnlock();
-});
+calc();
 
-// Auto-unlock if valid session
-(async function checkSaved() {
-  try {
-    const saved = localStorage.getItem(LOCK_KEY);
-    if (saved) {
-      const expected = await hashStr(PW_HASH + navigator.userAgent + 'dodo-salt');
-      if (saved === expected) {
-        document.getElementById('lockOverlay').classList.add('hidden');
-        document.getElementById('mainApp').style.display = 'block';
-      } else {
-        localStorage.removeItem(LOCK_KEY);
-      }
-    }
-  } catch(e) {}
-})();
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const idx = tab === 'landing' ? 0 : 1;
+  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+
+// ===== Interactive 65% Plan =====
+const DEFAULT_RATES = [5,5,5,5,5,3,3];
+let rates = [...DEFAULT_RATES];
+let simAmt = 300;
+const LIMIT = 65;
+
+
+
+
+
 </script>
-
 </body>
 </html>
