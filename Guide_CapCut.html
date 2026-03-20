@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 CapCut 연동 가이드 - DODO 영상제작 스튜디오</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d0f;--bg2:#18181e;--bg3:#1a1a22;--bg4:#20202a;--border:#2a2a32;--text:#f0ece4;--text2:#a0a098;--text3:#5a5a54;--gold:#d4a01e;--gold2:#e8b330;--gold-bg:rgba(212,160,30,.08);--gold-br:rgba(212,160,30,.25);--green:#4ecca3;--red:#e07050;--purple:#a78bfa;--cyan:#22d3ee}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;padding-bottom:80px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 10%,rgba(212,160,30,.04) 0%,transparent 50%);pointer-events:none}
+
+.header{text-align:center;padding:60px 20px 40px}
+.header-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--gold-br);border-radius:100px;font-size:.75rem;font-weight:600;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+.header h1{font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.header p{color:var(--text2);font-size:1rem;max-width:600px;margin:0 auto}
+
+.container{max-width:860px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--gold);text-decoration:none;font-size:.85rem;font-weight:500;margin-bottom:24px;opacity:.6;transition:opacity .2s}.back-link:hover{opacity:1}
+
+/* Flow */
+.flow-visual{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:40px}
+.flow-title{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:20px;text-align:center}
+.flow-steps{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+.flow-step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:100px}
+.flow-circle{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border);background:var(--bg3);transition:all .3s}
+.flow-step.active .flow-circle{border-color:var(--gold);background:var(--gold-bg);box-shadow:0 0 20px rgba(212,160,30,.15)}
+.flow-step.done .flow-circle{border-color:var(--green);background:rgba(78,204,163,.08)}
+.flow-label{font-size:11px;font-weight:600;color:var(--text3)}.flow-step.active .flow-label{color:var(--gold)}.flow-step.done .flow-label{color:var(--green)}
+.flow-arrow{font-size:16px;color:var(--text3);margin:0 8px;flex-shrink:0}
+
+/* Section */
+.section{margin-bottom:48px}
+.section-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.section-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;background:var(--gold-bg)}
+.section-header h2{font-size:1.3rem;font-weight:800}
+.section-header p{font-size:.85rem;color:var(--text2)}
+
+/* Step */
+.step{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:16px}
+.step:hover{border-color:rgba(255,255,255,.08)}
+.step-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.step-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.9rem;flex-shrink:0;background:rgba(212,160,30,.15);color:var(--gold)}
+.step-title{font-size:1.05rem;font-weight:700}
+.step-content{color:var(--text2);font-size:.9rem;padding-left:50px}
+.step-content p{margin-bottom:10px}
+.step-content strong{color:var(--text)}
+
+/* Info box */
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin:16px 0;font-size:.9rem}
+.info-box.gold{border-left:3px solid var(--gold)}.info-box.green{border-left:3px solid var(--green)}.info-box.purple{border-left:3px solid var(--purple)}.info-box.red{border-left:3px solid var(--red)}.info-box.cyan{border-left:3px solid var(--cyan)}
+.info-label{font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.info-box.gold .info-label{color:var(--gold)}.info-box.green .info-label{color:var(--green)}.info-box.purple .info-label{color:var(--purple)}.info-box.red .info-label{color:var(--red)}.info-box.cyan .info-label{color:var(--cyan)}
+
+/* Code block */
+.code-block{background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gold2);line-height:1.8;overflow-x:auto}
+
+/* Comparison table */
+.comp-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.85rem}
+.comp-table th{background:var(--bg4);padding:12px 16px;text-align:left;font-weight:700;color:var(--text2);text-transform:uppercase;font-size:.72rem;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.comp-table td{padding:12px 16px;border-bottom:1px solid rgba(42,42,50,.5);color:var(--text2)}
+.comp-table td:first-child{font-weight:600;color:var(--text)}
+.comp-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* Checklist */
+.checklist{list-style:none;margin:12px 0}
+.checklist li{padding:8px 0;padding-left:28px;position:relative;font-size:.88rem;color:var(--text2)}
+.checklist li::before{content:'✓';position:absolute;left:0;color:var(--gold);font-weight:800}
+
+/* Screenshot hint */
+.screenshot{background:var(--bg4);border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;margin:16px 0;color:var(--text3);font-size:.85rem}
+.screenshot .emoji{font-size:2rem;margin-bottom:8px}
+
+/* Nav path */
+.nav-path{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.nav-item{background:var(--bg4);border:1px solid var(--border);padding:6px 14px;border-radius:8px;font-size:.82rem;font-weight:600;color:var(--text)}
+.nav-arrow{color:var(--text3);font-size:.8rem}
+.nav-item.hl{background:rgba(212,160,30,.12);border-color:rgba(212,160,30,.3);color:var(--gold)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:48px 0}
+
+/* Edit sheet preview */
+.sheet-preview{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:16px 0}
+.sheet-header{background:var(--bg4);padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sheet-header .sh-icon{font-size:18px}.sheet-header .sh-title{font-size:13px;font-weight:700;color:var(--gold)}
+.sheet-body{padding:16px 20px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text2);line-height:2}
+.sheet-row{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(42,42,50,.3)}
+.sheet-row .sr-num{color:var(--gold);font-weight:700;min-width:50px}.sheet-row .sr-time{color:var(--cyan);min-width:120px}.sheet-row .sr-file{color:var(--green);min-width:140px}.sheet-row .sr-trans{color:var(--purple);min-width:80px}
+
+/* Final */
+.final-section{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;margin-top:48px}
+.final-section h2{font-size:1.4rem;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+@media(max-width:640px){.header h1{font-size:1.6rem}.step-content{padding-left:0}.container{padding:0 16px}.flow-steps{gap:4px}.flow-step{min-width:70px}.flow-circle{width:40px;height:40px;font-size:16px}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">DODO · Video Guide</div>
+  <h1>📖 CapCut 연동 가이드</h1>
+  <p>DODO 영상제작 스튜디오에서 편집 계획을 세우고, CapCut에서 고품질 영상을 완성하는 워크플로우</p>
+</div>
+
+<div class="container">
+  <a class="back-link" href="DODO_WORKSPACE_index.html">← DODO WORKSPACE</a>
+
+  <!-- Flow Visual -->
+  <div class="flow-visual">
+    <div class="flow-title">전체 워크플로우</div>
+    <div class="flow-steps">
+      <div class="flow-step done"><div class="flow-circle">🎬</div><div class="flow-label">소스 준비</div></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step done"><div class="flow-circle">🎞️</div><div class="flow-label">DODO 편집</div></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step active"><div class="flow-circle">📋</div><div class="flow-label">편집시트</div></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><div class="flow-circle">✂️</div><div class="flow-label">CapCut</div></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><div class="flow-circle">🎥</div><div class="flow-label">완성!</div></div>
+    </div>
+  </div>
+
+  <div class="info-box gold">
+    <div class="info-label">이 가이드의 핵심</div>
+    <p>DODO 스튜디오 = <strong>"편집 계획 + 미리보기 도구"</strong><br>
+    CapCut = <strong>"최종 렌더링 도구"</strong><br><br>
+    DODO에서 영상 클립 순서, 타이밍, 자막 싱크를 잡고 → 편집시트를 내보내면 → CapCut에서 그대로 따라 배치하고 고품질 MP4로 내보내는 방식이에요.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Part 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🎬</div>
+      <div><h2>Part 1. DODO 스튜디오에서 편집하기</h2><p>소스 업로드 → 타이밍 조정 → 미리보기</p></div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">1</div><div class="step-title">소스 파일 업로드</div></div>
+      <div class="step-content">
+        <p>DODO 영상제작 스튜디오를 열고 3가지 파일을 업로드합니다:</p>
+        <ul class="checklist">
+          <li><strong>🎬 영상 클립</strong> — MP4 파일들 (씬별 영상) 또는 이미지(JPG/PNG)</li>
+          <li><strong>🎙️ 나레이션</strong> — MP3 파일 (전체 음성)</li>
+          <li><strong>📝 자막</strong> — SRT 파일 (타이밍 포함)</li>
+          <li><strong>🎵 BGM</strong> — MP3 파일 (선택사항)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">2</div><div class="step-title">자동 배치 & 미리보기</div></div>
+      <div class="step-content">
+        <p><strong>"자동분배"</strong> 버튼을 클릭하면 나레이션 길이에 맞춰 영상 클립이 자동으로 배치됩니다.</p>
+        <p><strong>▶ 재생</strong>으로 전체 흐름을 미리보기합니다. 음성 + 영상 + 자막이 동시에 재생돼요.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">3</div><div class="step-title">수동 조정</div></div>
+      <div class="step-content">
+        <p>미리보기를 보면서 필요한 부분을 조정합니다:</p>
+        <ul class="checklist">
+          <li>씬 순서 변경 (드래그 또는 ▲▼ 버튼)</li>
+          <li>씬별 시작 시간 / 길이 미세 조정</li>
+          <li>트랜지션 종류 선택 (페이드/슬라이드/줌/컷)</li>
+          <li>자막 스타일 설정 (유튜브/틱톡/시네마)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">4</div><div class="step-title">편집시트 내보내기</div></div>
+      <div class="step-content">
+        <p>조정이 끝나면 <strong>"📋 편집시트 내보내기"</strong> 버튼을 클릭합니다.</p>
+        <p>아래와 같은 편집 정보가 생성됩니다:</p>
+      </div>
+    </div>
+
+    <!-- Edit Sheet Preview -->
+    <div class="sheet-preview">
+      <div class="sheet-header">
+        <span class="sh-icon">📋</span>
+        <span class="sh-title">DODO 편집시트 미리보기</span>
+      </div>
+      <div class="sheet-body">
+        <div style="margin-bottom:12px;color:var(--text);font-weight:700;font-size:13px">프로젝트: 경제해설_0318 | 16:9 | 14:50 | 46 Cuts</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">─── 타임라인 ───</div>
+        <div class="sheet-row"><span class="sr-num">Cut 1</span><span class="sr-time">0:00.0 → 0:03.9</span><span class="sr-file">cut01.mp4</span><span class="sr-trans">fade 0.5s</span></div>
+        <div class="sheet-row"><span class="sr-num">Cut 2</span><span class="sr-time">0:03.9 → 0:12.5</span><span class="sr-file">cut02.mp4</span><span class="sr-trans">fade 0.5s</span></div>
+        <div class="sheet-row"><span class="sr-num">Cut 3</span><span class="sr-time">0:12.5 → 0:41.3</span><span class="sr-file">cut03.mp4</span><span class="sr-trans">crossfade 0.5s</span></div>
+        <div class="sheet-row"><span class="sr-num">Cut 4</span><span class="sr-time">0:41.3 → 1:05.8</span><span class="sr-file">cut04.mp4</span><span class="sr-trans">cut</span></div>
+        <div style="color:var(--text3);padding:8px 0">... (46개 전체 목록)</div>
+        <div style="font-size:11px;color:var(--text3);margin:8px 0">─── 자막 설정 ───</div>
+        <div style="color:var(--text2)">스타일: 유튜브 | 크기: 24px | 색상: #ffffff | 배경: rgba(0,0,0,0.7) | 위치: 하단</div>
+        <div style="font-size:11px;color:var(--text3);margin:8px 0">─── 오디오 설정 ───</div>
+        <div style="color:var(--text2)">나레이션: 100% | BGM: 30% | 덕킹: 자동</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Part 2: CapCut -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">✂️</div>
+      <div><h2>Part 2. CapCut에서 완성하기</h2><p>편집시트 보고 따라 배치 → 고품질 내보내기</p></div>
+    </div>
+
+    <div class="info-box cyan">
+      <div class="info-label">CapCut 다운로드</div>
+      <p><strong>PC:</strong> <a href="https://www.capcut.com" target="_blank" style="color:var(--cyan)">capcut.com</a> (무료, Windows/Mac)<br>
+      <strong>모바일:</strong> App Store / Play Store에서 "CapCut" 검색<br>
+      <strong>웹:</strong> <a href="https://www.capcut.com/editor" target="_blank" style="color:var(--cyan)">capcut.com/editor</a> (브라우저에서 바로 편집)</p>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">1</div><div class="step-title">새 프로젝트 생성</div></div>
+      <div class="step-content">
+        <p>CapCut 실행 → <strong>"새 프로젝트"</strong> → 화면비율 선택 (편집시트에 적힌 비율과 동일하게)</p>
+        <div class="nav-path">
+          <span class="nav-item">CapCut 열기</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item hl">새 프로젝트</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item hl">16:9 선택</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">2</div><div class="step-title">소스 파일 가져오기</div></div>
+      <div class="step-content">
+        <p>편집시트에 적힌 파일들을 CapCut에 드래그앤드롭합니다:</p>
+        <ul class="checklist">
+          <li><strong>모든 영상 클립</strong> (cut01~cut46.mp4) → 미디어 라이브러리에 추가</li>
+          <li><strong>나레이션 음성</strong> (narration.mp3) → 오디오 트랙에 추가</li>
+          <li><strong>BGM</strong> (bgm.mp3) → 두 번째 오디오 트랙에 추가</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">3</div><div class="step-title">편집시트 보고 타임라인 배치</div></div>
+      <div class="step-content">
+        <p>DODO 편집시트를 옆에 띄워놓고, 시간에 맞춰 영상 클립을 배치합니다:</p>
+        <div class="code-block">편집시트 예시:
+Cut 1 | 0:00.0 → 0:03.9 | cut01.mp4 | fade 0.5s
+Cut 2 | 0:03.9 → 0:12.5 | cut02.mp4 | fade 0.5s
+Cut 3 | 0:12.5 → 0:41.3 | cut03.mp4 | crossfade 0.5s
+
+CapCut에서:
+1. cut01.mp4를 타임라인 처음에 놓기
+2. 길이를 3.9초로 맞추기
+3. cut02.mp4를 이어서 놓기
+4. 길이를 8.6초로 맞추기 (12.5 - 3.9)
+5. 씬 사이에 "페이드" 트랜지션 추가
+... 반복</div>
+        <div class="info-box green">
+          <div class="info-label">빠르게 하는 팁</div>
+          <p>CapCut에서 영상 클립을 순서대로 타임라인에 쭉 놓은 다음, 각 클립의 길이를 편집시트에 맞춰 조정하면 빠릅니다. 정확한 초 단위 입력은 클립 선택 → 우측 패널에서 "시작/끝 시간"을 직접 입력하세요.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">4</div><div class="step-title">자막 추가 (SRT 가져오기)</div></div>
+      <div class="step-content">
+        <p>CapCut은 <strong>SRT 파일 직접 가져오기</strong>를 지원합니다!</p>
+        <div class="nav-path">
+          <span class="nav-item">텍스트</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item hl">자막</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item hl">로컬 자막 가져오기</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item">SRT 파일 선택</span>
+        </div>
+        <p style="margin-top:10px">SRT 파일을 가져오면 <strong>타이밍이 자동으로 맞춰진 자막</strong>이 타임라인에 추가됩니다.</p>
+        <p>편집시트에 적힌 자막 스타일(크기/색상/배경)을 참고하여 CapCut에서 자막 디자인을 설정하세요.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">5</div><div class="step-title">오디오 설정</div></div>
+      <div class="step-content">
+        <ul class="checklist">
+          <li><strong>나레이션</strong> 볼륨: 편집시트 참고 (보통 100%)</li>
+          <li><strong>BGM</strong> 볼륨: 편집시트 참고 (보통 20~30%)</li>
+          <li>CapCut → 오디오 클립 선택 → <strong>"볼륨"</strong>에서 조정</li>
+          <li>덕킹: CapCut 자동 "음성 볼륨 낮추기" 기능 사용</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">6</div><div class="step-title">트랜지션 추가</div></div>
+      <div class="step-content">
+        <p>편집시트에 적힌 트랜지션을 씬 사이에 추가합니다:</p>
+        <table class="comp-table">
+          <thead><tr><th>DODO 편집시트</th><th>CapCut에서</th></tr></thead>
+          <tbody>
+            <tr><td>fade</td><td>트랜지션 → "페이드"</td></tr>
+            <tr><td>crossfade</td><td>트랜지션 → "디졸브"</td></tr>
+            <tr><td>slide-left</td><td>트랜지션 → "슬라이드 왼쪽"</td></tr>
+            <tr><td>slide-right</td><td>트랜지션 → "슬라이드 오른쪽"</td></tr>
+            <tr><td>zoom</td><td>트랜지션 → "줌"</td></tr>
+            <tr><td>none (컷)</td><td>트랜지션 없음</td></tr>
+          </tbody>
+        </table>
+        <div class="nav-path">
+          <span class="nav-item">두 클립 사이 | 아이콘 클릭</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item hl">트랜지션 선택</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item">시간 설정 (0.5s)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header"><div class="step-num">7</div><div class="step-title">고품질 내보내기</div></div>
+      <div class="step-content">
+        <div class="nav-path">
+          <span class="nav-item">우측 상단</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item hl">내보내기</span>
+          <span class="nav-arrow">→</span>
+          <span class="nav-item">1080p / 30fps / MP4</span>
+        </div>
+        <ul class="checklist">
+          <li>해상도: <strong>1080p</strong> (유튜브) 또는 <strong>4K</strong></li>
+          <li>프레임레이트: <strong>30fps</strong></li>
+          <li>포맷: <strong>MP4 (H.264)</strong></li>
+          <li>비트레이트: <strong>높음</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Part 3: Comparison -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📊</div>
+      <div><h2>품질 비교</h2><p>DODO 직접 내보내기 vs CapCut 내보내기</p></div>
+    </div>
+
+    <table class="comp-table">
+      <thead><tr><th>항목</th><th>DODO 직접 내보내기</th><th>CapCut 내보내기</th></tr></thead>
+      <tbody>
+        <tr><td>해상도</td><td>1080p</td><td>1080p ~ 4K</td></tr>
+        <tr><td>포맷</td><td>WebM</td><td>MP4 (H.264)</td></tr>
+        <tr><td>음성 싱크</td><td>⭐⭐⭐ 미세한 밀림 가능</td><td>⭐⭐⭐⭐⭐ 완벽</td></tr>
+        <tr><td>트랜지션</td><td>⭐⭐⭐ 기본 효과만</td><td>⭐⭐⭐⭐⭐ 수백 가지</td></tr>
+        <tr><td>자막 디자인</td><td>⭐⭐⭐ 3종 프리셋</td><td>⭐⭐⭐⭐⭐ 완전 커스텀</td></tr>
+        <tr><td>렌더링 속도</td><td>느림 (15분 영상 = 30분)</td><td>빠름 (15분 영상 = 5분)</td></tr>
+        <tr><td>추가 효과</td><td>Ken Burns만</td><td>키프레임, 모션, 필터 등</td></tr>
+        <tr><td>비용</td><td>무료</td><td>무료 (Pro 기능 일부 유료)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box gold">
+      <div class="info-label">추천 조합</div>
+      <p><strong>DODO 스튜디오</strong> = 빠르게 전체 구성 잡기 + 미리보기 + 편집 계획 수립<br>
+      <strong>CapCut</strong> = 최종 품질 마무리 + 트랜지션/효과 + MP4 내보내기<br><br>
+      이 조합이면 <strong>기획부터 완성까지 가장 효율적</strong>입니다!</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Tips -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">💡</div>
+      <div><h2>팁 & FAQ</h2></div>
+    </div>
+
+    <div class="info-box green">
+      <div class="info-label">CapCut 자막 꿀팁</div>
+      <p>SRT 파일로 자막을 가져온 후, CapCut의 <strong>"자막 스타일 일괄 적용"</strong> 기능을 사용하면 한번에 모든 자막의 디자인을 바꿀 수 있어요. 폰트·크기·색상·배경을 하나의 자막에 설정한 후 "전체 적용"을 누르세요.</p>
+    </div>
+
+    <div class="info-box purple">
+      <div class="info-label">클립 길이 빠르게 맞추기</div>
+      <p>CapCut에서 클립을 선택하고 우측 패널의 <strong>"지속 시간"</strong>에 편집시트의 시간을 직접 입력하면 됩니다. 마우스로 드래그하는 것보다 정확해요.</p>
+    </div>
+
+    <div class="info-box cyan">
+      <div class="info-label">BGM 덕킹 자동화</div>
+      <p>CapCut → BGM 클립 선택 → <strong>"자동 비트 싱크"</strong> 또는 나레이션 트랙 선택 → <strong>"음성 분리"</strong> 후 BGM 볼륨 자동 조절이 가능합니다.</p>
+    </div>
+  </div>
+
+  <!-- Final -->
+  <div class="final-section">
+    <h2>🎬 완벽한 영상 제작 워크플로우</h2>
+    <p style="color:var(--text2);margin-bottom:16px">
+      DODO 스튜디오에서 기획하고 → 편집시트 내보내고 → CapCut에서 완성하세요!<br>
+      이 조합이면 전문가 수준의 영상을 효율적으로 제작할 수 있습니다.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

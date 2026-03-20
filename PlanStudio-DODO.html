@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎬 DODO 영상 기획 스튜디오</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0e;--bg2:#12121a;--bg3:#1a1a24;--bg4:#22222e;--border:#2a2a36;--gold:#d4a01e;--gold2:#e8b330;--gold-bg:rgba(212,160,30,.08);--gold-br:rgba(212,160,30,.25);--green:#4ecca3;--red:#e07050;--purple:#a78bfa;--cyan:#22d3ee;--t1:#f0ece4;--t2:#a0a098;--t3:#5a5a54;--ff:'Noto Sans KR',sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--ff);background:var(--bg);color:var(--t1);min-height:100vh}
+button{font-family:var(--ff);cursor:pointer;border:none;background:none;color:var(--t1)}
+input,select,textarea{font-family:var(--ff);background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--t1);padding:10px 14px;font-size:13px;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,160,30,.08)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.header{text-align:center;padding:40px 20px 20px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.header h1{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:var(--t2);font-size:12px;margin-top:6px}
+
+/* Steps bar */
+.steps-bar{display:flex;justify-content:center;gap:0;padding:20px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.step-dot{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;position:relative}
+.step-dot .dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;transition:all .3s;background:var(--bg)}
+.step-dot.active .dot{border-color:var(--gold);background:var(--gold-bg);color:var(--gold);box-shadow:0 0 16px rgba(212,160,30,.2)}
+.step-dot.done .dot{border-color:var(--green);background:rgba(78,204,163,.1);color:var(--green)}
+.step-dot .label{font-size:10px;color:var(--t3);font-weight:600}.step-dot.active .label{color:var(--gold)}.step-dot.done .label{color:var(--green)}
+.step-line{width:40px;height:2px;background:var(--border);margin-top:18px;flex-shrink:0}
+.step-line.done{background:var(--green)}
+
+.container{max-width:900px;margin:0 auto;padding:24px}
+
+/* Cards */
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+.section h2{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+
+/* Style grid */
+.style-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.style-card{padding:14px 8px;text-align:center;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:all .2s;background:var(--bg)}
+.style-card:hover{border-color:var(--gold-br);background:var(--gold-bg)}
+.style-card.selected{border-color:var(--gold);background:var(--gold-bg);box-shadow:0 0 20px rgba(212,160,30,.1)}
+.style-card .icon{font-size:28px;margin-bottom:6px}
+.style-card .name{font-size:11px;font-weight:700;color:var(--t2)}.style-card.selected .name{color:var(--gold)}
+.style-card .desc{font-size:9px;color:var(--t3);margin-top:3px}
+
+/* Character grid */
+.char-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+
+/* Form rows */
+.form-row{display:flex;gap:12px;margin-bottom:14px;align-items:start}
+.form-row .form-group{flex:1}
+.form-group label{display:block;font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px}
+textarea{min-height:120px;resize:vertical;line-height:1.8}
+
+/* Preview */
+.preview-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;max-height:300px;overflow-y:auto;font-size:13px;color:var(--t2);line-height:1.8;white-space:pre-wrap}
+
+/* Scene list */
+.scene-item{display:flex;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;align-items:start;background:var(--bg)}
+.scene-num{background:var(--gold-bg);color:var(--gold);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;font-family:var(--mono);flex-shrink:0}
+.scene-content{flex:1;min-width:0}
+.scene-content .narr{font-size:12px;color:var(--t1);margin-bottom:4px}
+.scene-content .prompt{font-size:10px;color:var(--t3);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Buttons */
+.btn{padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;transition:all .2s}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#c89520);color:#0a0a0e;font-weight:800;box-shadow:0 4px 16px rgba(212,160,30,.2)}
+.btn-gold:hover{box-shadow:0 6px 24px rgba(212,160,30,.3);transform:translateY(-1px)}
+.btn-outline{border:1px solid var(--border);color:var(--t2)}.btn-outline:hover{border-color:var(--gold-br);color:var(--gold)}
+.btn-green{background:linear-gradient(135deg,var(--green),#3ba886);color:#fff;font-weight:800}
+
+.footer-btns{display:flex;justify-content:space-between;margin-top:24px;gap:12px}
+
+/* Settings summary */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.summary-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px}
+.summary-item .si-label{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:4px}
+.summary-item .si-value{font-size:14px;font-weight:700;color:var(--t1)}
+
+/* Toast */
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--gold-br);padding:12px 24px;border-radius:10px;font-size:13px;font-weight:700;color:var(--gold);z-index:999;display:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+
+@media(max-width:640px){.style-grid,.char-grid{grid-template-columns:repeat(3,1fr)}.form-row{flex-direction:column}.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎬 DODO 영상 기획 스튜디오</h1>
+  <p>브라우저에서 기획하고 → Claude Code로 제작하세요</p>
+</div>
+
+<div class="steps-bar" id="stepsBar"></div>
+
+<div class="container" id="main"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STYLES=[
+  {id:'stickman',icon:'✏️',name:'스케치 스틱맨',desc:'잉크 선화, 경제/시사',prefix:'Simple stickman sketch, black ink on beige paper, hand-drawn comic style, expressive stick figures'},
+  {id:'cartoon',icon:'🎨',name:'카툰 해설',desc:'컬러풀 웹툰풍',prefix:'Colorful flat cartoon, bold outlines, bright colors, Korean webtoon editorial style'},
+  {id:'cinematic',icon:'🎬',name:'시네마틱',desc:'드라마틱 실사',prefix:'Cinematic photorealistic, dramatic lighting, shallow depth of field, 35mm film grain'},
+  {id:'anime',icon:'🎌',name:'일본 애니',desc:'지브리 스타일',prefix:'Japanese anime style, Studio Ghibli inspired, detailed background, warm colors'},
+  {id:'3d',icon:'🧸',name:'3D 애니',desc:'픽사 스타일',prefix:'Pixar style 3D render, cute stylized characters, soft studio lighting, vibrant'},
+  {id:'flat',icon:'📐',name:'플랫 일러스트',desc:'미니멀 벡터',prefix:'Modern flat design, minimal geometric, pastel palette, clean vector art'},
+  {id:'news',icon:'📰',name:'뉴스 스타일',desc:'방송 느낌',prefix:'Professional news broadcast photo, formal, studio lighting, editorial quality'},
+  {id:'yadam',icon:'🏯',name:'한국 야담',desc:'수묵화 역사',prefix:'Traditional Korean ink wash painting, Joseon era, muted earth tones, calligraphic'},
+  {id:'pixel',icon:'🕹️',name:'레트로 픽셀',desc:'16비트 게임',prefix:'Retro 16-bit pixel art, nostalgic palette, detailed sprites, vintage game'},
+  {id:'clay',icon:'🧊',name:'클레이 애니',desc:'클레이메이션',prefix:'Claymation stop-motion, plasticine characters, miniature set, soft lighting'},
+];
+
+const CHARS=[
+  {id:'jollaman',icon:'🚶',name:'졸라맨',desc:'기본 스틱맨'},
+  {id:'expressive',icon:'😀',name:'표정 스틱맨',desc:'감정 풍부'},
+  {id:'business',icon:'👔',name:'비즈니스맨',desc:'정장 착용'},
+  {id:'cute_sd',icon:'👶',name:'귀여운 SD',desc:'2등신 캐릭'},
+  {id:'webtoon',icon:'📱',name:'웹툰 캐릭',desc:'한국 웹툰풍'},
+  {id:'anime',icon:'🎌',name:'애니메 캐릭',desc:'일본 애니풍'},
+  {id:'avatar',icon:'🧑',name:'실사 아바타',desc:'AI 생성 인물'},
+  {id:'animal',icon:'🐱',name:'동물 마스코트',desc:'의인화 동물'},
+  {id:'robot',icon:'🤖',name:'로봇/AI',desc:'미래형 로봇'},
+  {id:'none',icon:'🏞️',name:'캐릭터 없음',desc:'풍경/사물만'},
+];
+
+const CATEGORIES=[
+  {id:'economy',name:'경제/시사',topics:['주유소 기름값 폭등의 진짜 이유','은퇴 후 월 200만원 만드는 현실적인 방법','부동산 하락기에 살아남는 투자 전략','금값이 역대 최고인 이유와 전망','연금 개혁이 내 노후에 미치는 영향']},
+  {id:'education',name:'교육/정보',topics:['AI 시대에 살아남는 직업 TOP 5','건강보험 혜택 90%가 모르는 꿀팁','2026년 달라지는 세금 정책 총정리','스마트폰 하나로 끝내는 생활 꿀팁','치매 예방하는 과학적인 7가지 습관']},
+  {id:'story',name:'스토리/역사',topics:['조선 최고의 사기꾼 봉이 김선달의 진실','세계에서 가장 미스터리한 실종 사건 5선','한국전쟁 때 벌어진 기적같은 실화','타이타닉호에 탄 한국인의 운명','조선시대 왕들의 충격적인 식단']},
+  {id:'tech',name:'IT/테크',topics:['ChatGPT vs Claude vs Gemini 최종 비교','아이폰 17 유출 정보 총정리','무료 AI 도구 10선 생산성 끝판왕','2026년 최고의 앱 추천 TOP 10','AI로 유튜브 영상 자동 제작하는 방법']},
+  {id:'health',name:'건강/운동',topics:['하루 10분으로 혈당 잡는 운동법','50대 이후 반드시 먹어야 할 영양제','무릎 안 아프게 걷는 올바른 자세','수면의 질을 높이는 과학적 방법 5가지','100세 시대 건강하게 사는 식습관']},
+];
+
+const C={
+  step:1, // 1~6
+  category:'',
+  topic:'',
+  customTopic:'',
+  style:'stickman',
+  character:'jollaman',
+  customCharImg:null,
+  _apiKey:'',
+  _ytKey:'',
+  duration:'5min',
+  ratio:'16:9',
+  target:'시니어',
+  script:'',
+  scenes:[],
+  subStyle:'youtube',
+  bgmVol:25,
+  transition:'fade',
+  narrationVol:100,
+};
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500);}
+
+function renderSteps(){
+  const el=document.getElementById('stepsBar');
+  const steps=[{n:1,label:'주제'},{n:2,label:'스타일'},{n:3,label:'대본'},{n:4,label:'Grok'},{n:5,label:'오디오'},{n:6,label:'내보내기'}];
+  el.innerHTML=steps.map((s,i)=>{
+    const cls=s.n<C.step?'done':s.n===C.step?'active':'';
+    return (i>0?'<div class="step-line '+(s.n<=C.step?'done':'')+'"></div>':'')+
+      '<div class="step-dot '+cls+'" onclick="goStep('+s.n+')"><div class="dot">'+(s.n<C.step?'✓':s.n)+'</div><div class="label">'+s.label+'</div></div>';
+  }).join('');
+}
+
+function goStep(n){if(n<=C.step||n===C.step+1){C.step=n;render();}}
+
+function render(){
+  renderSteps();
+  const el=document.getElementById('main');
+  if(C.step===1) renderStep1(el);
+  else if(C.step===2) renderStep2(el);
+  else if(C.step===3) renderStep3(el);
+  else if(C.step===4) renderStep4(el);
+  else if(C.step===5) renderStep5(el);
+  else if(C.step===6) renderStep6(el);
+}
+
+// STEP 1: Topic
+function renderStep1(el){
+  const hasKey = getApiKey();
+  el.innerHTML=`
+  <div class="section">
+    <h2>📊 주제 선정</h2>
+    <div class="form-row">
+      <div class="form-group"><label>카테고리</label>
+        <select id="selCat" onchange="selectCategory(this.value)">
+          <option value="">카테고리 선택...</option>
+          ${CATEGORIES.map(c=>'<option value="'+c.id+'" '+(C.category===c.id?'selected':'')+'>'+c.name+'</option>').join('')}
+        </select>
+      </div>
+      <div class="form-group"><label>타겟</label>
+        <select id="selTarget" onchange="C.target=this.value">
+          <option ${C.target==='시니어'?'selected':''}>시니어</option>
+          <option ${C.target==='직장인'?'selected':''}>직장인</option>
+          <option ${C.target==='학생'?'selected':''}>학생</option>
+          <option ${C.target==='주부'?'selected':''}>주부</option>
+          <option ${C.target==='전체'?'selected':''}>전체</option>
+        </select>
+      </div>
+      <div class="form-group"><label>영상 길이</label>
+        <select onchange="C.duration=this.value">
+          <option value="30s" ${C.duration==='30s'?'selected':''}>30초 (숏폼)</option>
+          <option value="1min" ${C.duration==='1min'?'selected':''}>1분 (숏폼)</option>
+          <option value="3min" ${C.duration==='3min'?'selected':''}>3분</option>
+          <option value="5min" ${C.duration==='5min'?'selected':''}>5분</option>
+          <option value="10min" ${C.duration==='10min'?'selected':''}>10분 (롱폼)</option>
+          <option value="15min" ${C.duration==='15min'?'selected':''}>15분 (롱폼)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>화면비율</label>
+        <select onchange="C.ratio=this.value">
+          <option value="16:9" ${C.ratio==='16:9'?'selected':''}>16:9 (유튜브)</option>
+          <option value="9:16" ${C.ratio==='9:16'?'selected':''}>9:16 (숏폼)</option>
+          <option value="1:1" ${C.ratio==='1:1'?'selected':''}>1:1 (인스타)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Keys -->
+  <div class="section" style="padding:14px 20px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:12px;font-weight:700;color:var(--t2);min-width:70px">🔑 Claude</span>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." value="${getApiKey()}" 
+        style="flex:1;font-size:11px;font-family:var(--mono);padding:7px 10px"
+        onchange="saveApiKey(this.value)">
+      <span style="font-size:9px;color:${hasKey?'var(--green)':'var(--t3)'};font-weight:600;min-width:45px">${hasKey?'✓ 연결':'미연결'}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;font-weight:700;color:var(--t2);min-width:70px">🔑 YouTube</span>
+      <input type="password" id="ytKeyInput" placeholder="AIza..." value="${getYtKey()}" 
+        style="flex:1;font-size:11px;font-family:var(--mono);padding:7px 10px"
+        onchange="saveYtKey(this.value)">
+      <span style="font-size:9px;color:${getYtKey()?'var(--green)':'var(--t3)'};font-weight:600;min-width:45px">${getYtKey()?'✓ 연결':'미연결'}</span>
+    </div>
+  </div>
+
+  <div class="section" id="topicSection" style="${C.category?'':'display:none'}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0">💡 추천 주제</h2>
+      <div style="display:flex;gap:6px">
+        <button onclick="ytTrendTopics()" id="ytRecBtn"
+          style="padding:8px 16px;background:linear-gradient(135deg,#e24b4a,#c0392b);color:#fff;font-size:11px;font-weight:800;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;box-shadow:0 2px 12px rgba(226,75,74,0.25)">
+          <span style="font-size:13px">📊</span>YouTube 실제 트렌드
+        </button>
+        <button onclick="aiRecommendTopics()" id="aiRecBtn"
+          style="padding:8px 16px;background:linear-gradient(135deg,var(--purple),#8b5cf6);color:#fff;font-size:11px;font-weight:800;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;box-shadow:0 2px 12px rgba(167,139,250,0.25)">
+          <span style="font-size:13px">✨</span>AI 추천
+        </button>
+      </div>
+    </div>
+    <div id="topicList"></div>
+    <div id="aiLoading" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:24px;animation:spin 1s linear infinite;display:inline-block">⚡</div>
+      <div style="font-size:12px;color:var(--gold);margin-top:8px;font-weight:600" id="loadingText">분석 중...</div>
+    </div>
+    <div style="margin-top:14px">
+      <label style="font-size:11px;color:var(--t3);font-weight:600;display:block;margin-bottom:6px">또는 직접 입력:</label>
+      <input id="customTopic" placeholder="원하는 주제를 직접 입력하세요..." value="${C.customTopic}" oninput="C.customTopic=this.value;C.topic=this.value">
+    </div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <div class="footer-btns"><div></div><button class="btn btn-gold" onclick="if(C.topic||C.customTopic){C.step=2;render();}else{toast('주제를 선택하세요');}">다음: 스타일 선택 →</button></div>`;
+  if(C.category) selectCategory(C.category);
+}
+
+function getApiKey(){
+  if(C._apiKey) return C._apiKey;
+  try{ const k=JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}'); if(k.claude) return k.claude; }catch(e){}
+  try{ return localStorage.getItem('planstudio-api-key')||''; }catch(e){ return ''; }
+}
+function saveApiKey(key){ C._apiKey=key; try{localStorage.setItem('planstudio-api-key',key);}catch(e){} }
+
+function getYtKey(){
+  if(C._ytKey) return C._ytKey;
+  try{ const k=JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}'); if(k.youtube) return k.youtube; }catch(e){}
+  try{ return localStorage.getItem('planstudio-yt-key')||''; }catch(e){ return ''; }
+}
+function saveYtKey(key){ C._ytKey=key; try{localStorage.setItem('planstudio-yt-key',key);}catch(e){} }
+
+// YouTube 카테고리별 검색 키워드
+const YT_SEARCH_KEYWORDS = {
+  economy: ['경제 해설','주식 분석','부동산 전망','물가 상승','재테크 방법'],
+  education: ['생활 꿀팁','건강 정보','법률 상식','IT 강좌','자기계발'],
+  story: ['역사 미스터리','실화 사건','감동 스토리','한국 역사','세계 미스터리'],
+  tech: ['AI 활용법','아이폰 팁','앱 추천','프로그래밍','가젯 리뷰'],
+  health: ['건강 운동','다이어트','영양제 추천','수면 개선','홈트레이닝'],
+};
+
+function fmtNum(n){
+  if(n>=10000000) return (n/10000000).toFixed(1)+'천만';
+  if(n>=10000) return (n/10000).toFixed(1)+'만';
+  if(n>=1000) return (n/1000).toFixed(1)+'천';
+  return n.toString();
+}
+
+async function ytTrendTopics(){
+  const ytKey = getYtKey();
+  if(!ytKey){ toast('YouTube API 키를 입력해주세요'); return; }
+  
+  const cat = C.category;
+  const catObj = CATEGORIES.find(c=>c.id===cat);
+  if(!catObj){ toast('카테고리를 먼저 선택하세요'); return; }
+  
+  const btn = document.getElementById('ytRecBtn');
+  const loading = document.getElementById('aiLoading');
+  const loadText = document.getElementById('loadingText');
+  const list = document.getElementById('topicList');
+  
+  btn.disabled=true;
+  btn.innerHTML='<span style="font-size:13px;animation:spin 1s linear infinite;display:inline-block">📊</span>검색 중...';
+  loading.style.display='block';
+  loadText.textContent='YouTube에서 실제 트렌딩 데이터를 가져오는 중...';
+  list.innerHTML='';
+  
+  try{
+    const keywords = YT_SEARCH_KEYWORDS[cat] || ['트렌딩','인기'];
+    const allVideos = [];
+    
+    // Search 2~3 keywords for variety
+    for(let ki=0; ki<Math.min(3,keywords.length); ki++){
+      loadText.textContent='YouTube 검색 중... ('+keywords[ki]+')';
+      
+      const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
+      searchUrl.searchParams.set('key', ytKey);
+      searchUrl.searchParams.set('part', 'snippet');
+      searchUrl.searchParams.set('q', keywords[ki]);
+      searchUrl.searchParams.set('type', 'video');
+      searchUrl.searchParams.set('order', 'viewCount');
+      searchUrl.searchParams.set('maxResults', '5');
+      searchUrl.searchParams.set('publishedAfter', new Date(Date.now()-30*24*60*60*1000).toISOString());
+      searchUrl.searchParams.set('regionCode', 'KR');
+      searchUrl.searchParams.set('relevanceLanguage', 'ko');
+      
+      const searchResp = await fetch(searchUrl);
+      const searchData = await searchResp.json();
+      
+      if(searchData.error) throw new Error(searchData.error.message||'YouTube API 오류');
+      if(!searchData.items?.length) continue;
+      
+      // Get video stats
+      const videoIds = searchData.items.map(v=>v.id.videoId).join(',');
+      const statsUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
+      statsUrl.searchParams.set('key', ytKey);
+      statsUrl.searchParams.set('part', 'statistics,snippet,contentDetails');
+      statsUrl.searchParams.set('id', videoIds);
+      
+      const statsResp = await fetch(statsUrl);
+      const statsData = await statsResp.json();
+      
+      if(statsData.items){
+        statsData.items.forEach(v=>{
+          const views = parseInt(v.statistics.viewCount||0);
+          const likes = parseInt(v.statistics.likeCount||0);
+          const comments = parseInt(v.statistics.commentCount||0);
+          const published = new Date(v.snippet.publishedAt);
+          const daysAgo = Math.max(1, Math.floor((Date.now()-published)/(24*60*60*1000)));
+          const dailyViews = Math.round(views/daysAgo);
+          
+          allVideos.push({
+            title: v.snippet.title.replace(/\[.*?\]|\(.*?\)/g,'').trim(),
+            channel: v.snippet.channelTitle,
+            views, likes, comments, daysAgo, dailyViews,
+            videoId: v.id,
+            keyword: keywords[ki],
+            viralScore: Math.round((likes/(views||1))*10000 + (comments/(views||1))*50000 + Math.min(dailyViews/1000,50))
+          });
+        });
+      }
+    }
+    
+    // Sort by viral score and deduplicate similar titles
+    allVideos.sort((a,b)=>b.viralScore-a.viralScore);
+    const seen = new Set();
+    const topVideos = [];
+    for(const v of allVideos){
+      const key = v.title.slice(0,15);
+      if(!seen.has(key) && topVideos.length<5){ seen.add(key); topVideos.push(v); }
+    }
+    
+    if(!topVideos.length) throw new Error('검색 결과가 없습니다');
+    
+    // Update category topics
+    catObj.topics = topVideos.map(v=>v.title);
+    catObj._ytTopics = topVideos;
+    catObj._aiTopics = null; // Clear AI topics
+    
+    loading.style.display='none';
+    list.innerHTML = topVideos.map((v,i)=>
+      `<div onclick="selectTopic(${i})"
+        style="padding:14px 16px;border:1px solid ${C.topic===v.title?'var(--gold)':'var(--border)'};border-radius:10px;margin-bottom:8px;cursor:pointer;background:${C.topic===v.title?'var(--gold-bg)':'var(--bg)'};transition:all .2s">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="color:var(--gold);font-weight:800;font-family:var(--mono);background:var(--gold-bg);width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">${i+1}</span>
+          <span style="font-size:13px;font-weight:700;color:${C.topic===v.title?'var(--gold)':'var(--t1)'}; flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.title}</span>
+          <span style="font-size:9px;color:var(--red);background:rgba(226,75,74,0.1);padding:2px 8px;border-radius:4px;font-weight:700;flex-shrink:0">실제 데이터</span>
+        </div>
+        <div style="display:flex;gap:12px;padding-left:34px;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--cyan);font-weight:600">👁️ ${fmtNum(v.views)}회</span>
+          <span style="font-size:11px;color:var(--red);font-weight:600">❤️ ${fmtNum(v.likes)}</span>
+          <span style="font-size:11px;color:var(--purple);font-weight:600">💬 ${fmtNum(v.comments)}</span>
+          <span style="font-size:11px;color:var(--green);font-weight:600">📈 일 ${fmtNum(v.dailyViews)}회</span>
+          <span style="font-size:11px;color:var(--t3)">${v.daysAgo}일 전 · ${v.channel}</span>
+        </div>
+      </div>`
+    ).join('');
+    
+    toast('📊 YouTube 실제 트렌딩 데이터 '+topVideos.length+'개 로드!');
+    
+  }catch(e){
+    loading.style.display='none';
+    list.innerHTML=`<div style="padding:16px;text-align:center;color:var(--red);font-size:12px">
+      ⚠️ ${e.message}<br>
+      <span style="color:var(--t3)">YouTube API 키를 확인하거나 기본 주제를 사용하세요</span>
+    </div>`;
+    if(catObj) setTimeout(()=>selectCategory(cat),2000);
+  }
+  
+  btn.disabled=false;
+  btn.innerHTML='<span style="font-size:13px">📊</span>YouTube 실제 트렌드';
+}
+
+async function aiRecommendTopics(){
+  const key = getApiKey();
+  if(!key){ toast('API 키를 입력해주세요'); return; }
+  
+  const cat = C.category;
+  const catObj = CATEGORIES.find(c=>c.id===cat);
+  const catName = catObj ? catObj.name : '전체';
+  const target = C.target;
+  
+  const btn = document.getElementById('aiRecBtn');
+  const loading = document.getElementById('aiLoading');
+  const list = document.getElementById('topicList');
+  
+  btn.disabled = true;
+  btn.innerHTML = '<span style="font-size:14px;animation:spin 1s linear infinite;display:inline-block">⚡</span>분석 중...';
+  loading.style.display = 'block';
+  list.innerHTML = '';
+  
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: [{
+          role: 'user',
+          content: `당신은 유튜브 트렌드 전문가입니다. 
+카테고리: ${catName}
+타겟 시청자: ${target}
+
+이 카테고리에서 현재 가장 인기 있고 조회수를 많이 끌 수 있는 유튜브 영상 주제 5개를 추천해주세요.
+
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만:
+[
+  {"topic": "주제 제목", "reason": "추천 이유 한 줄", "hook": "영상 첫 5초 훅킹 문장"},
+  {"topic": "주제 제목", "reason": "추천 이유 한 줄", "hook": "영상 첫 5초 훅킹 문장"},
+  {"topic": "주제 제목", "reason": "추천 이유 한 줄", "hook": "영상 첫 5초 훅킹 문장"},
+  {"topic": "주제 제목", "reason": "추천 이유 한 줄", "hook": "영상 첫 5초 훅킹 문장"},
+  {"topic": "주제 제목", "reason": "추천 이유 한 줄", "hook": "영상 첫 5초 훅킹 문장"}
+]`
+        }]
+      })
+    });
+    
+    const data = await resp.json();
+    if(data.error){ throw new Error(data.error.message || 'API 오류'); }
+    
+    const text = data.content?.[0]?.text || '';
+    // Parse JSON from response (handle possible markdown wrapping)
+    const jsonStr = text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+    const topics = JSON.parse(jsonStr);
+    
+    // Update CATEGORIES with AI results
+    if(catObj){
+      catObj.topics = topics.map(t => t.topic);
+      catObj._aiTopics = topics; // Store full data
+    }
+    
+    // Render AI topics with extra info
+    loading.style.display = 'none';
+    list.innerHTML = topics.map((t,i) => 
+      `<div onclick="selectTopic(${i})" 
+        style="padding:14px 16px;border:1px solid ${C.topic===t.topic?'var(--gold)':'var(--border)'};border-radius:10px;margin-bottom:8px;cursor:pointer;background:${C.topic===t.topic?'var(--gold-bg)':'var(--bg)'};transition:all .2s">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="color:var(--gold);font-weight:800;font-family:var(--mono);background:var(--gold-bg);width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">${i+1}</span>
+          <span style="font-size:13px;font-weight:700;color:${C.topic===t.topic?'var(--gold)':'var(--t1)'}">${t.topic}</span>
+          <span style="margin-left:auto;font-size:9px;color:var(--purple);background:rgba(167,139,250,0.1);padding:2px 8px;border-radius:4px;font-weight:700">AI 추천</span>
+        </div>
+        <div style="font-size:11px;color:var(--t2);padding-left:34px;margin-bottom:4px">💡 ${t.reason}</div>
+        <div style="font-size:11px;color:var(--cyan);padding-left:34px;font-style:italic">🎯 훅: "${t.hook}"</div>
+      </div>`
+    ).join('');
+    
+    toast('✨ AI 추천 주제 5개가 생성되었습니다!');
+    
+  }catch(e){
+    loading.style.display = 'none';
+    list.innerHTML = `<div style="padding:16px;text-align:center;color:var(--red);font-size:12px">
+      ⚠️ ${e.message || 'API 호출 실패'}<br>
+      <span style="color:var(--t3)">API 키를 확인하거나 기본 추천 주제를 사용하세요</span>
+    </div>`;
+    // Fallback to hardcoded topics
+    if(catObj){
+      setTimeout(()=>{ selectCategory(cat); }, 2000);
+    }
+  }
+  
+  btn.disabled = false;
+  btn.innerHTML = '<span style="font-size:14px">✨</span>AI 실시간 추천';
+}
+
+function selectCategory(catId){
+  C.category=catId;
+  const cat=CATEGORIES.find(c=>c.id===catId);
+  document.getElementById('topicSection').style.display='';
+  if(!cat) return;
+  
+  // YouTube real data (priority)
+  if(cat._ytTopics){
+    document.getElementById('topicList').innerHTML=cat._ytTopics.map((v,i)=>
+      `<div onclick="selectTopic(${i})"
+        style="padding:14px 16px;border:1px solid ${C.topic===v.title?'var(--gold)':'var(--border)'};border-radius:10px;margin-bottom:8px;cursor:pointer;background:${C.topic===v.title?'var(--gold-bg)':'var(--bg)'};transition:all .2s">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="color:var(--gold);font-weight:800;font-family:var(--mono);background:var(--gold-bg);width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">${i+1}</span>
+          <span style="font-size:13px;font-weight:700;color:${C.topic===v.title?'var(--gold)':'var(--t1)'};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.title}</span>
+          <span style="font-size:9px;color:var(--red);background:rgba(226,75,74,0.1);padding:2px 8px;border-radius:4px;font-weight:700;flex-shrink:0">실제 데이터</span>
+        </div>
+        <div style="display:flex;gap:12px;padding-left:34px;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--cyan);font-weight:600">👁️ ${fmtNum(v.views)}회</span>
+          <span style="font-size:11px;color:var(--red);font-weight:600">❤️ ${fmtNum(v.likes)}</span>
+          <span style="font-size:11px;color:var(--purple);font-weight:600">💬 ${fmtNum(v.comments)}</span>
+          <span style="font-size:11px;color:var(--green);font-weight:600">📈 일 ${fmtNum(v.dailyViews)}회</span>
+          <span style="font-size:11px;color:var(--t3)">${v.daysAgo}일 전 · ${v.channel}</span>
+        </div>
+      </div>`
+    ).join('');
+  // AI recommended topics
+  } else if(cat._aiTopics){
+    document.getElementById('topicList').innerHTML=cat._aiTopics.map((t,i)=>
+      `<div onclick="selectTopic(${i})" 
+        style="padding:14px 16px;border:1px solid ${C.topic===t.topic?'var(--gold)':'var(--border)'};border-radius:10px;margin-bottom:8px;cursor:pointer;background:${C.topic===t.topic?'var(--gold-bg)':'var(--bg)'};transition:all .2s">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="color:var(--gold);font-weight:800;font-family:var(--mono);background:var(--gold-bg);width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">${i+1}</span>
+          <span style="font-size:13px;font-weight:700;color:${C.topic===t.topic?'var(--gold)':'var(--t1)'}">${t.topic}</span>
+          <span style="margin-left:auto;font-size:9px;color:var(--purple);background:rgba(167,139,250,0.1);padding:2px 8px;border-radius:4px;font-weight:700">AI 추천</span>
+        </div>
+        <div style="font-size:11px;color:var(--t2);padding-left:34px;margin-bottom:4px">💡 ${t.reason}</div>
+        <div style="font-size:11px;color:var(--cyan);padding-left:34px;font-style:italic">🎯 훅: "${t.hook}"</div>
+      </div>`
+    ).join('');
+  } else {
+    // Hardcoded fallback
+    document.getElementById('topicList').innerHTML=cat.topics.map((t,i)=>
+      `<div onclick="selectTopic(${i})" style="padding:12px 16px;border:1px solid ${C.topic===t?'var(--gold)':'var(--border)'};border-radius:8px;margin-bottom:6px;cursor:pointer;background:${C.topic===t?'var(--gold-bg)':'var(--bg)'};transition:all .2s;font-size:13px;display:flex;align-items:center;gap:10px"><span style="color:var(--gold);font-weight:800;font-family:var(--mono)">${i+1}</span><span style="color:${C.topic===t?'var(--gold)':'var(--t1)'}">${t}</span><span style="margin-left:auto;font-size:9px;color:var(--t3);background:var(--bg3);padding:2px 8px;border-radius:4px">기본</span></div>`
+    ).join('');
+  }
+}
+
+function selectTopic(idx){
+  const cat=CATEGORIES.find(c=>c.id===C.category);
+  if(!cat) return;
+  if(cat._ytTopics && cat._ytTopics[idx]) C.topic=cat._ytTopics[idx].title;
+  else if(cat._aiTopics && cat._aiTopics[idx]) C.topic=cat._aiTopics[idx].topic;
+  else if(cat.topics[idx]) C.topic=cat.topics[idx];
+  C.customTopic='';
+  selectCategory(C.category);
+}
+
+// STEP 2: Style + Character
+function renderStep2(el){
+  el.innerHTML=`
+  <div class="section">
+    <h2>🎨 영상 스타일</h2>
+    <div class="style-grid">${STYLES.map(s=>
+      '<div class="style-card '+(C.style===s.id?'selected':'')+'" onclick="C.style=\''+s.id+'\';render()"><div class="icon">'+s.icon+'</div><div class="name">'+s.name+'</div><div class="desc">'+s.desc+'</div></div>'
+    ).join('')}</div>
+  </div>
+  <div class="section">
+    <h2>👤 캐릭터 스타일</h2>
+    <div class="char-grid">${CHARS.map(c=>
+      '<div class="style-card '+(C.character===c.id?'selected':'')+'" onclick="C.character=\''+c.id+'\';render()"><div class="icon">'+c.icon+'</div><div class="name">'+c.name+'</div><div class="desc">'+c.desc+'</div></div>'
+    ).join('')}</div>
+  </div>
+  <div class="footer-btns">
+    <button class="btn btn-outline" onclick="C.step=1;render()">← 이전</button>
+    <button class="btn btn-gold" onclick="C.step=3;render()">다음: 대본 생성 →</button>
+  </div>`;
+}
+
+// STEP 3: Script
+function renderStep3(el){
+  const style=STYLES.find(s=>s.id===C.style);
+  const char=CHARS.find(c=>c.id===C.character);
+  const tc=getTargetChars();
+  el.innerHTML=`
+  <div class="section">
+    <h2>✍️ 대본 + 스토리보드</h2>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--t2)">
+      <span style="color:var(--gold);font-weight:700">설정:</span> 
+      ${C.topic||C.customTopic} · ${style?.name} · ${char?.name} · ${C.duration} · ${C.ratio}
+    </div>
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <label style="font-size:12px;font-weight:700;color:var(--t2)">대본</label>
+      <button onclick="aiGenerateScript()" id="scriptGenBtn"
+        style="padding:10px 22px;background:linear-gradient(135deg,var(--gold),#c89520);color:#0a0a0e;font-size:13px;font-weight:800;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(212,160,30,.3);transition:all .2s">
+        ✨ AI 대본 자동 생성
+      </button>
+    </div>
+    
+    <div id="scriptLoading" style="display:none;background:var(--bg);border:1px solid var(--gold-br);border-radius:10px;padding:20px;text-align:center;margin-bottom:12px">
+      <div style="font-size:28px;animation:spin 1.5s linear infinite;display:inline-block">✍️</div>
+      <div style="font-size:13px;color:var(--gold);margin-top:10px;font-weight:700" id="scriptLoadText">하몬서클 기반 대본 생성 중...</div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;margin-top:12px;overflow:hidden">
+        <div id="scriptProgress" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;width:0%;transition:width .5s"></div>
+      </div>
+    </div>
+
+    <textarea id="scriptInput" placeholder="✨ AI 대본 자동 생성 버튼을 클릭하거나, 직접 대본을 입력하세요." style="min-height:200px">${C.script}</textarea>
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span style="font-size:11px;color:var(--t3)" id="charCount">${C.script?C.script.length.toLocaleString()+'자':'0자'} / 목표: ${tc.toLocaleString()}자</span>
+      <span style="font-size:10px;color:var(--t3)">하몬서클 8단계 · 공감 설계 적용</span>
+    </div>
+  </div>
+  <div class="footer-btns">
+    <button class="btn btn-outline" onclick="C.step=2;render()">← 이전</button>
+    <button class="btn btn-gold" onclick="C.script=document.getElementById('scriptInput').value;C.step=4;render()">다음: Grok 프롬프트 →</button>
+  </div>`;
+  
+  // Live char count
+  document.getElementById('scriptInput').addEventListener('input',function(){
+    const len=this.value.length;
+    document.getElementById('charCount').innerHTML=len.toLocaleString()+'자 / 목표: '+tc.toLocaleString()+'자'+
+      (len>=tc*0.9?' <span style="color:var(--green);font-weight:700">✓ 목표 달성!</span>':
+       len>0?' <span style="color:var(--red);font-weight:700">('+Math.round(len/tc*100)+'%)</span>':'');
+  });
+}
+
+async function aiGenerateScript(){
+  const key=getApiKey();
+  if(!key){toast('Claude API 키를 입력해주세요 (Step 1에서)');return;}
+  
+  const style=STYLES.find(s=>s.id===C.style);
+  const char=CHARS.find(c=>c.id===C.character);
+  const topic=C.topic||C.customTopic;
+  const tc=getTargetChars();
+  
+  if(!topic){toast('주제를 먼저 선택하세요');return;}
+  
+  const btn=document.getElementById('scriptGenBtn');
+  const loading=document.getElementById('scriptLoading');
+  const loadText=document.getElementById('scriptLoadText');
+  const progress=document.getElementById('scriptProgress');
+  const textarea=document.getElementById('scriptInput');
+  
+  btn.disabled=true;
+  btn.innerHTML='생성 중...';
+  loading.style.display='block';
+  
+  // Progress animation
+  let pct=0;
+  const pTimer=setInterval(()=>{
+    pct=Math.min(pct+Math.random()*8,90);
+    progress.style.width=pct+'%';
+    const msgs=['하몬서클 구조 설계 중...','인트로 훅킹 작성 중...','전개부 스토리 구성 중...','클라이맥스 작성 중...','공감 포인트 삽입 중...','CTA 마무리 중...'];
+    loadText.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  },2000);
+  
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4096,
+        messages:[{role:'user',content:`당신은 한국 유튜브 콘텐츠 전문 대본 작가입니다.
+
+## 주제: ${topic}
+## 타겟: ${C.target}
+## 영상 길이: ${C.duration}
+## 스타일: ${style?.name||'기본'}
+## 캐릭터: ${char?.name||'없음'}
+
+## ⚠️ 글자수 목표: 정확히 ${tc.toLocaleString()}자 (±10%)
+각 섹션별 배분:
+- [인트로 - 15초 훅킹] (${Math.round(tc*0.05)}자) ← 공감 훅 + 거울효과
+- [도입부] (${Math.round(tc*0.15)}자) ← ①일상 + ②욕구
+- [전개 1] (${Math.round(tc*0.2)}자) ← ③출발 + ④탐색
+- [전개 2] (${Math.round(tc*0.2)}자) ← ④탐색 + ⑤발견
+- [전환점] (${Math.round(tc*0.15)}자) ← ⑥대가
+- [클라이맥스] (${Math.round(tc*0.15)}자) ← ⑦귀환
+- [마무리 - CTA] (${Math.round(tc*0.1)}자) ← ⑧변화
+
+## 🔄 하몬서클 ①일상→②욕구→③출발→④탐색→⑤발견→⑥대가→⑦귀환→⑧변화
+## 💗 공감: 거울효과, 감정롤러코스터, 취약성노출, 소속감, 행동촉발
+
+## 글자수 미달 방지:
+- 구체적 사례, 대화체, 감정묘사, 비유를 적극 활용
+- 각 섹션이 목표 글자수에 도달하도록 풍부하게 작성
+- "더 이상 쓸 내용이 없다"고 판단하지 마세요
+
+## 출력:
+대본만 출력하세요. 각 섹션 앞에 [인트로], [도입부], [전개 1] 등 표시.
+분석 리포트, 체크리스트 등은 출력하지 마세요. 순수 대본 텍스트만.
+모든 출력 한국어.`}]
+      })
+    });
+    
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message||'API 오류');
+    
+    const script=data.content?.[0]?.text||'';
+    
+    clearInterval(pTimer);
+    progress.style.width='100%';
+    loadText.textContent='✅ 대본 생성 완료!';
+    
+    setTimeout(()=>{
+      loading.style.display='none';
+      textarea.value=script;
+      C.script=script;
+      // Update char count
+      const len=script.length;
+      document.getElementById('charCount').innerHTML=len.toLocaleString()+'자 / 목표: '+tc.toLocaleString()+'자'+
+        (len>=tc*0.9?' <span style="color:var(--green);font-weight:700">✓ 목표 달성!</span>':
+        ' <span style="color:var(--red);font-weight:700">('+Math.round(len/tc*100)+'%)</span>');
+      toast('✍️ 대본 '+len.toLocaleString()+'자 생성 완료!');
+    },800);
+    
+  }catch(e){
+    clearInterval(pTimer);
+    loading.style.display='none';
+    toast('⚠️ '+e.message);
+  }
+  
+  btn.disabled=false;
+  btn.innerHTML='✨ AI 대본 자동 생성';
+}
+
+function getTargetChars(){
+  const m={'30s':500,'1min':1000,'3min':3000,'5min':5000,'10min':10000,'15min':15000};
+  return m[C.duration]||5000;
+}
+
+// STEP 4: Grok prompts preview
+function renderStep4(el){
+  const style=STYLES.find(s=>s.id===C.style);
+  const ratio=C.ratio==='16:9'?'wide landscape 16:9':C.ratio==='9:16'?'vertical portrait 9:16':'square 1:1';
+  const sceneCount=getSceneCount();
+  
+  el.innerHTML=`
+  <div class="section">
+    <h2>🤖 Grok 프롬프트 미리보기</h2>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:16px">
+      ${sceneCount}개 씬의 Grok 프롬프트가 생성됩니다. Claude Code가 자동으로 만들어주며, 여기서 미리 확인할 수 있어요.
+    </p>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:6px">프롬프트 프리픽스 (모든 씬에 적용):</div>
+      <div style="font-size:12px;color:var(--cyan);font-family:var(--mono);line-height:1.7">${style?.prefix}, ${ratio} aspect ratio.</div>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">예시 씬 프롬프트:</div>
+    ${Array.from({length:Math.min(3,sceneCount)},(_,i)=>
+      '<div class="scene-item"><div class="scene-num">'+(i+1)+'</div><div class="scene-content"><div class="narr">씬 '+(i+1)+' 나레이션 텍스트 (Claude Code가 생성)</div><div class="prompt">'+style?.prefix+', '+ratio+'. Scene: [씬 '+(i+1)+' 설명]. Camera: [구도].</div></div></div>'
+    ).join('')}
+    <div style="text-align:center;color:var(--t3);font-size:12px;padding:8px">... 총 ${sceneCount}개 씬</div>
+  </div>
+  <div class="footer-btns">
+    <button class="btn btn-outline" onclick="C.step=3;render()">← 이전</button>
+    <button class="btn btn-gold" onclick="C.step=5;render()">다음: 오디오 설정 →</button>
+  </div>`;
+}
+
+function getSceneCount(){
+  const m={'30s':6,'1min':8,'3min':12,'5min':16,'10min':25,'15min':35};
+  return m[C.duration]||16;
+}
+
+// STEP 5: Audio settings
+function renderStep5(el){
+  el.innerHTML=`
+  <div class="section">
+    <h2>🔊 오디오 + 자막 설정</h2>
+    <div class="form-row">
+      <div class="form-group"><label>자막 스타일</label>
+        <select onchange="C.subStyle=this.value">
+          <option value="youtube" ${C.subStyle==='youtube'?'selected':''}>유튜브 (흰색 28px, 검정배경)</option>
+          <option value="tiktok" ${C.subStyle==='tiktok'?'selected':''}>틱톡 (노란색 36px, 테두리)</option>
+          <option value="cinema" ${C.subStyle==='cinema'?'selected':''}>시네마 (아이보리 22px, 투명)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>트랜지션</label>
+        <select onchange="C.transition=this.value">
+          <option value="fade" ${C.transition==='fade'?'selected':''}>페이드 0.5s</option>
+          <option value="dissolve" ${C.transition==='dissolve'?'selected':''}>디졸브 0.5s</option>
+          <option value="slide" ${C.transition==='slide'?'selected':''}>슬라이드</option>
+          <option value="none" ${C.transition==='none'?'selected':''}>없음 (컷)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>나레이션 볼륨: ${C.narrationVol}%</label>
+        <input type="range" min="50" max="100" value="${C.narrationVol}" oninput="C.narrationVol=+this.value;this.previousElementSibling.textContent='나레이션 볼륨: '+this.value+'%'">
+      </div>
+      <div class="form-group"><label>BGM 볼륨: ${C.bgmVol}%</label>
+        <input type="range" min="0" max="50" value="${C.bgmVol}" oninput="C.bgmVol=+this.value;this.previousElementSibling.textContent='BGM 볼륨: '+this.value+'%'">
+      </div>
+    </div>
+  </div>
+  <div class="footer-btns">
+    <button class="btn btn-outline" onclick="C.step=4;render()">← 이전</button>
+    <button class="btn btn-gold" onclick="C.step=6;render()">다음: 내보내기 →</button>
+  </div>`;
+}
+
+// STEP 6: Export
+function renderStep6(el){
+  const style=STYLES.find(s=>s.id===C.style);
+  const char=CHARS.find(c=>c.id===C.character);
+  el.innerHTML=`
+  <div class="section">
+    <h2>📦 프로젝트 요약</h2>
+    <div class="summary-grid">
+      <div class="summary-item"><div class="si-label">주제</div><div class="si-value">${C.topic||C.customTopic||'미정'}</div></div>
+      <div class="summary-item"><div class="si-label">카테고리 / 타겟</div><div class="si-value">${CATEGORIES.find(c=>c.id===C.category)?.name||'미선택'} · ${C.target}</div></div>
+      <div class="summary-item"><div class="si-label">영상 스타일</div><div class="si-value">${style?.icon} ${style?.name}</div></div>
+      <div class="summary-item"><div class="si-label">캐릭터</div><div class="si-value">${char?.icon} ${char?.name}</div></div>
+      <div class="summary-item"><div class="si-label">길이 / 비율</div><div class="si-value">${C.duration} · ${C.ratio}</div></div>
+      <div class="summary-item"><div class="si-label">씬 수 (예상)</div><div class="si-value">${getSceneCount()}개</div></div>
+      <div class="summary-item"><div class="si-label">자막 / 트랜지션</div><div class="si-value">${C.subStyle} · ${C.transition}</div></div>
+      <div class="summary-item"><div class="si-label">오디오</div><div class="si-value">나레이션 ${C.narrationVol}% · BGM ${C.bgmVol}%</div></div>
+    </div>
+    ${C.script?'<div style="margin-top:12px"><div style="font-size:11px;color:var(--t3);font-weight:700;margin-bottom:6px">대본 ('+C.script.length+'자):</div><div class="preview-box">'+C.script.slice(0,500)+(C.script.length>500?'...':'')+'</div></div>':''}
+  </div>
+  <div class="section" style="text-align:center;padding:32px">
+    <h2 style="justify-content:center">🎬 준비 완료!</h2>
+    <p style="color:var(--t2);font-size:13px;margin-bottom:20px">
+      설정파일을 내보내고 Claude Code에서 영상을 제작하세요
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-gold" onclick="exportConfig()" style="font-size:15px;padding:16px 40px">📥 설정파일 내보내기 (JSON)</button>
+      <button class="btn btn-green" onclick="exportConfig();toast('Claude Code에서: project_config.json 읽고 영상 만들어줘')" style="font-size:15px;padding:16px 40px">🚀 Claude Code로 제작 시작</button>
+    </div>
+    <div style="margin-top:20px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:left">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">사용법:</div>
+      <div style="font-size:12px;color:var(--t2);line-height:2;font-family:var(--mono)">
+        1. "설정파일 내보내기" → project_config.json 다운로드<br>
+        2. 파일을 프로젝트 폴더에 넣기<br>
+        3. 터미널에서: cd ~/Desktop/프로젝트폴더 → claude<br>
+        4. "project_config.json 읽고 영상 만들어줘"<br>
+        5. Claude Code가 대본→프롬프트→자막까지 자동 생성!
+      </div>
+    </div>
+  </div>
+  <div class="footer-btns">
+    <button class="btn btn-outline" onclick="C.step=5;render()">← 이전</button>
+    <button class="btn btn-outline" onclick="C.step=1;render()">처음부터 다시</button>
+  </div>`;
+}
+
+function exportConfig(){
+  const style=STYLES.find(s=>s.id===C.style);
+  const char=CHARS.find(c=>c.id===C.character);
+  const config={
+    project_name:(C.topic||C.customTopic||'DODO_Video').replace(/[^가-힣a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,'_').slice(0,30),
+    topic:C.topic||C.customTopic,
+    category:C.category,
+    target:C.target,
+    duration:C.duration,
+    ratio:C.ratio,
+    style:C.style,
+    style_prefix:style?.prefix||'',
+    character:{type:C.character,description:char?.name||''},
+    subtitle:{style:C.subStyle,font:'NotoSansKR-Bold',size:C.subStyle==='tiktok'?36:C.subStyle==='cinema'?22:28,color:C.subStyle==='tiktok'?'#FFFF00':C.subStyle==='cinema'?'#E8E0D0':'#FFFFFF',position:'bottom'},
+    audio:{narration_volume:C.narrationVol,bgm_volume:C.bgmVol,ducking:true,fade_in:2,fade_out:3,tts_voice:'korean_female'},
+    video:{quality:'high',crf:18,transition:C.transition,transition_duration:0.5,intro_fade:1,outro_fade:2,outro_black:3},
+    script:C.script||'',
+    scene_count:getSceneCount(),
+    created:new Date().toISOString().slice(0,10),
+    tool:'DODO Video Planning Studio'
+  };
+  const blob=new Blob([JSON.stringify(config,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='project_config.json';a.click();
+  toast('project_config.json 내보내기 완료!');
+}
+
+render();
+</script>
+</body>
+</html>
