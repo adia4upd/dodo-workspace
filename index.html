@@ -1551,13 +1551,14 @@ const TOOLS = [
     id: "script-studio",
     guide: "Guide_ScriptStudio.html",
     name: "스크립트 AI 스튜디오",
-    desc: "Claude AI 기반 유튜브 스크립트 자동 생성. 프리셋 선택으로 길이·콘셉트·스타일을 맞춤 설정.",
+    desc: "Claude AI 기반 유튜브 스크립트 자동 생성. 프리셋 선택으로 길이·콘셉트·스타일을 맞춤 설정. 스토리보드 내보내기 + Grok 프롬프트 생성기.",
     file: "ScriptStudio-DODO.html",
     icon: "🎬",
     tags: ["스크립트", "AI"],
-    version: "v1.0",
-    modified: "2026-03-17",
+    version: "v1.1",
+    modified: "2026-03-20",
     changelog: [
+      { date: "2026-03-20", ver: "v1.1", text: "스토리보드 내보내기 + Grok 프롬프트 생성기 추가" },
       { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
     ]
   },
@@ -1625,10 +1626,38 @@ const TOOLS = [
     file: "TikTokTrend-DODO.html",
     icon: "🔥",
     tags: ["틱톡", "수집"],
-    version: "v1.0",
-    modified: "2026-03-17",
+    version: "v1.1",
+    modified: "2026-03-20",
     changelog: [
+      { date: "2026-03-20", ver: "v1.1", text: "검색 키워드/카테고리/세부주제 필터 추가, 영상 링크 수정" },
       { date: "2026-03-17", ver: "v1.0", text: "최초 배포" }
+    ]
+  },
+  {
+    id: "plan-studio",
+    name: "영상 기획 스튜디오",
+    desc: "YouTube 실제 트렌드 기반 주제 선정, 스타일·캐릭터 선택, AI 대본 생성까지. Claude Code 연동으로 완성 영상 제작.",
+    file: "PlanStudio-DODO.html",
+    icon: "📋",
+    tags: ["기획", "AI"],
+    version: "v1.0",
+    modified: "2026-03-20",
+    changelog: [
+      { date: "2026-03-20", ver: "v1.0", text: "최초 배포 — YouTube/Claude API 연동, 10종 스타일, 10종 캐릭터, 하몬서클 대본 생성" }
+    ]
+  },
+  {
+    id: "video-studio",
+    guide: "Guide_CapCut.html",
+    name: "영상제작 스튜디오",
+    desc: "이미지/영상 클립 타임라인 편집, Ken Burns, 트랜지션, 자막 프리셋, 오디오 믹서. 미리보기 및 내보내기.",
+    file: "VideoStudio-DODO.html",
+    icon: "🎞️",
+    tags: ["영상", "편집"],
+    version: "v1.0",
+    modified: "2026-03-20",
+    changelog: [
+      { date: "2026-03-20", ver: "v1.0", text: "최초 배포 — 3패널+타임라인 에디터, Ken Burns, 자막 3종 프리셋, 오디오 믹서" }
     ]
   }
 ];
@@ -1645,6 +1674,11 @@ const TOOLS = [
 //  3. 저장 → 끝! 사이트에 자동 반영됩니다.
 // =========================================================
 const CHANGELOG = [
+  { name: "📋 영상 기획 스튜디오 추가", ver: "v1.0", date: "2026-03-20", desc: "YouTube 실제 트렌드 + AI 대본 생성 + Grok 프롬프트 + Claude Code 연동" },
+  { name: "🎞️ 영상제작 스튜디오 추가", ver: "v1.0", date: "2026-03-20", desc: "타임라인 에디터 + Ken Burns + 자막 프리셋 + 오디오 믹서" },
+  { name: "🔥 틱톡 트렌드 업데이트", ver: "v1.1", date: "2026-03-20", desc: "검색 키워드/카테고리/세부주제 필터 추가, 영상 링크 수정" },
+  { name: "🎬 스크립트 스튜디오 업데이트", ver: "v1.1", date: "2026-03-20", desc: "스토리보드 내보내기 + Grok 프롬프트 생성기 추가" },
+  { name: "📖 CapCut 연동 가이드 추가", ver: "v1.0", date: "2026-03-20", desc: "DODO 스튜디오 → CapCut 워크플로우 가이드" },
   { name: "⚡ DODO WORKSPACE v1.0", ver: "v1.0", date: "2026-03-17", desc: "워크스페이스 최초 배포 — 6개 도구 + 가이드 + 고객센터" },
   // 새 항목은 이 위에 추가하세요:
   // { name: "서치 트렌드 업데이트", ver: "v1.1", date: "2026-03-20", desc: "검색 필터 UI 개선" },

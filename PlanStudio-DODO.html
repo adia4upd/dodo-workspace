@@ -14,7 +14,7 @@ input,select,textarea{font-family:var(--ff);background:var(--bg2);border:1px sol
 input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,160,30,.08)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-.header{text-align:center;padding:40px 20px 20px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.header{text-align:center;padding:40px 20px 20px;border-bottom:1px solid var(--border);background:var(--bg2);position:relative}
 .header h1{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header p{color:var(--t2);font-size:12px;margin-top:6px}
 
@@ -81,6 +81,25 @@ textarea{min-height:120px;resize:vertical;line-height:1.8}
 .toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--gold-br);padding:12px 24px;border-radius:10px;font-size:13px;font-weight:700;color:var(--gold);z-index:999;display:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 
 @media(max-width:640px){.style-grid,.char-grid{grid-template-columns:repeat(3,1fr)}.form-row{flex-direction:column}.summary-grid{grid-template-columns:1fr}}
+
+/* History panel */
+.hist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;backdrop-filter:blur(3px)}
+.hist-overlay.show{display:block}
+.hist-panel{position:fixed;top:0;right:-420px;width:400px;max-width:90vw;height:100vh;background:var(--bg2);border-left:1px solid var(--border);z-index:101;transition:right .3s;overflow-y:auto;display:flex;flex-direction:column}
+.hist-panel.show{right:0}
+.hist-header{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid var(--border)}
+.hist-header h3{font-size:15px;font-weight:800;color:var(--gold)}
+.hist-item{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s}
+.hist-item:hover{background:var(--gold-bg)}
+.hist-item .hi-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-item .hi-meta{font-size:10px;color:var(--t3);display:flex;gap:8px;flex-wrap:wrap}
+.hist-item .hi-meta span{background:var(--bg3);padding:1px 6px;border-radius:4px}
+.hist-item .hi-actions{display:flex;gap:6px;margin-top:8px}
+.hist-item .hi-actions button{padding:4px 10px;font-size:10px;border-radius:5px;font-weight:600;border:1px solid var(--border);color:var(--t2);transition:all .2s}
+.hist-item .hi-actions button:hover{border-color:var(--gold-br);color:var(--gold)}
+.hist-item .hi-actions button.del{color:var(--red);border-color:rgba(224,112,80,.2)}
+.hist-item .hi-actions button.del:hover{background:rgba(224,112,80,.08)}
+.hist-empty{padding:40px;text-align:center;color:var(--t3);font-size:13px}
 </style>
 </head>
 <body>
@@ -88,6 +107,17 @@ textarea{min-height:120px;resize:vertical;line-height:1.8}
 <div class="header">
   <h1>🎬 DODO 영상 기획 스튜디오</h1>
   <p>브라우저에서 기획하고 → Claude Code로 제작하세요</p>
+  <button onclick="openHistory()" style="position:absolute;top:20px;right:20px;padding:8px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s" onmouseover="this.style.borderColor='var(--gold-br)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--t2)'">📂 히스토리</button>
+</div>
+
+<!-- History Panel -->
+<div class="hist-overlay" id="histOverlay" onclick="closeHistory()"></div>
+<div class="hist-panel" id="histPanel">
+  <div class="hist-header">
+    <h3>📂 프로젝트 히스토리</h3>
+    <button onclick="closeHistory()" style="font-size:18px;color:var(--t3);padding:4px">✕</button>
+  </div>
+  <div id="histList"></div>
 </div>
 
 <div class="steps-bar" id="stepsBar"></div>
@@ -152,6 +182,132 @@ const C={
 };
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500);}
+
+// ===== HISTORY =====
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem('planstudio-history')||'[]'); }catch(e){ return []; }
+}
+
+function saveHistory(){
+  const hist = getHistory();
+  const topic = C.topic || C.customTopic;
+  if(!topic) return;
+  
+  const style = STYLES.find(s=>s.id===C.style);
+  const char = CHARS.find(c=>c.id===C.character);
+  
+  const item = {
+    id: 'h'+Date.now(),
+    date: new Date().toISOString(),
+    topic: topic,
+    category: C.category,
+    target: C.target,
+    style: C.style,
+    styleName: style?.name||'',
+    character: C.character,
+    charName: char?.name||'',
+    duration: C.duration,
+    ratio: C.ratio,
+    subStyle: C.subStyle,
+    bgmVol: C.bgmVol,
+    transition: C.transition,
+    narrationVol: C.narrationVol,
+    script: C.script,
+    step: C.step
+  };
+  
+  // Remove old same-topic entry if exists
+  const filtered = hist.filter(h => h.topic !== topic);
+  filtered.unshift(item);
+  
+  // Keep max 20
+  const trimmed = filtered.slice(0, 20);
+  try{ localStorage.setItem('planstudio-history', JSON.stringify(trimmed)); }catch(e){}
+  toast('💾 히스토리 저장됨');
+}
+
+function loadHistory(id){
+  const hist = getHistory();
+  const item = hist.find(h=>h.id===id);
+  if(!item) return;
+  
+  C.topic = item.topic||'';
+  C.customTopic = '';
+  C.category = item.category||'';
+  C.target = item.target||'시니어';
+  C.style = item.style||'stickman';
+  C.character = item.character||'jollaman';
+  C.duration = item.duration||'5min';
+  C.ratio = item.ratio||'16:9';
+  C.subStyle = item.subStyle||'youtube';
+  C.bgmVol = item.bgmVol||25;
+  C.transition = item.transition||'fade';
+  C.narrationVol = item.narrationVol||100;
+  C.script = item.script||'';
+  C.step = item.step||1;
+  
+  closeHistory();
+  render();
+  toast('📂 "'+item.topic.slice(0,20)+'" 불러옴');
+}
+
+function deleteHistory(id){
+  const hist = getHistory().filter(h=>h.id!==id);
+  try{ localStorage.setItem('planstudio-history', JSON.stringify(hist)); }catch(e){}
+  renderHistory();
+  toast('🗑️ 삭제됨');
+}
+
+function clearHistory(){
+  if(!confirm('전체 히스토리를 삭제할까요?')) return;
+  try{ localStorage.removeItem('planstudio-history'); }catch(e){}
+  renderHistory();
+  toast('🗑️ 전체 삭제됨');
+}
+
+function openHistory(){
+  renderHistory();
+  document.getElementById('histOverlay').classList.add('show');
+  document.getElementById('histPanel').classList.add('show');
+}
+
+function closeHistory(){
+  document.getElementById('histOverlay').classList.remove('show');
+  document.getElementById('histPanel').classList.remove('show');
+}
+
+function renderHistory(){
+  const hist = getHistory();
+  const el = document.getElementById('histList');
+  
+  if(!hist.length){
+    el.innerHTML='<div class="hist-empty">아직 저장된 프로젝트가 없습니다.<br><span style="font-size:11px;color:var(--t3)">설정파일을 내보내면 자동 저장됩니다.</span></div>';
+    return;
+  }
+  
+  el.innerHTML = `<div style="padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+    <span style="font-size:11px;color:var(--t3)">${hist.length}개 프로젝트</span>
+    <button onclick="clearHistory()" style="font-size:10px;color:var(--red);padding:4px 8px;border:1px solid rgba(224,112,80,.2);border-radius:4px;cursor:pointer;background:none">전체 삭제</button>
+  </div>` + hist.map(h=>{
+    const d = new Date(h.date);
+    const dateStr = (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+    return `<div class="hist-item">
+      <div class="hi-title">${h.topic}</div>
+      <div class="hi-meta">
+        <span>${h.styleName||h.style}</span>
+        <span>${h.charName||h.character}</span>
+        <span>${h.duration}</span>
+        <span>${h.ratio}</span>
+        <span>${dateStr}</span>
+        ${h.script?'<span style="color:var(--green)">대본 있음</span>':''}
+      </div>
+      <div class="hi-actions">
+        <button onclick="event.stopPropagation();loadHistory('${h.id}')">📂 불러오기</button>
+        <button class="del" onclick="event.stopPropagation();deleteHistory('${h.id}')">🗑️ 삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 function renderSteps(){
   const el=document.getElementById('stepsBar');
@@ -852,7 +1008,10 @@ function renderStep6(el){
     </p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-gold" onclick="exportConfig()" style="font-size:15px;padding:16px 40px">📥 설정파일 내보내기 (JSON)</button>
-      <button class="btn btn-green" onclick="exportConfig();toast('Claude Code에서: project_config.json 읽고 영상 만들어줘')" style="font-size:15px;padding:16px 40px">🚀 Claude Code로 제작 시작</button>
+      <button class="btn btn-green" onclick="exportConfig();saveHistory();toast('Claude Code에서: project_config.json 읽고 영상 만들어줘')" style="font-size:15px;padding:16px 40px">🚀 Claude Code로 제작 시작</button>
+    </div>
+    <div style="margin-top:12px;text-align:center">
+      <button onclick="saveHistory()" style="padding:8px 20px;font-size:12px;font-weight:600;color:var(--t2);background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold-br)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--t2)'">💾 히스토리에 저장만 하기</button>
     </div>
     <div style="margin-top:20px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:left">
       <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px">사용법:</div>
@@ -896,6 +1055,7 @@ function exportConfig(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='project_config.json';a.click();
   toast('project_config.json 내보내기 완료!');
+  saveHistory();
 }
 
 render();
