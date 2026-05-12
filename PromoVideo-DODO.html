@@ -223,7 +223,7 @@ select.fs:focus{border-color:var(--g600)}
   <!-- Hero -->
   <div class="hero">
     <h1>주제만 넣으면<br><span>완성된 홍보영상 기획서</span></h1>
-    <p>시장 분석 → 타겟 전략 → 5막 구조 스토리보드<br>나노바나나2 이미지 프롬프트 + 영상 모션 프롬프트까지 한번에</p>
+    <p>시장 분석 → 타겟 전략 → 5막 구조 스토리보드<br>MiniMax 이미지 프롬프트 + Seedance 모션 프롬프트까지 한번에</p>
   </div>
 
   <!-- Input Panel -->
@@ -318,7 +318,7 @@ select.fs:focus{border-color:var(--g600)}
       </div>
       <div class="pstep wait" id="ps4">
         <div class="pstep-icon">🖼️</div>
-        <div><strong>이미지 프롬프트</strong> — 나노바나나2용 상황 묘사</div>
+        <div><strong>이미지 프롬프트</strong> — MiniMax용 캐릭터·장면 묘사</div>
       </div>
       <div class="pstep wait" id="ps5">
         <div class="pstep-icon">✨</div>
@@ -347,6 +347,24 @@ select.fs:focus{border-color:var(--g600)}
 </div>
 
 <script>
+// ── JSON Sanitizer ───────────────────────────────────────────────
+function sanitizeJson(str){
+  let r='',inStr=false,esc=false;
+  for(let i=0;i<str.length;i++){
+    const c=str[i];
+    if(esc){r+=c;esc=false;continue;}
+    if(c==='\\'&&inStr){r+=c;esc=true;continue;}
+    if(c==='"'){inStr=!inStr;r+=c;continue;}
+    if(inStr){
+      if(c==='\n'){r+='\\n';continue;}
+      if(c==='\r')continue;
+      if(c==='\t'){r+='\\t';continue;}
+    }
+    r+=c;
+  }
+  return r;
+}
+
 // ── API Key ─────────────────────────────────────────────────────
 function getKey(){ try{ return JSON.parse(localStorage.getItem('promo-dodo-keys')||'{}').anthropic||''; }catch{return '';} }
 function updateKeyUI(){
@@ -401,6 +419,17 @@ function copyText(text, btn){
 
 // ── Render ───────────────────────────────────────────────────────
 function renderAnalysis(a){
+  const cg = a.character_guide;
+  const charHtml = cg ? `
+    <div class="aitem" style="grid-column:1/-1">
+      <label style="color:var(--green)">캐릭터 가이드 (${cg.type==='consistent'?'전 씬 동일':'씬별 다름'})</label>
+      <p>${cg.description||''} · ${cg.color_tone||''}</p>
+    </div>` : '';
+  const ratioHtml = a.recommended_ratio ? `
+    <div class="aitem">
+      <label style="color:var(--cyan)">권장 비율</label>
+      <p>${a.recommended_ratio}</p>
+    </div>` : '';
   document.getElementById('analysisCard').innerHTML=`
     <div style="font-family:var(--fd);font-weight:700;font-size:13px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">
       📊 기획 전략 분석
@@ -410,6 +439,8 @@ function renderAnalysis(a){
       <div class="aitem"><label>타겟 분석</label><p>${a.target_insight||''}</p></div>
       <div class="aitem"><label>훅 포인트 전략</label><p>${a.hook_strategy||''}</p></div>
       <div class="aitem"><label>차별화 포인트</label><p>${a.differentiation||''}</p></div>
+      ${ratioHtml}
+      ${charHtml}
       <div class="aitem key-msg"><label>핵심 메시지</label><p>${a.key_message||''}</p></div>
     </div>`;
 }
@@ -452,7 +483,7 @@ function renderScenes(scenes){
           </div>
           <div class="ssec full">
             <div class="ssec-label img">
-              🖼 나노바나나2 이미지 프롬프트
+              🖼 MiniMax 이미지 프롬프트
               <button class="ssec-copy" onclick="copyText(\`${escQ(sc.image_prompt)}\`,this)">복사</button>
             </div>
             <p>${sc.image_prompt||''}</p>
@@ -482,10 +513,10 @@ function copyAll(){
   out+=`📊 핵심 메시지: ${analysis.key_message||''}\n`;
   out+=`🎯 훅 포인트: ${analysis.hook_strategy||''}\n\n`;
   scenes.forEach((sc,i)=>{
-    out+=`────────────────────\n씬 ${i+1} [${sc.type||''}] ${sc.title||''} / ${sc.duration||''}\n\n`;
+    out+=`────────────────────\n씬 ${i+1} [${sc.type||''}] ${sc.title||''} / ${sc.duration||''}초\n\n`;
     out+=`[나레이션]\n${sc.narration||''}\n\n`;
     out+=`[자막]\n${sc.subtitle||''}\n\n`;
-    out+=`[나노바나나2 이미지 프롬프트]\n${sc.image_prompt||''}\n\n`;
+    out+=`[이미지 프롬프트]\n${sc.image_prompt||''}\n\n`;
     out+=`[영상 모션 프롬프트]\n${sc.motion_prompt||''}\n\n`;
   });
   navigator.clipboard.writeText(out).then(()=>{
@@ -551,41 +582,76 @@ async function generate(){
 "사회적 증거" (후기, 수치, 신뢰 요소)
 "CTA" (행동 유도, 마지막 씬)
 
-[이미지 프롬프트 규칙 — 나노바나나2용]
-- 한국어로 작성
-- 구체적 장면 묘사: 인물/배경/조명/색감/구도 포함
-- 예시: "30대 초반 한국 여성이 밝은 카페에서 스마트폰을 보며 미소 짓는 장면, 자연광, 따뜻한 아이보리 톤, 얕은 심도, 시네마틱"
-- 스타일 키워드: ${imgLabel}
+[씬 duration 배분 규칙 ⚠️ 반드시 준수]
+모든 씬의 duration 합계가 정확히 ${duration}초가 되도록 배분할 것.
+씬 타입별 권장 비율:
+- 오프닝 훅: 전체의 5~8% (최소 3초)
+- 문제 제기: 전체의 15~20%
+- 솔루션: 전체의 25~30%
+- 사회적 증거: 전체의 20~25%
+- CTA: 전체의 10~15% (최소 5초)
 
-[영상 모션 프롬프트 규칙]
-- 영어로 작성 (Seedance/Veo 호환)
-- 카메라 움직임 + 피사체 움직임 + 분위기 포함
-- 예시: "Slow push-in on woman smiling at phone in warm cafe, soft bokeh, golden hour light, cinematic 24fps"
+[나레이션 글자수 규칙 ⚠️ 반드시 준수]
+한국어 발화 속도 = 초당 약 4~5자 (분당 250자 기준)
+- 3초 씬 → 나레이션 12~18자
+- 5초 씬 → 나레이션 20~28자
+- 8초 씬 → 나레이션 32~44자
+- 10초 씬 → 나레이션 40~55자
+- 12초 씬 → 나레이션 48~65자
+- 15초 씬 → 나레이션 60~80자
 
-[JSON 형식 — 반드시 이 구조만 출력]
+[MiniMax 이미지 프롬프트 규칙]
+- 한국어로 작성, 인물/배경/조명/색감/구도 포함
+- ${imgLabel} 스타일
+- 반드시 밝고 긍정적인 한국 광고 이미지 (공포·혐오·어두운 분위기·트러블 클로즈업 절대 금지)
+- 문제 씬도 "공감·감성" 표현으로 (거울 보며 고민하는 자연스러운 표정 등)
+- 인물은 한국인, 자연스러운 표정, 깔끔한 외모
+- character_guide의 인물 설명을 모든 씬에 반드시 반영
+
+[Seedance image-to-video 모션 프롬프트 규칙]
+- 영어로 작성
+- 생성된 이미지에서 시작하는 움직임 묘사 (새 장면 묘사 금지)
+- 형식: 피사체 움직임 + 카메라 움직임 + 분위기
+- 예시: "Subject gently turns and smiles, slow push-in camera, soft warm lighting, Korean beauty ad feel"
+
+[비율 규칙]
+플랫폼에 따라 recommended_ratio 설정:
+- 유튜브 숏폼 / 틱톡 / 인스타 릴스 → "9:16"
+- 유튜브 롱폼 / 웹 → "16:9"
+- 정방형 → "1:1"
+
+[캐릭터 일관성 규칙]
+- consistent: 스토리형·브랜드모델형 광고 (전 씬 동일 인물)
+- varied: 고객후기형·다양한타겟 광고 (씬별 다른 인물)
+
+JSON만 출력 (다른 설명 없이):
 {
   "analysis": {
-    "market_insight": "시장 경쟁 환경과 기회 분석 (2~3문장)",
-    "target_insight": "타겟의 핵심 페인포인트와 욕구 (2~3문장)",
-    "hook_strategy": "첫 3초 훅 전략 (구체적인 방법)",
+    "market_insight": "시장 경쟁 환경과 기회 분석 2~3문장",
+    "target_insight": "타겟의 핵심 페인포인트와 욕구 2~3문장",
+    "hook_strategy": "첫 3초 훅 전략 구체적 방법",
     "differentiation": "경쟁 대비 차별화 포인트",
-    "key_message": "영상 전체를 관통하는 핵심 메시지 한 줄"
+    "key_message": "영상 전체를 관통하는 핵심 메시지 한 줄",
+    "recommended_ratio": "9:16",
+    "character_guide": {
+      "type": "consistent",
+      "description": "30대 초반 한국 여성, 단발머리, 자연스러운 메이크업",
+      "color_tone": "따뜻한 아이보리 색감, 고급 인테리어 배경"
+    }
   },
   "scenes": [
     {
       "scene_num": 1,
       "title": "씬 제목",
       "type": "오프닝 훅",
-      "duration": "3초",
-      "narration": "나레이션 대본 (실제 읽을 텍스트)",
-      "subtitle": "화면에 표시할 짧은 자막 (최대 15자)",
-      "image_prompt": "나노바나나2용 한국어 이미지 프롬프트 (상세하게)",
-      "motion_prompt": "영어 영상 모션 프롬프트 (카메라+피사체+분위기)"
+      "duration": 3,
+      "narration": "duration 글자수 규칙에 맞는 나레이션",
+      "subtitle": "화면 자막 최대 15자",
+      "image_prompt": "MiniMax용 한국어 이미지 프롬프트 (character_guide 반영, 밝고 긍정적)",
+      "motion_prompt": "Seedance image-to-video 영어 모션 프롬프트"
     }
   ]
-}
-
-JSON만 출력하세요. 다른 설명 없이.`;
+}`;
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -614,10 +680,17 @@ JSON만 출력하세요. 다른 설명 없이.`;
     const data=await res.json();
     const raw=data.content?.[0]?.text||'';
 
-    // JSON 파싱
+    // JSON 파싱 (문자 단위 sanitizer)
     const jsonMatch=raw.match(/\{[\s\S]*\}/);
     if(!jsonMatch) throw new Error('JSON 파싱 실패. 다시 시도해주세요.');
-    const parsed=JSON.parse(jsonMatch[0]);
+    let jsonStr = jsonMatch[0];
+    jsonStr = sanitizeJson(jsonStr);
+    let parsed;
+    try { parsed = JSON.parse(jsonStr); }
+    catch(e) {
+      try { parsed = JSON.parse(jsonStr.replace(/,\s*([}\]])/g,'$1')); }
+      catch(e2) { throw new Error('JSON 파싱 실패: '+e2.message); }
+    }
 
     window.__lastAnalysis=parsed.analysis||{};
     window.__lastScenes=parsed.scenes||[];
