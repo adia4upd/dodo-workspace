@@ -631,7 +631,13 @@ JSON만 출력하세요. 다른 설명 없이.`;
 
   }catch(err){
     clearInterval(stepInterval);
-    showErr('오류: '+err.message);
+    const msg = err.message || '';
+    if(msg.toLowerCase().includes('invalid') && msg.toLowerCase().includes('key') || msg.includes('401') || msg.includes('api-key')){
+      showErr('❌ API 키가 잘못되었습니다. 우측 상단 "API 키 설정"에서 올바른 키를 입력해주세요.');
+      openKeyModal();
+    } else {
+      showErr('오류: ' + msg);
+    }
     document.getElementById('progressWrap').classList.remove('show');
     console.error(err);
   }
