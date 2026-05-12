@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 홍보영상 프롬프트 — DODO</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0d0d;--glass:rgba(255,255,255,0.03);--glass2:rgba(255,255,255,0.055);
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --g200:#f5c45a;--g300:#f0a030;--g400:#e89420;--g500:#cc7a10;--g600:#a86008;--g700:#7a4506;
+  --glow:rgba(240,150,30,0.12);--glow2:rgba(240,150,30,0.25);
+  --cyan:#22d3ee;--purple:#a78bfa;--green:#4ade80;--red:#f87171;
+  --t1:#e8e4dc;--t2:#8a847a;--t3:#4a4640;
+  --fn:'Pretendard Variable','Pretendard',-apple-system,sans-serif;
+  --fd:'Syne','Pretendard',sans-serif;
+  --r:8px;--r2:14px;--r3:20px
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:var(--bg);font-family:var(--fn);color:var(--t1);line-height:1.55;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.25;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  background-size:200px}
+body::after{content:'';position:fixed;z-index:0;top:-20%;left:-5%;width:50vw;height:50vw;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,150,30,.035),transparent 70%);pointer-events:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--g700);border-radius:3px}
+
+/* Header */
+.hdr{position:sticky;top:0;z-index:100;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(13,13,13,.9);backdrop-filter:blur(40px);border-bottom:1px solid var(--border)}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--g400),var(--g600));border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 20px var(--glow)}
+.hdr-t{font-family:var(--fd);font-weight:800;font-size:18px;color:var(--g300)}
+.hdr-sub{font-size:10px;color:var(--t2);letter-spacing:2.5px;text-transform:uppercase;margin-left:8px}
+.btn-key{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--t2);font-size:12px;font-family:var(--fn);padding:7px 14px;cursor:pointer;transition:.25s}
+.btn-key:hover{border-color:var(--g500);color:var(--g300)}
+.key-dot{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;margin-right:5px;vertical-align:middle}
+.key-dot.on{background:var(--green)}
+
+/* Wrap */
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:28px 18px 80px}
+
+/* Panel */
+.panel{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border);
+  border-radius:var(--r3);padding:24px;margin-bottom:18px}
+.panel-title{font-family:var(--fd);font-weight:700;font-size:13px;color:var(--g300);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-title svg{opacity:.7}
+
+/* Hero */
+.hero{text-align:center;padding:40px 20px 32px;margin-bottom:8px}
+.hero h1{font-family:var(--fd);font-weight:800;font-size:32px;color:var(--t1);line-height:1.2;margin-bottom:10px}
+.hero h1 span{background:linear-gradient(90deg,var(--g300),var(--g200));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;color:var(--t2);max-width:520px;margin:0 auto;line-height:1.7}
+
+/* Input */
+.si{width:100%;padding:14px 18px;font-size:15px;font-family:var(--fn);
+  background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:var(--r2);
+  color:var(--t1);outline:none;transition:.3s;resize:none}
+.si:focus{border-color:var(--g500);box-shadow:0 0 0 3px var(--glow)}
+.si::placeholder{color:var(--t3)}
+.label{font-size:11px;color:var(--t2);font-weight:600;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;display:block}
+
+/* Options grid */
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:14px}
+.opt-group label{font-size:10px;color:var(--t2);font-weight:600;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px}
+select.fs{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--t1);font-size:13px;font-family:var(--fn);outline:none;transition:.25s}
+select.fs:focus{border-color:var(--g600)}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{padding:5px 12px;font-size:11px;font-weight:600;border-radius:20px;cursor:pointer;
+  background:var(--glass);border:1px solid var(--border);color:var(--t2);transition:.2s;font-family:var(--fn)}
+.chip:hover{border-color:var(--g500);color:var(--g300)}
+.chip.on{background:rgba(240,150,30,.1);border-color:rgba(240,150,30,.3);color:var(--g300)}
+
+/* Buttons */
+.btn-go{width:100%;padding:16px;font-size:16px;font-weight:700;font-family:var(--fn);
+  background:linear-gradient(135deg,var(--g500),var(--g400));color:#0d0d0d;
+  border:none;border-radius:var(--r2);cursor:pointer;transition:.25s;
+  box-shadow:0 4px 20px var(--glow);margin-top:6px}
+.btn-go:hover:not(:disabled){box-shadow:0 6px 30px var(--glow2);transform:translateY(-2px)}
+.btn-go:disabled{background:var(--t3);color:#555;cursor:wait;transform:none;box-shadow:none}
+
+/* Progress */
+.progress-wrap{display:none;margin-top:20px}
+.progress-wrap.show{display:block}
+.progress-steps{display:flex;flex-direction:column;gap:8px}
+.pstep{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r);
+  background:var(--glass);border:1px solid var(--border);font-size:13px;transition:.3s}
+.pstep.active{border-color:rgba(240,150,30,.3);background:rgba(240,150,30,.05);color:var(--g300)}
+.pstep.done{border-color:rgba(74,222,128,.2);background:rgba(74,222,128,.04);color:var(--green)}
+.pstep.wait{color:var(--t3)}
+.pstep-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.pstep.active .pstep-icon{background:rgba(240,150,30,.15);animation:pulse 1.2s infinite}
+.pstep.done .pstep-icon{background:rgba(74,222,128,.15)}
+.pstep.wait .pstep-icon{background:rgba(255,255,255,.04)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.spinner{width:16px;height:16px;border:2px solid rgba(240,150,30,.2);border-top-color:var(--g400);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Result */
+.result-wrap{display:none;margin-top:20px}
+.result-wrap.show{display:block}
+
+/* Analysis card */
+.analysis-card{background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.15);border-radius:var(--r2);padding:20px;margin-bottom:20px}
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:600px){.analysis-grid{grid-template-columns:1fr}}
+.aitem label{font-size:10px;color:var(--purple);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px}
+.aitem p{font-size:13px;color:var(--t1);line-height:1.6}
+.key-msg{grid-column:1/-1;background:rgba(240,150,30,.06);border:1px solid rgba(240,150,30,.15);border-radius:var(--r);padding:14px}
+.key-msg label{color:var(--g300)}
+.key-msg p{font-size:14px;font-weight:600;color:var(--g200)}
+
+/* Scene cards */
+.scenes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.scenes-header h3{font-family:var(--fd);font-weight:700;font-size:16px;color:var(--t1)}
+.btn-copy-all{padding:8px 16px;font-size:12px;font-weight:600;background:rgba(240,150,30,.08);
+  border:1px solid rgba(240,150,30,.2);color:var(--g300);border-radius:var(--r);cursor:pointer;
+  font-family:var(--fn);transition:.2s}
+.btn-copy-all:hover{background:rgba(240,150,30,.18)}
+
+.scene-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r2);
+  margin-bottom:12px;overflow:hidden;transition:.3s}
+.scene-card:hover{border-color:rgba(240,150,30,.2);background:var(--glass2)}
+.scene-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;
+  border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.scene-num{display:flex;align-items:center;gap:10px}
+.scene-badge{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--g500),var(--g700));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#0d0d0d;font-family:var(--fd)}
+.scene-type{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+.type-hook{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+.type-problem{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
+.type-solution{background:rgba(74,222,128,.1);color:var(--green);border:1px solid rgba(74,222,128,.2)}
+.type-proof{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.type-cta{background:rgba(240,150,30,.12);color:var(--g300);border:1px solid rgba(240,150,30,.25)}
+.type-etc{background:var(--glass);color:var(--t2);border:1px solid var(--border)}
+.scene-dur{font-size:11px;color:var(--t3)}
+.scene-toggle{font-size:11px;color:var(--t3);transition:.2s}
+.scene-card.open .scene-toggle{transform:rotate(180deg)}
+
+.scene-body{display:none;padding:16px}
+.scene-card.open .scene-body{display:block}
+.scene-sections{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.scene-sections{grid-template-columns:1fr}}
+.ssec{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:var(--r);padding:12px;position:relative}
+.ssec.full{grid-column:1/-1}
+.ssec-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.ssec-label.narr{color:#60a5fa}
+.ssec-label.sub{color:#f9a8d4}
+.ssec-label.img{color:#86efac}
+.ssec-label.mot{color:var(--cyan)}
+.ssec p{font-size:13px;color:var(--t1);line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.ssec-copy{background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;
+  font-size:10px;color:var(--t2);cursor:pointer;font-family:var(--fn);transition:.2s}
+.ssec-copy:hover{border-color:var(--g500);color:var(--g300)}
+.ssec-copy.ok{color:var(--green);border-color:rgba(74,222,128,.3)}
+
+/* Error */
+.err{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:var(--r2);
+  padding:14px 18px;color:var(--red);font-size:14px;margin-top:14px;display:none}
+.err.show{display:block}
+
+/* Key modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#161616;border:1px solid var(--border2);border-radius:20px;padding:28px;width:100%;max-width:440px;margin:0 16px}
+.modal h3{font-size:15px;font-weight:700;color:var(--g300);margin-bottom:6px}
+.modal p{font-size:12px;color:var(--t2);margin-bottom:18px;line-height:1.6}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn-sm{padding:8px 16px;border-radius:var(--r);font-size:12px;font-weight:600;font-family:var(--fn);cursor:pointer;transition:.2s}
+.btn-sm-ghost{background:none;border:1px solid var(--border);color:var(--t2)}
+.btn-sm-ghost:hover{border-color:var(--border2);color:var(--t1)}
+.btn-sm-gold{background:linear-gradient(135deg,var(--g500),var(--g400));color:#0d0d0d;border:none;box-shadow:0 3px 12px var(--glow)}
+.btn-sm-gold:hover{box-shadow:0 4px 20px var(--glow2)}
+.btn-sm-red{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:var(--red)}
+
+/* Tip */
+.tip{font-size:12px;color:var(--t3);margin-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">🎬</div>
+    <div>
+      <span class="hdr-t">홍보영상 프롬프트</span>
+      <span class="hdr-sub">Promo Storyboard</span>
+    </div>
+  </div>
+  <button class="btn-key" onclick="openKeyModal()">
+    <span class="key-dot" id="keyDot"></span>
+    <span id="keyLabel">API 키 설정</span>
+  </button>
+</header>
+
+<!-- API Key Modal -->
+<div class="modal-bg" id="keyModal" onclick="closeKeyModal(event)">
+  <div class="modal">
+    <h3>🔑 Claude API 키</h3>
+    <p>Anthropic API 키를 입력하세요. 이 기기 localStorage에만 저장됩니다.</p>
+    <label class="label">API Key</label>
+    <input type="password" class="si" id="keyInput" placeholder="sk-ant-api03-..." style="margin-bottom:4px">
+    <p style="font-size:11px;color:var(--t3)">console.anthropic.com → API Keys에서 발급</p>
+    <div class="modal-btns">
+      <button class="btn-sm btn-sm-red" onclick="clearKey()">삭제</button>
+      <button class="btn-sm btn-sm-ghost" onclick="closeKeyModal()">취소</button>
+      <button class="btn-sm btn-sm-gold" onclick="saveKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>주제만 넣으면<br><span>완성된 홍보영상 기획서</span></h1>
+    <p>시장 분석 → 타겟 전략 → 5막 구조 스토리보드<br>나노바나나2 이미지 프롬프트 + 영상 모션 프롬프트까지 한번에</p>
+  </div>
+
+  <!-- Input Panel -->
+  <div class="panel">
+    <div class="panel-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      기획 입력
+    </div>
+
+    <label class="label">홍보할 주제 / 상품 / 브랜드</label>
+    <textarea class="si" id="topic" rows="3"
+      placeholder="예: 강남 피부과 레이저 시술, 유기농 반려견 간식 브랜드, 온라인 영어회화 앱, 스타트업 SaaS 협업툴..."></textarea>
+
+    <div class="opts">
+      <div class="opt-group">
+        <label>플랫폼</label>
+        <select class="fs" id="platform">
+          <option value="youtube-shorts">유튜브 숏폼 (9:16)</option>
+          <option value="youtube-long">유튜브 롱폼 (16:9)</option>
+          <option value="instagram-reels">인스타 릴스 (9:16)</option>
+          <option value="tiktok">TikTok (9:16)</option>
+          <option value="genspark">젠스파크 범용</option>
+        </select>
+      </div>
+      <div class="opt-group">
+        <label>영상 길이</label>
+        <select class="fs" id="duration">
+          <option value="30">30초</option>
+          <option value="60" selected>60초</option>
+          <option value="90">90초</option>
+          <option value="180">3분</option>
+        </select>
+      </div>
+      <div class="opt-group">
+        <label>타겟</label>
+        <select class="fs" id="target">
+          <option value="general">일반 소비자 (B2C)</option>
+          <option value="b2b">기업 담당자 (B2B)</option>
+          <option value="20s">2030 젊은층</option>
+          <option value="40s">4050 중장년층</option>
+          <option value="global">글로벌 (한국+해외)</option>
+        </select>
+      </div>
+      <div class="opt-group">
+        <label>이미지 스타일</label>
+        <select class="fs" id="imgStyle">
+          <option value="cinematic">시네마틱 실사</option>
+          <option value="product">제품컷 클린</option>
+          <option value="lifestyle">라이프스타일</option>
+          <option value="illustration">감성 일러스트</option>
+          <option value="documentary">다큐멘터리</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tone chips -->
+    <div style="margin-top:16px">
+      <label class="label">영상 톤</label>
+      <div class="chips" id="toneChips">
+        <span class="chip on" data-val="emotional">감성적</span>
+        <span class="chip" data-val="trust">신뢰감 있는</span>
+        <span class="chip" data-val="urgent">긴박감·바이럴</span>
+        <span class="chip" data-val="professional">전문가적</span>
+        <span class="chip" data-val="humor">유머러스</span>
+        <span class="chip" data-val="luxury">프리미엄·럭셔리</span>
+      </div>
+    </div>
+
+    <div id="errMsg" class="err"></div>
+    <button class="btn-go" id="btnGo" onclick="generate()">🎬 홍보영상 기획서 생성</button>
+    <p class="tip">Claude가 시장 분석 → 전략 기획 → 씬별 스토리보드를 순서대로 생성합니다 (약 30~60초)</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="panel-title" style="margin-bottom:14px">
+      <div class="spinner"></div>
+      생성 중...
+    </div>
+    <div class="progress-steps" id="progressSteps">
+      <div class="pstep wait" id="ps1">
+        <div class="pstep-icon">📊</div>
+        <div><strong>시장 분석</strong> — 경쟁 환경·타겟 인사이트 파악</div>
+      </div>
+      <div class="pstep wait" id="ps2">
+        <div class="pstep-icon">🧠</div>
+        <div><strong>전략 기획</strong> — 핵심 메시지·훅 포인트 설계</div>
+      </div>
+      <div class="pstep wait" id="ps3">
+        <div class="pstep-icon">🎬</div>
+        <div><strong>스토리보드</strong> — 5막 구조 씬 분할</div>
+      </div>
+      <div class="pstep wait" id="ps4">
+        <div class="pstep-icon">🖼️</div>
+        <div><strong>이미지 프롬프트</strong> — 나노바나나2용 상황 묘사</div>
+      </div>
+      <div class="pstep wait" id="ps5">
+        <div class="pstep-icon">✨</div>
+        <div><strong>모션 프롬프트</strong> — 영상 움직임·카메라 연출</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-wrap" id="resultWrap">
+
+    <!-- Analysis -->
+    <div class="analysis-card" id="analysisCard"></div>
+
+    <!-- Scenes -->
+    <div id="scenesWrap">
+      <div class="scenes-header">
+        <h3 id="scenesTitle">📋 씬별 스토리보드</h3>
+        <button class="btn-copy-all" onclick="copyAll()">📋 전체 복사</button>
+      </div>
+      <div id="scenesContainer"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ── API Key ─────────────────────────────────────────────────────
+function getKey(){ try{ return JSON.parse(localStorage.getItem('promo-dodo-keys')||'{}').anthropic||''; }catch{return '';} }
+function updateKeyUI(){
+  const k=getKey();
+  document.getElementById('keyDot').className='key-dot'+(k?' on':'');
+  document.getElementById('keyLabel').textContent=k?'API 키 설정됨':'API 키 설정';
+}
+function openKeyModal(){
+  document.getElementById('keyInput').value=getKey();
+  document.getElementById('keyModal').classList.add('show');
+}
+function closeKeyModal(e){ if(!e||e.target===document.getElementById('keyModal')) document.getElementById('keyModal').classList.remove('show'); }
+function saveKey(){
+  const v=document.getElementById('keyInput').value.trim();
+  try{ const s=JSON.parse(localStorage.getItem('promo-dodo-keys')||'{}'); s.anthropic=v; localStorage.setItem('promo-dodo-keys',JSON.stringify(s)); }catch{}
+  updateKeyUI(); closeKeyModal();
+}
+function clearKey(){
+  try{ const s=JSON.parse(localStorage.getItem('promo-dodo-keys')||'{}'); delete s.anthropic; localStorage.setItem('promo-dodo-keys',JSON.stringify(s)); }catch{}
+  document.getElementById('keyInput').value=''; updateKeyUI();
+}
+updateKeyUI();
+
+// ── Tone chips ───────────────────────────────────────────────────
+document.querySelectorAll('#toneChips .chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('#toneChips .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');
+  });
+});
+function getTone(){ return document.querySelector('#toneChips .chip.on')?.dataset.val||'emotional'; }
+
+// ── Progress helpers ─────────────────────────────────────────────
+function setStep(id,state){
+  const el=document.getElementById(id);
+  el.className='pstep '+state;
+  const ic=el.querySelector('.pstep-icon');
+  if(state==='active') ic.innerHTML='<div class="spinner"></div>';
+  else if(state==='done') ic.textContent=['📊','🧠','🎬','🖼️','✨'][['ps1','ps2','ps3','ps4','ps5'].indexOf(id)];
+}
+
+// ── Scene type badge ─────────────────────────────────────────────
+const typeMap={'오프닝 훅':'hook','문제 제기':'problem','솔루션':'solution','사회적 증거':'proof','CTA':'cta'};
+function typeClass(t){ return 'type-'+(typeMap[t]||'etc'); }
+
+// ── Copy helper ──────────────────────────────────────────────────
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    if(btn){ btn.textContent='✓ 복사됨'; btn.classList.add('ok'); setTimeout(()=>{ btn.textContent='복사'; btn.classList.remove('ok'); },1500); }
+  });
+}
+
+// ── Render ───────────────────────────────────────────────────────
+function renderAnalysis(a){
+  document.getElementById('analysisCard').innerHTML=`
+    <div style="font-family:var(--fd);font-weight:700;font-size:13px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">
+      📊 기획 전략 분석
+    </div>
+    <div class="analysis-grid">
+      <div class="aitem"><label>시장 인사이트</label><p>${a.market_insight||''}</p></div>
+      <div class="aitem"><label>타겟 분석</label><p>${a.target_insight||''}</p></div>
+      <div class="aitem"><label>훅 포인트 전략</label><p>${a.hook_strategy||''}</p></div>
+      <div class="aitem"><label>차별화 포인트</label><p>${a.differentiation||''}</p></div>
+      <div class="aitem key-msg"><label>핵심 메시지</label><p>${a.key_message||''}</p></div>
+    </div>`;
+}
+
+function renderScenes(scenes){
+  const c=document.getElementById('scenesContainer');
+  c.innerHTML='';
+  scenes.forEach((sc,i)=>{
+    const div=document.createElement('div');
+    div.className='scene-card';
+    div.innerHTML=`
+      <div class="scene-head" onclick="toggleScene(this.parentElement)">
+        <div class="scene-num">
+          <div class="scene-badge">${i+1}</div>
+          <div>
+            <span style="font-size:13px;font-weight:600;color:var(--t1)">${sc.title||'씬 '+(i+1)}</span>
+            <span class="scene-type ${typeClass(sc.type)}" style="margin-left:8px">${sc.type||''}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="scene-dur">${sc.duration||''}</span>
+          <span class="scene-toggle">▼</span>
+        </div>
+      </div>
+      <div class="scene-body">
+        <div class="scene-sections">
+          <div class="ssec">
+            <div class="ssec-label narr">
+              🎙 나레이션 대본
+              <button class="ssec-copy" onclick="copyText(\`${escQ(sc.narration)}\`,this)">복사</button>
+            </div>
+            <p>${sc.narration||''}</p>
+          </div>
+          <div class="ssec">
+            <div class="ssec-label sub">
+              📝 화면 자막
+              <button class="ssec-copy" onclick="copyText(\`${escQ(sc.subtitle)}\`,this)">복사</button>
+            </div>
+            <p>${sc.subtitle||''}</p>
+          </div>
+          <div class="ssec full">
+            <div class="ssec-label img">
+              🖼 나노바나나2 이미지 프롬프트
+              <button class="ssec-copy" onclick="copyText(\`${escQ(sc.image_prompt)}\`,this)">복사</button>
+            </div>
+            <p>${sc.image_prompt||''}</p>
+          </div>
+          <div class="ssec full">
+            <div class="ssec-label mot">
+              🎞 영상 모션 프롬프트
+              <button class="ssec-copy" onclick="copyText(\`${escQ(sc.motion_prompt)}\`,this)">복사</button>
+            </div>
+            <p>${sc.motion_prompt||''}</p>
+          </div>
+        </div>
+      </div>`;
+    // 첫 씬 열어두기
+    if(i===0) div.classList.add('open');
+    c.appendChild(div);
+  });
+}
+
+function escQ(s){ return (s||'').replace(/`/g,"'").replace(/\\/g,'\\\\'); }
+function toggleScene(card){ card.classList.toggle('open'); }
+
+function copyAll(){
+  const scenes=window.__lastScenes||[];
+  const analysis=window.__lastAnalysis||{};
+  let out='=== 홍보영상 기획서 ===\n\n';
+  out+=`📊 핵심 메시지: ${analysis.key_message||''}\n`;
+  out+=`🎯 훅 포인트: ${analysis.hook_strategy||''}\n\n`;
+  scenes.forEach((sc,i)=>{
+    out+=`────────────────────\n씬 ${i+1} [${sc.type||''}] ${sc.title||''} / ${sc.duration||''}\n\n`;
+    out+=`[나레이션]\n${sc.narration||''}\n\n`;
+    out+=`[자막]\n${sc.subtitle||''}\n\n`;
+    out+=`[나노바나나2 이미지 프롬프트]\n${sc.image_prompt||''}\n\n`;
+    out+=`[영상 모션 프롬프트]\n${sc.motion_prompt||''}\n\n`;
+  });
+  navigator.clipboard.writeText(out).then(()=>{
+    const b=document.querySelector('.btn-copy-all');
+    b.textContent='✓ 복사됨!'; setTimeout(()=>b.textContent='📋 전체 복사',2000);
+  });
+}
+
+// ── Generate ─────────────────────────────────────────────────────
+async function generate(){
+  const topic=document.getElementById('topic').value.trim();
+  if(!topic){ showErr('홍보 주제를 입력해주세요.'); return; }
+  const key=getKey();
+  if(!key){ showErr('Claude API 키를 먼저 설정해주세요.'); openKeyModal(); return; }
+  hideErr();
+
+  const platform=document.getElementById('platform').value;
+  const duration=document.getElementById('duration').value;
+  const target=document.getElementById('target').value;
+  const imgStyle=document.getElementById('imgStyle').value;
+  const tone=getTone();
+
+  const platformLabel={'youtube-shorts':'유튜브 숏폼 9:16','youtube-long':'유튜브 롱폼 16:9','instagram-reels':'인스타 릴스 9:16','tiktok':'TikTok 9:16','genspark':'젠스파크 범용'}[platform]||platform;
+  const toneLabel={'emotional':'감성적','trust':'신뢰감 있는','urgent':'긴박감·바이럴','professional':'전문가적','humor':'유머러스','luxury':'프리미엄·럭셔리'}[tone]||tone;
+  const targetLabel={'general':'일반 소비자','b2b':'기업 담당자','20s':'2030 젊은층','40s':'4050 중장년층','global':'글로벌'}[target]||target;
+  const imgLabel={'cinematic':'시네마틱 실사','product':'제품컷 클린','lifestyle':'라이프스타일','illustration':'감성 일러스트','documentary':'다큐멘터리'}[imgStyle]||imgStyle;
+
+  const sceneCount = duration<=30?5 : duration<=60?6 : duration<=90?8 : 10;
+
+  // UI 상태
+  document.getElementById('btnGo').disabled=true;
+  document.getElementById('progressWrap').classList.add('show');
+  document.getElementById('resultWrap').classList.remove('show');
+  ['ps1','ps2','ps3','ps4','ps5'].forEach(id=>setStep(id,'wait'));
+
+  // 단계별 시각적 효과
+  const steps=['ps1','ps2','ps3','ps4','ps5'];
+  let stepIdx=0;
+  const stepInterval=setInterval(()=>{
+    if(stepIdx>0) setStep(steps[stepIdx-1],'done');
+    if(stepIdx<steps.length) setStep(steps[stepIdx],'active');
+    stepIdx++;
+    if(stepIdx>steps.length) clearInterval(stepInterval);
+  },600);
+
+  const prompt=`당신은 광고 전략 디렉터이자 영상 기획 전문가입니다.
+아래 조건으로 홍보영상 기획서를 JSON 형식으로 생성해주세요.
+
+[입력 정보]
+- 홍보 주제: ${topic}
+- 플랫폼: ${platformLabel}
+- 영상 길이: ${duration}초
+- 타겟: ${targetLabel}
+- 영상 톤: ${toneLabel}
+- 이미지 스타일: ${imgLabel}
+- 씬 수: ${sceneCount}개
+
+[씬 구조 규칙]
+씬 타입은 반드시 이 5가지 중에서 사용:
+"오프닝 훅" (첫 3초 강렬한 후킹)
+"문제 제기" (타겟의 고통·불편 공감)
+"솔루션" (제품/서비스가 해결책임을 보여줌)
+"사회적 증거" (후기, 수치, 신뢰 요소)
+"CTA" (행동 유도, 마지막 씬)
+
+[이미지 프롬프트 규칙 — 나노바나나2용]
+- 한국어로 작성
+- 구체적 장면 묘사: 인물/배경/조명/색감/구도 포함
+- 예시: "30대 초반 한국 여성이 밝은 카페에서 스마트폰을 보며 미소 짓는 장면, 자연광, 따뜻한 아이보리 톤, 얕은 심도, 시네마틱"
+- 스타일 키워드: ${imgLabel}
+
+[영상 모션 프롬프트 규칙]
+- 영어로 작성 (Seedance/Veo 호환)
+- 카메라 움직임 + 피사체 움직임 + 분위기 포함
+- 예시: "Slow push-in on woman smiling at phone in warm cafe, soft bokeh, golden hour light, cinematic 24fps"
+
+[JSON 형식 — 반드시 이 구조만 출력]
+{
+  "analysis": {
+    "market_insight": "시장 경쟁 환경과 기회 분석 (2~3문장)",
+    "target_insight": "타겟의 핵심 페인포인트와 욕구 (2~3문장)",
+    "hook_strategy": "첫 3초 훅 전략 (구체적인 방법)",
+    "differentiation": "경쟁 대비 차별화 포인트",
+    "key_message": "영상 전체를 관통하는 핵심 메시지 한 줄"
+  },
+  "scenes": [
+    {
+      "scene_num": 1,
+      "title": "씬 제목",
+      "type": "오프닝 훅",
+      "duration": "3초",
+      "narration": "나레이션 대본 (실제 읽을 텍스트)",
+      "subtitle": "화면에 표시할 짧은 자막 (최대 15자)",
+      "image_prompt": "나노바나나2용 한국어 이미지 프롬프트 (상세하게)",
+      "motion_prompt": "영어 영상 모션 프롬프트 (카메라+피사체+분위기)"
+    }
+  ]
+}
+
+JSON만 출력하세요. 다른 설명 없이.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:4000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    clearInterval(stepInterval);
+    steps.forEach(id=>setStep(id,'done'));
+
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      throw new Error(e?.error?.message||`API 오류 ${res.status}`);
+    }
+
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'';
+
+    // JSON 파싱
+    const jsonMatch=raw.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('JSON 파싱 실패. 다시 시도해주세요.');
+    const parsed=JSON.parse(jsonMatch[0]);
+
+    window.__lastAnalysis=parsed.analysis||{};
+    window.__lastScenes=parsed.scenes||[];
+
+    renderAnalysis(parsed.analysis||{});
+    renderScenes(parsed.scenes||[]);
+
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('progressWrap').classList.remove('show');
+    document.getElementById('resultWrap').scrollIntoView({behavior:'smooth',block:'start'});
+
+  }catch(err){
+    clearInterval(stepInterval);
+    showErr('오류: '+err.message);
+    document.getElementById('progressWrap').classList.remove('show');
+    console.error(err);
+  }
+
+  document.getElementById('btnGo').disabled=false;
+}
+
+function showErr(msg){ const e=document.getElementById('errMsg'); e.textContent=msg; e.classList.add('show'); }
+function hideErr(){ document.getElementById('errMsg').classList.remove('show'); }
+</script>
+</body>
+</html>
