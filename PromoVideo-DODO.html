@@ -611,8 +611,22 @@ async function generate(){
 [Seedance image-to-video 모션 프롬프트 규칙]
 - 영어로 작성
 - 생성된 이미지에서 시작하는 움직임 묘사 (새 장면 묘사 금지)
-- 형식: 피사체 움직임 + 카메라 움직임 + 분위기
-- 예시: "Subject gently turns and smiles, slow push-in camera, soft warm lighting, Korean beauty ad feel"
+- 형식: 피사체 움직임 + 카메라 타입 + 분위기
+- 과도한 움직임 금지
+
+카메라 타입은 씬 목적에 따라 반드시 구분:
+- ZOOM-IN (임팩트·훅 필요): "slow push-in camera toward subject"
+  → 오프닝 훅, CTA 씬에 적합
+- FULL-FRAME (맥락·배경 유지): "static camera, hold full frame composition, no zoom"
+  → 문제 제기, 솔루션, 사회적 증거 씬에 적합
+- PAN (공간감·전환): "gentle pan left/right, full frame maintained"
+
+씬 타입별 기본 권장:
+- 오프닝 훅 → ZOOM-IN
+- 문제 제기 → FULL-FRAME
+- 솔루션 → FULL-FRAME 또는 PAN
+- 사회적 증거 → FULL-FRAME
+- CTA → ZOOM-IN
 
 [비율 규칙]
 플랫폼에 따라 recommended_ratio 설정:
