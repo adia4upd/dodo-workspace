@@ -1531,12 +1531,16 @@ function normalizeApifyItem(item) {
   return {
     id: item.id || item.videoId || item.aweme_id || '',
     url: (function(){
-      const candidates = [item.webVideoUrl, item.url, item.videoUrl, item.video_url, item.shareUrl];
+      // 1순위: shareUrl (tiktok.com/t/XXXXX 포함)
+      if(item.shareUrl && typeof item.shareUrl === 'string' && item.shareUrl.includes('tiktok.com')) return item.shareUrl;
+      // 2순위: /video/ 포함된 직접 URL
+      const candidates = [item.webVideoUrl, item.url, item.videoUrl, item.video_url];
       for(const u of candidates){
-        if(u && typeof u === 'string' && u.includes('/video/')) return u;
+        if(u && typeof u === 'string' && u.includes('tiktok.com') && u.includes('/video/')) return u;
       }
+      // 3순위: id + uniqueId로 조합 (uniqueId 우선)
       const vid = item.id || item.videoId || item.aweme_id || '';
-      const uid = author.uniqueId || author.name || author.username || '';
+      const uid = author.uniqueId || author.username || '';
       if(vid && uid) return 'https://www.tiktok.com/@' + uid + '/video/' + vid;
       if(vid) return 'https://www.tiktok.com/video/' + vid;
       return '';
