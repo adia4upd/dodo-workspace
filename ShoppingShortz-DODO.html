@@ -152,7 +152,7 @@ async function compressImage(file,maxW=1200){
   });
 }
 async function callAPI(sys,msgs,tools,timeout=120000){
-  const body={model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:msgs};
+  const body={model:'claude-sonnet-4-6',max_tokens:8000,system:sys,messages:msgs};
   if(tools?.length)body.tools=tools;
   try{
     const fetchP=fetch('https://api.anthropic.com/v1/messages',{

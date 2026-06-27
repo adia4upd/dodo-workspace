@@ -604,7 +604,7 @@ async function aiRecommendTopics(){
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         messages: [{
           role: 'user',
@@ -841,7 +841,7 @@ async function aiGenerateScript(){
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:4096,
         messages:[{role:'user',content:`당신은 한국 유튜브 콘텐츠 전문 대본 작가입니다.
 

@@ -1254,7 +1254,7 @@ async function testClaudeKey() {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 10,
         messages: [{ role: 'user', content: 'ping' }]
       })
@@ -1852,7 +1852,7 @@ async function runAiAnalysis() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': STATE.claudeKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           max_tokens: 2000,
           messages: [{ role: 'user', content: `당신은 틱톡 바이럴 콘텐츠 전문 분석가입니다.\n아래 데이터를 분석하여 다음을 정리해주세요:\n1. 공통 주제 패턴\n2. 훅(Hook) 기법 분석\n3. 해시태그 트렌드\n4. 음원 트렌드\n5. 최적 영상 길이\n6. 한국 시니어/건강/경제 채널에 적용 가능한 아이디어 3가지\n\n=== 바이럴 영상 TOP ${top20.length} ===\n${summaries}\n\nHTML 형식으로 답변해주세요 (h2, h3, p, ul, li, strong 태그 사용).` }]
         })

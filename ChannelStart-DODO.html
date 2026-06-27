@@ -317,7 +317,7 @@ function ChannelDNA({ onBack, platform, apiKey }) {
 
   const gen=async()=>{if(!apiKey){setResult({error:"API 키를 먼저 등록해주세요. 홈 화면 > 🔑 설정"});return;}setLoading(true);try{
     const prompt=`한국 ${p.name} ${cw} 전략 전문가. ${cw} DNA 리포트 작성.\n\n플랫폼:${p.name}\n${cw}명:${data.channelName||"미정"}\n카테고리:${data.category.join(",")}\n타겟연령:${data.targetAge.join(",")}\n성별:${data.targetGender}\n컨셉:${data.concept}\n차별화:${data.uniqueValue}\n톤:${data.tone}\n빈도:${data.uploadFreq}\n길이:${data.contentLength}\n수익화:${data.monetization.join(",")}\n\nJSON만(백틱없이):\n{"channelIdentity":"20자이내","slogan":"15자이내","targetPersona":"3문장","contentPillars":["1","2","3"],"differentiator":"2문장","toneGuide":"3문장","channelDescription":"${platform==='instagram'?'150자':platform==='tiktok'?'80자':'2~3문장'} SEO 복붙용","first5Contents":[{"title":"제목","hook":"후킹","format":"포맷"},{"title":"","hook":"","format":""},{"title":"","hook":"","format":""},{"title":"","hook":"","format":""},{"title":"","hook":"","format":""}],"growthStrategy":"3문장","hashtagStrategy":"2문장","riskWarning":"2문장"}`;
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true","anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true","anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
     const d=await res.json();const t=d.content?.map(c=>c.text||"").join("")||"";
     setResult(JSON.parse(t.replace(/```json|```/g,"").trim()));
   }catch(err){console.error(err);setResult({error:"API 오류: " + (err.message||"네트워크 연결 또는 API 키를 확인해 주세요")})}setLoading(false)};
@@ -363,14 +363,14 @@ function Benchmark({ onBack, platform, apiKey }) {
 
   const goStep=async()=>{if(!apiKey){setResult({error:"API 키를 먼저 등록해주세요. 홈 화면 > 🔑 설정"});return;}setLoading(true);try{
     const prompt=`${p.name} ${cw} 분석 전문가. 뇌훔치기 방식으로 분석.\n\n플랫폼:${p.name}\n${cw}명:${input.name}\n팔로워/구독:${input.followers}\n조회수:${input.views}\n스타일:${input.style}\n강점:${input.strengths}\n비주얼:${input.visual}\n후킹:${input.hook}\n빈도:${input.freq}\n추가:${input.extra}\n\nJSON만:\n{"channelSummary":"한문장","successFormula":"3문장","contentPattern":{"structure":"구조","hookStyle":"후킹","storytelling":"기법"},"visualAnalysis":"비주얼전략","audienceInsight":"시청자분석","stealableElements":[{"element":"요소1","howToApply":"적용1"},{"element":"요소2","howToApply":"적용2"},{"element":"요소3","howToApply":"적용3"},{"element":"요소4","howToApply":"적용4"},{"element":"요소5","howToApply":"적용5"}],"weaknesses":"약점2문장","actionPlan":"3단계"}`;
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true","anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true","anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
     const d=await res.json();const t=d.content?.map(c=>c.text||"").join("")||"";
     setResult(JSON.parse(t.replace(/```json|```/g,"").trim()));
   }catch(err){console.error(err);setResult({error:"API 오류: " + (err.message||"네트워크 연결 또는 API 키를 확인해 주세요")})}setLoading(false)};
 
   const goPaste=async()=>{if(!apiKey){setResult({error:"API 키를 먼저 등록해주세요. 홈 화면 > 🔑 설정"});return;}setLoading(true);try{
     const prompt="당신은 " + p.name + " " + cw + " 분석 전문가입니다. '뇌훔치기' 방식으로 아래 정보를 심층 분석하세요.\n\n플랫폼: " + p.name + "\n\n아래는 사용자가 붙여넣기한 " + cw + " 정보입니다 (채널 홈 링크, 관찰 메모, 스크린샷 텍스트 등이 섞여있을 수 있습니다). 이 정보에서 채널명, 구독자/팔로워, 콘텐츠 스타일, 강점, 썸네일/비주얼, 후킹 패턴, 업로드 빈도 등을 최대한 추출해서 분석하세요:\n\n" + pasteText + "\n\nJSON만 출력 (마크다운/백틱 없이):\n{\"channelSummary\":\"이 채널을 한 문장으로 정의\",\"successFormula\":\"핵심 성공 공식 (3문장)\",\"contentPattern\":{\"structure\":\"영상 구조 패턴 분석\",\"hookStyle\":\"후킹 스타일 분석\",\"storytelling\":\"스토리텔링/편집 기법 분석\"},\"visualAnalysis\":\"썸네일/비주얼 전략 분석\",\"audienceInsight\":\"시청자/팔로워층 분석\",\"stealableElements\":[{\"element\":\"훔칠 요소 1\",\"howToApply\":\"내 채널에 적용하는 법\"},{\"element\":\"훔칠 요소 2\",\"howToApply\":\"적용법\"},{\"element\":\"훔칠 요소 3\",\"howToApply\":\"적용법\"},{\"element\":\"훔칠 요소 4\",\"howToApply\":\"적용법\"},{\"element\":\"훔칠 요소 5\",\"howToApply\":\"적용법\"}],\"weaknesses\":\"약점 / 내가 더 잘할 수 있는 부분 (2문장)\",\"actionPlan\":\"이 채널을 참고하여 바로 적용할 3단계 액션플랜\"}";
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true","anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-dangerous-direct-browser-access":"true","anthropic-version":"2023-06-01"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
     const d=await res.json();const t=d.content?.map(c=>c.text||"").join("")||"";
     setResult(JSON.parse(t.replace(/```json|```/g,"").trim()));
   }catch(err){console.error(err);setResult({error:"API 오류: " + (err.message||"네트워크 연결 또는 API 키를 확인해 주세요")})}setLoading(false)};
@@ -606,7 +606,7 @@ function GlobalExpansion({ onBack, platform, apiKey }) {
     var res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-dangerous-direct-browser-access": "true", "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: maxTok || 4000, messages: [{ role: "user", content: prompt }] }),
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: maxTok || 4000, messages: [{ role: "user", content: prompt }] }),
     });
     var d = await res.json();
     var text = (d.content || []).map(function(c) { return c.text || ""; }).join("");
