@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧵 스레드 일상글 에디터-DODO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--page:#111113;--card:#1B1B1F;--inner:#131315;--input:#0E0E10;--bdr:#2A2A2E;--bdr-in:#232327;--bdr-focus:#D4951C;--orange:#F5A623;--orange-d:rgba(245,166,35,.12);--amber:#E8B731;--amber-d:rgba(232,183,49,.12);--amber-t:#F0C95C;--green:#4ADE80;--green-d:rgba(74,222,128,.10);--blue:#60A5FA;--blue-d:rgba(96,165,250,.10);--rose:#F87171;--rose-d:rgba(248,113,113,.10);--purple:#C084FC;--purple-d:rgba(192,132,252,.10);--cyan:#22D3EE;--cyan-d:rgba(34,211,238,.10);--white:#fff;--t1:#E4E4E8;--t2:#9E9EA8;--t3:#5C5C66;--ff:'Pretendard Variable',Pretendard,-apple-system,sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--ff);background:var(--page);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:4px}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fillFlash{0%{border-color:var(--green);box-shadow:0 0 8px rgba(74,222,128,.2)}100%{border-color:var(--bdr-in);box-shadow:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px 60px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:22px;margin-bottom:16px;transition:border-color .3s ease,box-shadow .3s ease}.card:hover{border-color:rgba(245,166,35,.12);box-shadow:0 2px 16px rgba(0,0,0,.15)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.card-hdr-left{display:flex;align-items:center;gap:8px}.card-hdr-left .emoji{font-size:18px}.card-hdr-left .title{font-size:16px;font-weight:700;color:var(--white)}
+.badge{background:var(--inner);border:1px solid var(--bdr-in);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:600;color:var(--t2);font-family:var(--mono)}
+.lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;color:var(--t3)}
+.inp{width:100%;padding:12px 14px;border-radius:10px;background:var(--input);border:1px solid var(--bdr-in);color:var(--t1);font-size:14px;outline:none;font-family:var(--ff);transition:all .25s ease}.inp:focus{border-color:var(--bdr-focus);box-shadow:0 0 12px rgba(212,149,28,.1)}.inp:hover{border-color:rgba(212,149,28,.2)}.inp::placeholder{color:var(--t3)}textarea.inp{resize:vertical;line-height:1.6}
+.btn-amber{padding:7px 14px;border-radius:8px;background:var(--amber-d);border:1px solid rgba(232,183,49,.33);color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);transition:all .25s ease}.btn-amber:hover{background:rgba(232,183,49,.22);transform:translateY(-2px);box-shadow:0 4px 12px rgba(232,183,49,.15)}.btn-amber:active{transform:translateY(0);box-shadow:none}.btn-amber.active{background:var(--green-d);border-color:rgba(74,222,128,.33);color:var(--green)}
+.btn-primary{width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,#E8A020,#D4951C);border:none;color:#000;font-size:16px;font-weight:800;cursor:pointer;font-family:var(--ff);position:relative;overflow:hidden;transition:all .3s ease}.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(232,160,32,.4)}.btn-primary:active{transform:translateY(-1px)}.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary .shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:shimmer 3s ease-in-out infinite;background-size:200% 100%}
+.inner-box{background:var(--inner);border:1px solid var(--bdr-in);border-radius:10px;padding:14px}
+.msg-box{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5}.msg-box.err{background:var(--rose-d);border:1px solid rgba(248,113,113,.2);color:var(--rose)}.msg-box.ok{background:var(--green-d);border:1px solid rgba(74,222,128,.2);color:var(--green)}.msg-box.info{background:var(--blue-d);border:1px solid rgba(96,165,250,.2);color:var(--blue)}
+.hidden{display:none}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.text-center{text-align:center}.field-filled{animation:fillFlash .8s ease-out}
+.chip{padding:9px 12px;border-radius:9px;background:var(--inner);border:1px solid var(--bdr-in);color:var(--t3);cursor:pointer;font-size:12px;font-weight:600;font-family:var(--ff);transition:all .25s ease;text-align:center}.chip:hover{border-color:rgba(245,166,35,.25);color:var(--t2);transform:translateY(-2px)}.chip.active{background:var(--orange-d);border-color:rgba(245,166,35,.4);color:var(--orange)}
+.tone-card{padding:11px 12px;border-radius:10px;background:var(--inner);border:2px solid var(--bdr-in);cursor:pointer;transition:all .2s ease;text-align:center}.tone-card:hover{border-color:rgba(245,166,35,.3);transform:translateY(-2px)}.tone-card.active{border-color:var(--orange);background:var(--orange-d)}.tone-card .te{font-size:18px}.tone-card .tn{font-size:11px;font-weight:700;color:var(--t1);margin-top:3px}
+.post-card{background:var(--inner);border:1px solid var(--bdr-in);border-radius:12px;overflow:hidden;margin-bottom:12px;border-left:3px solid var(--orange);animation:fadeUp .4s ease both}
+.post-hdr{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--bdr-in);background:#0C0C0E}
+.post-type{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--amber-t)}
+.post-body{padding:16px;font-size:15px;line-height:1.65;color:var(--t1);white-space:pre-wrap;word-break:break-word}
+.char-count{font-size:10px;font-family:var(--mono);color:var(--t3);padding:0 16px 10px}
+.hook-note{margin:0 14px 14px;padding:9px 12px;border-radius:8px;background:var(--purple-d);border:1px solid rgba(192,132,252,.18);font-size:11.5px;line-height:1.5;color:var(--purple)}
+.pin-box{background:linear-gradient(135deg,rgba(74,222,128,.06),rgba(34,211,238,.05));border:1px solid rgba(74,222,128,.18);border-radius:12px;padding:16px;margin-bottom:12px}
+.img-pill{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);font-size:12.5px;line-height:1.5;color:var(--t2);margin-bottom:7px}
+.img-pill .n{flex-shrink:0;width:20px;height:20px;border-radius:5px;background:var(--cyan-d);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono)}
+.load-step{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);font-size:13px}
+.load-step .icon{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#000;display:flex;align-items:center;justify-content:center;font-size:11px}
+.spin-ic{width:14px;height:14px;border:2px solid transparent;border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.key-display{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);font-family:var(--mono);font-size:12px;color:var(--t2);margin-bottom:10px;flex-wrap:wrap}
+.btn-danger{padding:4px 10px;border-radius:6px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:var(--rose);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--ff)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ═══════════ CONFIG ═══════════ */
+const PASSWORD='0425';
+const MODEL='claude-sonnet-4-20250514';
+const TONES=[
+  {id:'auto',te:'✨',name:'AI 추천'},
+  {id:'emotion',te:'😮',name:'감정후킹'},
+  {id:'info',te:'🔍',name:'호기심정보'},
+  {id:'empathy',te:'🫂',name:'공감위로'},
+  {id:'humor',te:'😂',name:'드립/유머'},
+  {id:'story',te:'📖',name:'스토리'},
+];
+
+/* ═══════════ STATE ═══════════ */
+function loadKey(){return localStorage.getItem('dodo_api_key')||(function(){try{return JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}').claude||''}catch(e){return''}})()||''}
+const S={
+  step:localStorage.getItem('dodo_logged_in')?(loadKey()?'input':'apisetup'):'login',
+  apiKey:loadKey(),
+  keyword:'',tone:'auto',monetize:false,linkType:'',
+  result:null,error:null,loading:false,loginError:'',viewingHistory:null
+};
+
+/* ═══════════ UTILS ═══════════ */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function maskKey(k){return k&&k.length>8?'••••'+k.slice(-6):'••••••'}
+function copyText(t,b){navigator.clipboard.writeText(t);const o=b.textContent;b.textContent='✓ 복사됨';b.classList.add('active');setTimeout(()=>{b.textContent=o;b.classList.remove('active')},1200)}
+function showMsg(sel,type,text){const el=$(sel);if(!el)return;el.className='msg-box '+type;el.innerHTML=text;el.style.display='block'}
+function krLen(s){return (s||'').replace(/\n/g,'').length}
+function extractJSON(text){if(!text)return null;let c=text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();try{return JSON.parse(c)}catch(e){}let d=0,s=-1;for(let i=0;i<c.length;i++){if(c[i]==='{'){if(!d)s=i;d++}if(c[i]==='}'){d--;if(!d&&s>=0){try{return JSON.parse(c.substring(s,i+1))}catch(e){s=-1}}}}return null}
+function getResp(d){let t='';(d.content||[]).forEach(b=>{if(b.type==='text')t+=b.text});return t}
+
+/* ═══════════ HISTORY ═══════════ */
+function getHistory(){try{return JSON.parse(localStorage.getItem('dodo_threads_history')||'[]')}catch(e){return[]}}
+function saveHistory(h){try{localStorage.setItem('dodo_threads_history',JSON.stringify(h))}catch(e){}}
+function addToHistory(result,keyword){const h=getHistory();h.unshift({id:Date.now(),date:new Date().toISOString(),keyword:keyword||'',result});if(h.length>50)h.length=50;saveHistory(h)}
+function deleteHistory(id){saveHistory(getHistory().filter(x=>x.id!==id))}
+function fmtDate(iso){const d=new Date(iso);return`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`}
+
+/* ═══════════ API ═══════════ */
+async function callAPI(sys,userMsg,timeout=120000){
+  const body={model:MODEL,max_tokens:4000,system:sys,messages:[{role:'user',content:userMsg}]};
+  const fetchP=fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':S.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body)
+  });
+  const timeoutP=new Promise((_,rej)=>setTimeout(()=>rej(new Error('⏰ 타임아웃('+Math.round(timeout/1000)+'초). 다시 시도해주세요')),timeout));
+  const res=await Promise.race([fetchP,timeoutP]);
+  if(!res.ok){let m='HTTP '+res.status;try{const ej=JSON.parse(await res.text());m=ej?.error?.message||m}catch(e){}throw new Error(m)}
+  return await res.json();
+}
+
+/* ═══════════ PROMPT (개선된 v2 알고리즘) ═══════════ */
+function buildPrompt(){
+  const toneMap={auto:'키워드 맥락에 가장 잘 맞는 톤을 네가 판단해서',emotion:'감정 후킹(솔직한 감정 토로) 위주로',info:'호기심/정보형(궁금증 유발) 위주로',empathy:'공감/위로형(같이 겪은 듯한 따뜻함) 위주로',humor:'드립/유머(가볍고 웃긴 자조) 위주로',story:'미니 스토리(짧은 서사) 위주로'};
+  const monetizeLine=S.monetize
+    ? `\n- 사용자가 수익화를 원한다. 본문에는 링크를 절대 넣지 말고, "pinned_comment"에 ${S.linkType||'외부 링크'}를 자연스럽게 붙일 1줄 멘트를 만들어라. 광고 티 안 나게.`
+    : `\n- "pinned_comment"에는 댓글 대화를 이어갈 자연스러운 1줄(링크 없이)을 넣어라.`;
+  return `너는 스레드(Threads) 알고리즘과 한국 유저 정서를 깊이 이해한 카피라이터다. 조회수 부스팅과 '신뢰 유지'를 동시에 고려한다. 어그로만 끄는 글은 거절한다.
+
+[작성 규칙]
+1. 두괄식. 결론/감정을 첫 줄에 던진다. 줄바꿈(\\n)으로 스캔하기 쉽게. 글자수를 억지로 자르지 말고 짧고 호흡 빠르게(보통 1~5줄).
+2. 첫 줄 = 썸네일. 호기심 또는 솔직한 감정으로 스크롤을 멈추게 한다. "얘들아 큰일났다" 류 닳은 클리셰는 피하고 키워드 맥락에 맞게 변주한다.
+3. 구체적 숫자 1~2개를 자연스럽게 넣는다. 어색하면 빼라(억지 숫자 금지).
+4. 공감 표본을 넓힌다. 너무 좁은 소재 대신 직장인·자취·돈·관계 등 대중 정서에 건다.
+5. '약한 고리 + 은근한 강점'을 섞되 자랑이 티 나지 않게. 티 나는 올려치기/찡찡거림은 역풍이므로 진짜 사람 말투로 톤다운한다.
+6. 마지막 줄은 열린 질문 또는 미완결로 끝내 댓글창을 열게 한다. 단 훈수 유발은 1줄 이내.${monetizeLine}
+- 톤 방향: ${toneMap[S.tone]} 작성하되, 3개 버전은 서로 다른 후킹 각도로 만든다.
+
+[출력] 아래 JSON만 출력. 백틱·설명 금지. 본문 줄바꿈은 \\n 사용:
+{"versions":[{"type":"감정 후킹형","body":"본문(\\n 포함)","hook_reason":"왜 이 첫 줄이 멈추게 하는지 한 줄"},{"type":"호기심/정보형","body":"","hook_reason":""},{"type":"공감/위로형","body":"","hook_reason":""}],"image_concepts":["함께 올릴 일상사진 컨셉1","컨셉2","컨셉3","컨셉4","컨셉5"],"pinned_comment":"고정 댓글용 1줄"}
+
+[오늘의 일상 키워드]: ${S.keyword}`;
+}
+
+async function generate(){
+  S.loading=true;S.error=null;render();
+  try{
+    const data=await callAPI('You output only valid JSON.',buildPrompt());
+    const txt=getResp(data);
+    const json=extractJSON(txt);
+    if(!json||!json.versions)throw new Error('응답 파싱 실패. 다시 시도해주세요.');
+    S.result=json;S.viewingHistory=null;
+    addToHistory(json,S.keyword);
+    S.step='result';S.loading=false;render();
+  }catch(e){
+    S.loading=false;S.error=e.message;S.step='input';render();
+  }
+}
+
+/* ═══════════ RENDER ═══════════ */
+function render(){const a=$('#app');if(S.loading){renderLoading(a);return}if(S.step==='login')renderLogin(a);else if(S.step==='apisetup')renderApiSetup(a);else if(S.step==='history')renderHistory(a);else if(S.step==='result')renderResult(a);else renderInput(a)}
+
+/* ── LOGIN ── */
+function renderLogin(a){
+  a.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px">
+    <div style="width:100%;max-width:380px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🧵</div>
+      <h1 style="font-size:25px;font-weight:900;color:var(--orange);margin:0 0 6px">스레드 일상글 에디터-DODO</h1>
+      <p style="color:var(--t3);font-size:13px;margin-bottom:32px">키워드 하나로 알고리즘 최적화 일상글 3종 생성</p>
+      <div class="card" style="text-align:left">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="font-size:20px">🔒</span><span style="font-size:15px;font-weight:700;color:var(--white)">비밀번호 입력</span></div>
+        <input class="inp" id="pwInput" type="password" placeholder="비밀번호 4자리" maxlength="10" style="font-size:18px;text-align:center;letter-spacing:8px;padding:16px;font-family:var(--mono)">
+        ${S.loginError?`<div class="msg-box err" style="margin-top:10px">${S.loginError}</div>`:''}
+        <button class="btn-primary" id="loginBtn" style="margin-top:16px"><span style="position:relative;z-index:1">🔓 로그인</span><div class="shimmer"></div></button>
+      </div>
+      <p style="color:var(--t3);font-size:11px;margin-top:16px">Powered by DODO Content System</p>
+    </div></div>`;
+  setTimeout(()=>{const inp=$('#pwInput');inp?.focus();inp?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});$('#loginBtn')?.addEventListener('click',doLogin)},0);
+}
+function doLogin(){const v=$('#pwInput')?.value||'';if(v===PASSWORD){S.loginError='';localStorage.setItem('dodo_logged_in','1');S.step=S.apiKey?'input':'apisetup';render()}else{S.loginError=v?'비밀번호가 틀렸습니다':'비밀번호를 입력해주세요';render()}}
+
+/* ── API SETUP ── */
+function renderApiSetup(a){
+  a.innerHTML=`<div style="padding:36px 0 24px;text-align:center"><div style="font-size:36px;margin-bottom:10px">🔑</div><h1 style="font-size:24px;font-weight:900;color:var(--orange);margin:0 0 6px">Claude API 키 설정</h1><p style="color:var(--t3);font-size:13px">프로그램 사용을 위해 API 키가 필요합니다</p></div>
+  <div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🔑</span><span class="title">API 키 입력</span></div></div>
+    <input class="inp" id="apiSetupInput" type="password" placeholder="sk-ant-api03-..." style="font-family:var(--mono);font-size:13px;padding:14px">
+    <div id="apiSetupMsg" style="display:none"></div>
+    <button class="btn-primary" id="apiSetupSave" style="margin-top:14px"><span style="position:relative;z-index:1">🔌 연결 확인 후 시작하기</span><div class="shimmer"></div></button>
+  </div>
+  <div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">📖</span><span class="title">키 발급 (3분)</span></div></div>
+    <p style="color:var(--t2);font-size:12.5px;line-height:1.8">1. <a href="https://console.anthropic.com" target="_blank" style="color:var(--cyan)">console.anthropic.com ↗</a> 가입<br>2. Settings → Billing → 최소 <b style="color:var(--orange)">$5</b> 충전 (글 1회 ≈ 30~60원)<br>3. Settings → API Keys → <b style="color:var(--orange)">Create Key</b> → 복사<br>4. 위 칸에 붙여넣기</p>
+  </div>`;
+  setTimeout(()=>{$('#apiSetupSave')?.addEventListener('click',async()=>{
+    const key=$('#apiSetupInput')?.value.trim();
+    if(!key||!key.startsWith('sk-ant')){showMsg('#apiSetupMsg','err','올바른 API 키를 입력해주세요 (sk-ant-...)');return}
+    const btn=$('#apiSetupSave');btn.disabled=true;btn.querySelector('span').innerHTML='<span class="spin-ic"></span> 연결 확인 중...';
+    S.apiKey=key;
+    try{await callAPI('test','hi',30000);localStorage.setItem('dodo_api_key',key);try{const c=JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}');c.claude=key;localStorage.setItem('dodo-ws-api-keys',JSON.stringify(c))}catch(e){}S.step='input';render()}
+    catch(e){showMsg('#apiSetupMsg','err','연결 실패: '+e.message);btn.disabled=false;btn.querySelector('span').innerHTML='🔌 연결 확인 후 시작하기'}
+  })},0);
+}
+
+/* ── INPUT ── */
+function renderInput(a){
+  a.innerHTML=`
+  <div style="padding:24px 0 16px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">🧵</span><h1 style="font-size:21px;font-weight:900;color:var(--orange);margin:0">스레드 일상글 에디터</h1></div>
+    <div style="display:flex;gap:6px"><button class="btn-amber" id="histBtn">📂 기록</button></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">✏️</span><span class="title">오늘의 일상 키워드</span></div></div>
+    <textarea class="inp" id="kwInput" rows="3" placeholder="오늘 겪은 일이나 쓰고 싶은 소재를 적어주세요.&#10;예: 카페 알바 첫날인데 손님이 팁 줌 / 6개월 모은 적금 깸 / 소개팅 나갔다가 아는 사람 만남">${esc(S.keyword)}</textarea>
+    <div id="kwMsg" style="display:none"></div>
+
+    <div class="lbl" style="margin-top:18px">톤 방향</div>
+    <div class="grid-3" id="toneGrid">
+      ${TONES.map(t=>`<div class="tone-card ${S.tone===t.id?'active':''}" data-tone="${t.id}"><div class="te">${t.te}</div><div class="tn">${t.name}</div></div>`).join('')}
+    </div>
+
+    <div class="lbl" style="margin-top:18px">수익화 (고정 댓글 링크)</div>
+    <div class="inner-box" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="font-size:12.5px;color:var(--t2);line-height:1.5">본문엔 링크 금지 →<br><b style="color:var(--amber-t)">고정 댓글용 멘트</b>를 따로 생성</div>
+      <button class="btn-amber ${S.monetize?'active':''}" id="monToggle">${S.monetize?'✓ ON':'OFF'}</button>
+    </div>
+    <input class="inp ${S.monetize?'':'hidden'}" id="linkInput" style="margin-top:8px" placeholder="링크 종류 (예: 쿠팡 파트너스, 내 블로그, 스마트스토어)" value="${esc(S.linkType)}">
+
+    <button class="btn-primary" id="genBtn" style="margin-top:18px"><span style="position:relative;z-index:1">🚀 일상글 3종 생성</span><div class="shimmer"></div></button>
+  </div>
+  <p style="text-align:center;color:var(--t3);font-size:11px;margin-top:4px">💡 본문엔 링크 절대 금지 · 외부 링크는 항상 '고정 댓글'에</p>`;
+
+  setTimeout(()=>{
+    if(S.error){showMsg('#kwMsg','err','⚠️ '+S.error);S.error=null}
+    $('#kwInput')?.addEventListener('input',e=>S.keyword=e.target.value);
+    $('#histBtn')?.addEventListener('click',()=>{S.step='history';render()});
+    $$('#toneGrid .tone-card').forEach(c=>c.addEventListener('click',()=>{S.tone=c.dataset.tone;render()}));
+    $('#monToggle')?.addEventListener('click',()=>{S.monetize=!S.monetize;render()});
+    $('#linkInput')?.addEventListener('input',e=>S.linkType=e.target.value);
+    $('#genBtn')?.addEventListener('click',()=>{
+      S.keyword=($('#kwInput')?.value||'').trim();
+      if(!S.keyword){showMsg('#kwMsg','err','키워드를 입력해주세요');return}
+      generate();
+    });
+  },0);
+}
+
+/* ── LOADING ── */
+function renderLoading(a){
+  a.innerHTML=`<div style="padding:80px 0;text-align:center">
+    <div style="font-size:40px;margin-bottom:20px">🧵</div>
+    <div class="load-step" style="max-width:340px;margin:0 auto"><div class="icon"><span class="spin-ic"></span></div><div style="color:var(--orange);font-weight:600">알고리즘 최적화 일상글 작성 중...</div></div>
+    <p style="color:var(--t3);font-size:12px;margin-top:14px">보통 10~25초 걸려요</p>
+  </div>`;
+}
+
+/* ── RESULT ── */
+function renderResult(a){
+  const r=S.result;
+  const colors=['var(--orange)','var(--cyan)','var(--green)'];
+  a.innerHTML=`
+  <div style="padding:24px 0 12px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">🧵</span><h1 style="font-size:20px;font-weight:900;color:var(--orange);margin:0">완성된 일상글</h1></div>
+    <button class="btn-amber" id="backBtn">← 새로 만들기</button>
+  </div>
+  ${(r.versions||[]).map((v,i)=>`
+    <div class="post-card" style="border-left-color:${colors[i%3]};animation-delay:${i*0.08}s">
+      <div class="post-hdr">
+        <div class="post-type"><span style="color:${colors[i%3]}">●</span> 버전 ${String.fromCharCode(65+i)} · ${esc(v.type)}</div>
+        <button class="btn-amber copyBtn" data-i="${i}">📋 복사</button>
+      </div>
+      <div class="post-body" id="body-${i}">${esc(v.body)}</div>
+      <div class="char-count">${krLen(v.body)}자 · ${(v.body||'').split('\n').length}줄</div>
+      ${v.hook_reason?`<div class="hook-note">🎯 ${esc(v.hook_reason)}</div>`:''}
+    </div>`).join('')}
+
+  ${r.pinned_comment?`<div class="pin-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--green)">📌 고정 댓글용 멘트</div><button class="btn-amber" id="pinCopy">📋 복사</button></div>
+    <div style="font-size:14px;line-height:1.6;color:var(--t1);white-space:pre-wrap" id="pinBody">${esc(r.pinned_comment)}</div>
+    <p style="font-size:11px;color:var(--t3);margin-top:8px">⚠️ 외부 링크는 본문이 아니라 이 고정 댓글에 다세요 (도달률 보호)</p>
+  </div>`:''}
+
+  ${(r.image_concepts&&r.image_concepts.length)?`<div class="card">
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🖼️</span><span class="title">추천 첨부 이미지 컨셉</span></div></div>
+    ${r.image_concepts.map((c,i)=>`<div class="img-pill"><span class="n">${i+1}</span><span>${esc(c)}</span></div>`).join('')}
+  </div>`:''}
+
+  <button class="btn-primary" id="regenBtn" style="margin-top:4px"><span style="position:relative;z-index:1">🔄 같은 키워드로 다시 생성</span><div class="shimmer"></div></button>`;
+
+  setTimeout(()=>{
+    $('#backBtn')?.addEventListener('click',()=>{S.step='input';render()});
+    $('#regenBtn')?.addEventListener('click',()=>generate());
+    $$('.copyBtn').forEach(b=>b.addEventListener('click',()=>copyText(r.versions[+b.dataset.i].body,b)));
+    $('#pinCopy')?.addEventListener('click',()=>copyText(r.pinned_comment,$('#pinCopy')));
+  },0);
+}
+
+/* ── HISTORY ── */
+function renderHistory(a){
+  const h=getHistory();
+  a.innerHTML=`<div style="padding:24px 0 16px;display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">📂</span><h1 style="font-size:21px;font-weight:900;color:var(--orange);margin:0">기록</h1><span class="badge">${h.length}개</span></div>
+    <button class="btn-amber" id="hBack">← 돌아가기</button></div>
+  ${h.length===0?`<div class="card text-center" style="padding:40px 20px"><span style="font-size:36px;opacity:.4">📭</span><p style="color:var(--t3);font-size:14px;margin-top:12px">아직 기록이 없습니다</p></div>`
+  :h.map(it=>`<div class="card" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div class="hView" data-id="${it.id}" style="flex:1;min-width:0;cursor:pointer">
+        <div style="color:var(--white);font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.keyword||'(키워드 없음)')}</div>
+        <div style="color:var(--t3);font-size:11px;font-family:var(--mono);margin-top:4px">${fmtDate(it.date)} · ${(it.result?.versions||[]).length}종</div>
+      </div>
+      <button class="btn-danger hDel" data-id="${it.id}">✕</button>
+    </div>`).join('')}`;
+  setTimeout(()=>{
+    $('#hBack')?.addEventListener('click',()=>{S.step='input';render()});
+    $$('.hView').forEach(b=>b.addEventListener('click',()=>{const it=getHistory().find(x=>x.id==b.dataset.id);if(it){S.result=it.result;S.viewingHistory=it.id;S.step='result';render()}}));
+    $$('.hDel').forEach(b=>b.addEventListener('click',()=>{if(confirm('이 기록을 삭제할까요?')){deleteHistory(+b.dataset.id);render()}}));
+  },0);
+}
+
+/* ═══════════ BOOT ═══════════ */
+render();
+</script>
+</body>
+</html>
