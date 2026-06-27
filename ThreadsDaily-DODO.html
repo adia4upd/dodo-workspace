@@ -35,8 +35,12 @@
 .char-count{font-size:10px;font-family:var(--mono);color:var(--t3);padding:0 16px 10px}
 .hook-note{margin:0 14px 14px;padding:9px 12px;border-radius:8px;background:var(--purple-d);border:1px solid rgba(192,132,252,.18);font-size:11.5px;line-height:1.5;color:var(--purple)}
 .pin-box{background:linear-gradient(135deg,rgba(74,222,128,.06),rgba(34,211,238,.05));border:1px solid rgba(74,222,128,.18);border-radius:12px;padding:16px;margin-bottom:12px}
-.img-pill{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:8px;background:var(--inner);border:1px solid var(--bdr-in);font-size:12.5px;line-height:1.5;color:var(--t2);margin-bottom:7px}
-.img-pill .n{flex-shrink:0;width:20px;height:20px;border-radius:5px;background:var(--cyan-d);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono)}
+.img-block{background:var(--inner);border:1px solid var(--bdr-in);border-radius:10px;padding:12px;margin-bottom:8px}
+.img-block-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px}
+.img-concept{font-size:13px;font-weight:600;color:var(--t1);line-height:1.5}
+.img-block .n{flex-shrink:0;width:20px;height:20px;border-radius:5px;background:var(--cyan-d);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono)}
+.img-prompt{background:#0A0A0C;border-radius:8px;padding:10px 12px}
+.img-prompt-txt{font-size:11.5px;font-family:var(--mono);color:var(--t2);line-height:1.65;word-break:break-word;margin-bottom:9px}
 .load-step{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);font-size:13px}
 .load-step .icon{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#000;display:flex;align-items:center;justify-content:center;font-size:11px}
 .spin-ic{width:14px;height:14px;border:2px solid transparent;border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
@@ -116,8 +120,18 @@ function buildPrompt(){
 6. 마지막 줄은 열린 질문 또는 미완결로 끝내 댓글창을 열게 한다. 단 훈수 유발은 1줄 이내.${monetizeLine}
 - 톤 방향: ${toneMap[S.tone]} 작성하되, 3개 버전은 서로 다른 후킹 각도로 만든다.
 
+[이미지 프롬프트 규칙]
+- image_concepts의 각 항목은 {concept, prompt} 객체로 만든다.
+- concept: 어떤 사진인지 한국어 한 줄 설명.
+- prompt: 그 사진을 만들 '바로 붙여넣는' 영문 이미지 생성 프롬프트. 다음을 지켜라.
+  · 스레드 일상글이므로 광고·스튜디오 티 나는 완벽샷 금지. "진짜 폰카로 찍은 듯한" 사실감이 핵심.
+  · 필수 키워드: photorealistic, shot on iPhone, natural light, candid, amateur snapshot, slight grain, true-to-life, NOT over-edited.
+  · 본문 무드와 색감을 맞춰라(예: 외롭고 차분 → muted tones, dim lighting / 설레는 → warm cozy light).
+  · 구도·소품·앵글을 구체적으로. 사람 얼굴은 가급적 안 보이게(뒷모습/손/사물 위주 — 익명성+이입).
+  · 끝에 세로 비율 추가: --ar 4:5 (스레드 권장). 30~60단어.
+
 [출력] 아래 JSON만 출력. 백틱·설명 금지. 본문 줄바꿈은 \\n 사용:
-{"versions":[{"type":"감정 후킹형","body":"본문(\\n 포함)","hook_reason":"왜 이 첫 줄이 멈추게 하는지 한 줄"},{"type":"호기심/정보형","body":"","hook_reason":""},{"type":"공감/위로형","body":"","hook_reason":""}],"image_concepts":["함께 올릴 일상사진 컨셉1","컨셉2","컨셉3","컨셉4","컨셉5"],"pinned_comment":"고정 댓글용 1줄"}
+{"versions":[{"type":"감정 후킹형","body":"본문(\\n 포함)","hook_reason":"왜 이 첫 줄이 멈추게 하는지 한 줄"},{"type":"호기심/정보형","body":"","hook_reason":""},{"type":"공감/위로형","body":"","hook_reason":""}],"image_concepts":[{"concept":"한국어 한 줄 컨셉","prompt":"ready-to-use English image prompt ... --ar 4:5"},{"concept":"","prompt":""},{"concept":"","prompt":""},{"concept":"","prompt":""},{"concept":"","prompt":""}],"pinned_comment":"고정 댓글용 1줄"}
 
 [오늘의 일상 키워드]: ${S.keyword}`;
 }
@@ -259,8 +273,17 @@ function renderResult(a){
   </div>`:''}
 
   ${(r.image_concepts&&r.image_concepts.length)?`<div class="card">
-    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🖼️</span><span class="title">추천 첨부 이미지 컨셉</span></div></div>
-    ${r.image_concepts.map((c,i)=>`<div class="img-pill"><span class="n">${i+1}</span><span>${esc(c)}</span></div>`).join('')}
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🖼️</span><span class="title">추천 첨부 이미지 + 생성 프롬프트</span></div><span class="badge">${r.image_concepts.length}컷</span></div>
+    ${r.image_concepts.map((c,i)=>{
+      const obj=c&&typeof c==='object';
+      const concept=obj?(c.concept||''):c;
+      const prompt=obj?(c.prompt||''):'';
+      return`<div class="img-block">
+        <div class="img-block-hdr"><span class="n">${i+1}</span><span class="img-concept">${esc(concept)}</span></div>
+        ${prompt?`<div class="img-prompt"><div class="img-prompt-txt" id="imgp-${i}">${esc(prompt)}</div><button class="btn-amber imgCopy" data-i="${i}">📋 프롬프트 복사</button></div>`:''}
+      </div>`;
+    }).join('')}
+    <p style="font-size:11px;color:var(--t3);margin-top:6px">💡 프롬프트는 나노바나나·Grok·Midjourney 등에 그대로 붙여넣으세요 · 폰카 사실감 위주로 작성됨</p>
   </div>`:''}
 
   <button class="btn-primary" id="regenBtn" style="margin-top:4px"><span style="position:relative;z-index:1">🔄 같은 키워드로 다시 생성</span><div class="shimmer"></div></button>`;
@@ -270,6 +293,7 @@ function renderResult(a){
     $('#regenBtn')?.addEventListener('click',()=>generate());
     $$('.copyBtn').forEach(b=>b.addEventListener('click',()=>copyText(r.versions[+b.dataset.i].body,b)));
     $('#pinCopy')?.addEventListener('click',()=>copyText(r.pinned_comment,$('#pinCopy')));
+    $$('.imgCopy').forEach(b=>b.addEventListener('click',()=>{const c=r.image_concepts[+b.dataset.i];copyText(typeof c==='object'?c.prompt:c,b)}));
   },0);
 }
 
