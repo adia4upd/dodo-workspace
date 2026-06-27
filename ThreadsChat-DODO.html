@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 스레드 일상글 에디터 (대화형)-DODO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--page:#111113;--card:#1B1B1F;--inner:#131315;--input:#0E0E10;--bdr:#2A2A2E;--bdr-in:#232327;--bdr-focus:#D4951C;--orange:#F5A623;--orange-d:rgba(245,166,35,.12);--amber:#E8B731;--amber-d:rgba(232,183,49,.12);--amber-t:#F0C95C;--green:#4ADE80;--green-d:rgba(74,222,128,.10);--blue:#60A5FA;--blue-d:rgba(96,165,250,.10);--rose:#F87171;--rose-d:rgba(248,113,113,.10);--purple:#C084FC;--purple-d:rgba(192,132,252,.10);--cyan:#22D3EE;--cyan-d:rgba(34,211,238,.10);--white:#fff;--t1:#E4E4E8;--t2:#9E9EA8;--t3:#5C5C66;--ff:'Pretendard Variable',Pretendard,-apple-system,sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{font-family:var(--ff);background:var(--page);color:var(--t1);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:4px}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.inp{width:100%;padding:12px 14px;border-radius:10px;background:var(--input);border:1px solid var(--bdr-in);color:var(--t1);font-size:14px;outline:none;font-family:var(--ff);transition:all .25s ease}.inp:focus{border-color:var(--bdr-focus);box-shadow:0 0 12px rgba(212,149,28,.1)}.inp::placeholder{color:var(--t3)}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:22px;margin-bottom:16px}
+.btn-primary{width:100%;padding:16px;border-radius:12px;background:linear-gradient(135deg,#E8A020,#D4951C);border:none;color:#000;font-size:16px;font-weight:800;cursor:pointer;font-family:var(--ff);position:relative;overflow:hidden;transition:all .3s ease}.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(232,160,32,.4)}.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary .shimmer{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:shimmer 3s ease-in-out infinite;background-size:200% 100%}
+.btn-amber{padding:7px 14px;border-radius:8px;background:var(--amber-d);border:1px solid rgba(232,183,49,.33);color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);transition:all .2s ease}.btn-amber:hover{background:rgba(232,183,49,.22)}.btn-amber.active{background:var(--green-d);border-color:rgba(74,222,128,.33);color:var(--green)}
+.msg-box{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.5}.msg-box.err{background:var(--rose-d);border:1px solid rgba(248,113,113,.2);color:var(--rose)}
+.spin-ic{width:14px;height:14px;border:2px solid transparent;border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.hidden{display:none}
+
+/* ── chat layout ── */
+#chat-root{display:flex;flex-direction:column;height:100vh;max-width:720px;margin:0 auto}
+.chat-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bdr);background:var(--page);position:sticky;top:0;z-index:5}
+.chat-hdr .ttl{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:800;color:var(--orange)}
+.chat-scroll{flex:1;overflow-y:auto;padding:18px 18px 8px}
+.msg{display:flex;margin-bottom:14px;animation:fadeUp .3s ease both}
+.msg.user{justify-content:flex-end}
+.bubble{max-width:86%;padding:13px 16px;border-radius:14px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.msg.user .bubble{background:linear-gradient(135deg,rgba(232,160,32,.18),rgba(212,149,28,.12));border:1px solid rgba(232,183,49,.25);color:var(--amber-t);border-bottom-right-radius:5px}
+.msg.bot .bubble{background:var(--card);border:1px solid var(--bdr);color:var(--t1);border-bottom-left-radius:5px}
+.bubble b{color:var(--white);font-weight:700}
+.bubble .vline{color:var(--orange);font-weight:800}
+.bubble .hookline{color:var(--purple)}
+.bubble .metaline{color:var(--t3);font-size:12px;font-family:var(--mono)}
+.msg-tools{display:flex;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid var(--bdr-in)}
+.typing{display:inline-flex;gap:5px;padding:4px 2px}.typing span{width:7px;height:7px;border-radius:50%;background:var(--t2);animation:blink 1.2s infinite}.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:8px 18px 0;flex-wrap:wrap}
+.chip{padding:7px 13px;border-radius:18px;background:var(--inner);border:1px solid var(--bdr-in);color:var(--t2);font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s ease}.chip:hover{border-color:rgba(245,166,35,.35);color:var(--orange);transform:translateY(-1px)}
+.composer{padding:10px 18px 18px;background:var(--page);border-top:1px solid var(--bdr)}
+.composer-row{display:flex;gap:9px;align-items:flex-end}
+.composer textarea{flex:1;resize:none;max-height:140px;min-height:48px;line-height:1.5}
+.send-btn{flex-shrink:0;width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#E8A020,#D4951C);border:none;color:#000;font-size:19px;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center}.send-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(232,160,32,.35)}.send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.foot-tip{text-align:center;color:var(--t3);font-size:11px;margin-top:8px}
+.empty-hi{text-align:center;padding:36px 16px;color:var(--t2)}
+.empty-hi .big{font-size:40px;margin-bottom:14px}
+.empty-hi h2{font-size:18px;color:var(--white);font-weight:800;margin-bottom:8px}
+.empty-hi p{font-size:13px;line-height:1.7;color:var(--t3)}
+.seed-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px;text-align:left}
+.seed{padding:12px 14px;border-radius:10px;background:var(--inner);border:1px solid var(--bdr-in);font-size:13px;color:var(--t2);cursor:pointer;transition:all .2s ease}.seed:hover{border-color:rgba(245,166,35,.3);color:var(--t1);transform:translateY(-2px)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ═══════════ CONFIG ═══════════ */
+const PASSWORD='0425';
+const MODEL='claude-sonnet-4-6';
+const SEEDS=['카페 알바 첫날 팁 받음','6개월 모은 적금 깸','퇴근길 지하철에서 울 뻔','자취방 곰팡이 발견','소개팅 나갔다 아는 사람 만남','월급날인데 이미 텅장'];
+
+const SYSTEM_PROMPT=`너는 스레드(Threads) 알고리즘과 한국 유저 정서를 깊이 이해한 카피라이터다. 조회수와 '신뢰 유지'를 동시에 고려한다. 어그로만 끄는 글은 거절한다. 사용자와 대화하며 스레드 일상글을 다듬는다.
+
+[작동 방식]
+- 사용자가 일상 키워드를 주면 3버전을 만든다. 형식은 정확히:
+**버전 A · 감정 후킹형**
+(본문, 줄바꿈 자유)
+└ 후킹 포인트: (한 줄)
+(43자 · 4줄)
+
+**버전 B · 호기심/정보형**
+...
+
+**버전 C · 공감/위로형**
+...
+- 3버전 뒤 한 줄로 묻는다: "어떤 버전 다듬을까요? (예: A 더 짧게 / B 더 웃기게 / 전부 더 솔직하게 / A로 확정)"
+- 수정 지시를 받으면 해당 버전만 다시 쓴다. 매번 전체를 다시 뽑지 마라.
+- "확정" 또는 "이걸로"라고 하면 그 버전의 [완성 본문] + [추천 이미지 프롬프트 3개] + [고정 댓글 멘트]를 정리해 출력한다.
+
+[작성 규칙]
+1. 두괄식. 결론/감정을 첫 줄에. 줄바꿈으로 스캔하기 쉽게. 짧고 호흡 빠르게(보통 1~5줄). 글자수를 억지로 자르지 마라(한줄20자/150자 같은 기계적 제한 금지).
+2. 첫 줄=썸네일. 호기심 또는 솔직한 감정으로 스크롤을 멈추게. 닳은 클리셰("얘들아 큰일났다")는 피하고 맥락에 맞게 변주.
+3. 구체적 숫자 1~2개를 자연스럽게(억지면 빼라).
+4. 공감 표본을 넓혀라(직장인·자취·돈·관계 등 대중 정서).
+5. '약한 고리+은근한 강점'을 섞되 자랑이 티 안 나게. 노골적 올려치기/찡찡거림은 역풍이므로 진짜 사람 말투로 톤다운.
+6. 마지막 줄은 열린 질문 또는 미완결로 댓글창을 열게. 훈수 유발은 1줄 이내.
+
+[수익화] 본문엔 외부 링크 절대 금지. 링크/제품을 주면 본문은 링크 없이, '고정 댓글 멘트'를 따로 만든다.
+
+[이미지 프롬프트(확정 시)] 컨셉(한국어 한 줄)+영문 프롬프트 3개. 영문은 폰카 사실감 위주: photorealistic, shot on iPhone, natural light, candid, amateur snapshot, slight grain. 본문 무드와 색감 매칭. 얼굴 가급적 안 보이게. 끝에 --ar 4:5.
+
+[톤] 군더더기 없이 결과물 위주. 서론 길게 늘어놓지 마라. 한국어로.`;
+
+/* ═══════════ STATE ═══════════ */
+function loadKey(){return localStorage.getItem('dodo_api_key')||(function(){try{return JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}').claude||''}catch(e){return''}})()||''}
+const S={
+  step:localStorage.getItem('dodo_logged_in')?(loadKey()?'chat':'apisetup'):'login',
+  apiKey:loadKey(),
+  messages:[],   // {role:'user'|'assistant', content}
+  sending:false, loginError:''
+};
+
+/* ═══════════ UTILS ═══════════ */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function showMsg(sel,type,text){const el=$(sel);if(!el)return;el.className='msg-box '+type;el.innerHTML=text;el.style.display='block'}
+function copyText(t,b){navigator.clipboard.writeText(t);const o=b.textContent;b.textContent='✓ 복사됨';b.classList.add('active');setTimeout(()=>{b.textContent=o;b.classList.remove('active')},1200)}
+function fmtBot(t){
+  // light markdown: **bold**, 버전 라인, 후킹 라인, (메타) 라인
+  let h=esc(t);
+  h=h.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  h=h.split('\n').map(line=>{
+    if(/^(<b>)?버전\s|^(<b>)?\s*■|^(<b>)?[ABC]\s?·|버전\s?[ABC]/.test(line)&&line.includes('<b>'))return '<span class="vline">'+line+'</span>';
+    if(/^└|후킹\s?포인트/.test(line))return '<span class="hookline">'+line+'</span>';
+    if(/^\(?\d+자/.test(line.trim()))return '<span class="metaline">'+line+'</span>';
+    return line;
+  }).join('\n');
+  return h;
+}
+
+/* ═══════════ API (멀티턴) ═══════════ */
+async function callAPI(messages,timeout=120000){
+  const body={model:MODEL,max_tokens:2500,system:SYSTEM_PROMPT,messages:messages.map(m=>({role:m.role,content:m.content}))};
+  const fetchP=fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':S.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body)
+  });
+  const timeoutP=new Promise((_,rej)=>setTimeout(()=>rej(new Error('⏰ 타임아웃. 다시 시도해주세요')),timeout));
+  const res=await Promise.race([fetchP,timeoutP]);
+  if(!res.ok){let m='HTTP '+res.status;try{const ej=JSON.parse(await res.text());m=ej?.error?.message||m}catch(e){}throw new Error(m)}
+  const data=await res.json();let t='';(data.content||[]).forEach(b=>{if(b.type==='text')t+=b.text});return t;
+}
+
+async function send(text){
+  if(!text||S.sending)return;
+  S.messages.push({role:'user',content:text});
+  S.sending=true;renderChat();scrollBottom();
+  try{
+    const reply=await callAPI(S.messages);
+    S.messages.push({role:'assistant',content:reply});
+  }catch(e){
+    S.messages.push({role:'assistant',content:'⚠️ 오류: '+e.message});
+  }
+  S.sending=false;renderChat();scrollBottom();
+}
+
+function scrollBottom(){setTimeout(()=>{const sc=$('.chat-scroll');if(sc)sc.scrollTop=sc.scrollHeight},30)}
+
+/* ═══════════ RENDER ═══════════ */
+function render(){const a=$('#app');if(S.step==='login')renderLogin(a);else if(S.step==='apisetup')renderApiSetup(a);else renderChat()}
+
+/* ── LOGIN ── */
+function renderLogin(a){
+  a.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px"><div style="width:100%;max-width:380px;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">💬</div>
+    <h1 style="font-size:24px;font-weight:900;color:var(--orange);margin:0 0 6px">스레드 일상글 에디터 · 대화형</h1>
+    <p style="color:var(--t3);font-size:13px;margin-bottom:32px">채팅하며 다듬는 스레드 글쓰기 비서</p>
+    <div class="card" style="text-align:left">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px"><span style="font-size:20px">🔒</span><span style="font-size:15px;font-weight:700;color:var(--white)">비밀번호 입력</span></div>
+      <input class="inp" id="pwInput" type="password" placeholder="비밀번호 4자리" maxlength="10" style="font-size:18px;text-align:center;letter-spacing:8px;padding:16px;font-family:var(--mono)">
+      ${S.loginError?`<div class="msg-box err" style="margin-top:10px">${S.loginError}</div>`:''}
+      <button class="btn-primary" id="loginBtn" style="margin-top:16px"><span style="position:relative;z-index:1">🔓 로그인</span><div class="shimmer"></div></button>
+    </div>
+    <p style="color:var(--t3);font-size:11px;margin-top:16px">Powered by DODO Content System</p>
+  </div></div>`;
+  setTimeout(()=>{const i=$('#pwInput');i?.focus();i?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});$('#loginBtn')?.addEventListener('click',doLogin)},0);
+}
+function doLogin(){const v=$('#pwInput')?.value||'';if(v===PASSWORD){S.loginError='';localStorage.setItem('dodo_logged_in','1');S.step=S.apiKey?'chat':'apisetup';render()}else{S.loginError=v?'비밀번호가 틀렸습니다':'비밀번호를 입력해주세요';render()}}
+
+/* ── API SETUP ── */
+function renderApiSetup(a){
+  a.innerHTML=`<div style="max-width:560px;margin:0 auto;padding:0 20px">
+  <div style="padding:36px 0 24px;text-align:center"><div style="font-size:36px;margin-bottom:10px">🔑</div><h1 style="font-size:24px;font-weight:900;color:var(--orange);margin:0 0 6px">Claude API 키 설정</h1><p style="color:var(--t3);font-size:13px">프로그램 사용을 위해 API 키가 필요합니다</p></div>
+  <div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-size:18px">🔑</span><span style="font-size:16px;font-weight:700;color:var(--white)">API 키 입력</span></div>
+    <input class="inp" id="apiSetupInput" type="password" placeholder="sk-ant-api03-..." style="font-family:var(--mono);font-size:13px;padding:14px">
+    <div id="apiSetupMsg" style="display:none"></div>
+    <button class="btn-primary" id="apiSetupSave" style="margin-top:14px"><span style="position:relative;z-index:1">🔌 연결 확인 후 시작하기</span><div class="shimmer"></div></button>
+  </div>
+  <div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:18px">📖</span><span style="font-size:16px;font-weight:700;color:var(--white)">키 발급 (3분)</span></div>
+    <p style="color:var(--t2);font-size:12.5px;line-height:1.8">1. <a href="https://console.anthropic.com" target="_blank" style="color:var(--cyan)">console.anthropic.com ↗</a> 가입<br>2. Settings → Billing → 최소 <b style="color:var(--orange)">$5</b> 충전<br>3. Settings → API Keys → <b style="color:var(--orange)">Create Key</b> → 복사<br>4. 위 칸에 붙여넣기</p>
+  </div></div>`;
+  setTimeout(()=>{$('#apiSetupSave')?.addEventListener('click',async()=>{
+    const key=$('#apiSetupInput')?.value.trim();
+    if(!key||!key.startsWith('sk-ant')){showMsg('#apiSetupMsg','err','올바른 API 키를 입력해주세요 (sk-ant-...)');return}
+    const btn=$('#apiSetupSave');btn.disabled=true;btn.querySelector('span').innerHTML='<span class="spin-ic"></span> 연결 확인 중...';
+    S.apiKey=key;
+    try{await callAPI([{role:'user',content:'hi'}],30000);localStorage.setItem('dodo_api_key',key);try{const c=JSON.parse(localStorage.getItem('dodo-ws-api-keys')||'{}');c.claude=key;localStorage.setItem('dodo-ws-api-keys',JSON.stringify(c))}catch(e){}S.step='chat';render()}
+    catch(e){showMsg('#apiSetupMsg','err','연결 실패: '+e.message);btn.disabled=false;btn.querySelector('span').innerHTML='🔌 연결 확인 후 시작하기'}
+  })},0);
+}
+
+/* ── CHAT ── */
+function renderChat(){
+  const a=$('#app');
+  const hasMsg=S.messages.length>0;
+  a.innerHTML=`<div id="chat-root">
+    <div class="chat-hdr">
+      <div class="ttl"><span style="font-size:19px">💬</span> 스레드 일상글 에디터</div>
+      <button class="btn-amber" id="newChat">＋ 새 대화</button>
+    </div>
+    <div class="chat-scroll" id="scroll">
+      ${hasMsg?S.messages.map((m,i)=>msgHTML(m,i)).join(''):emptyHTML()}
+      ${S.sending?`<div class="msg bot"><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`:''}
+    </div>
+    ${hasMsg?`<div class="chips" id="chips">
+      ${['A 더 짧게','B 더 웃기게','C 더 솔직하게','숫자 더 구체적으로','A로 확정'].map(c=>`<div class="chip" data-c="${c}">${c}</div>`).join('')}
+    </div>`:''}
+    <div class="composer">
+      <div class="composer-row">
+        <textarea class="inp" id="ta" placeholder="${hasMsg?'다듬을 지시를 입력… (예: A를 더 담백하게)':'오늘의 일상 키워드를 입력하세요…'}" rows="1"></textarea>
+        <button class="send-btn" id="sendBtn" ${S.sending?'disabled':''}>➤</button>
+      </div>
+      <div class="foot-tip">💡 본문엔 링크 금지 · 외부 링크는 항상 '고정 댓글'에 · Enter 전송 / Shift+Enter 줄바꿈</div>
+    </div>
+  </div>`;
+  wireChat();
+  scrollBottom();
+}
+
+function emptyHTML(){
+  return `<div class="empty-hi">
+    <div class="big">🧵</div>
+    <h2>오늘 뭐 있었어요?</h2>
+    <p>키워드 하나만 던지면 일상글 3버전을 만들고,<br>대화하면서 같이 다듬어 드려요.</p>
+    <div class="seed-grid">
+      ${SEEDS.map(s=>`<div class="seed" data-s="${esc(s)}">"${esc(s)}"</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function msgHTML(m,i){
+  if(m.role==='user')return `<div class="msg user"><div class="bubble">${esc(m.content)}</div></div>`;
+  return `<div class="msg bot"><div class="bubble">${fmtBot(m.content)}<div class="msg-tools"><button class="btn-amber copyMsg" data-i="${i}">📋 전체 복사</button></div></div></div>`;
+}
+
+function wireChat(){
+  const ta=$('#ta'),btn=$('#sendBtn');
+  ta?.focus();
+  const autoGrow=()=>{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,140)+'px'};
+  ta?.addEventListener('input',autoGrow);
+  const doSend=()=>{const v=(ta.value||'').trim();if(!v)return;ta.value='';autoGrow();send(v)};
+  ta?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend()}});
+  btn?.addEventListener('click',doSend);
+  $('#newChat')?.addEventListener('click',()=>{if(S.messages.length&&!confirm('새 대화를 시작할까요? 현재 대화는 사라집니다.'))return;S.messages=[];renderChat()});
+  $$('.seed').forEach(el=>el.addEventListener('click',()=>send(el.dataset.s)));
+  $$('.chip').forEach(el=>el.addEventListener('click',()=>send(el.dataset.c)));
+  $$('.copyMsg').forEach(b=>b.addEventListener('click',()=>copyText(S.messages[+b.dataset.i].content,b)));
+}
+
+/* ═══════════ BOOT ═══════════ */
+render();
+</script>
+</body>
+</html>
