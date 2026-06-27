@@ -90,6 +90,8 @@ const SYSTEM_PROMPT=`너는 스레드(Threads) 알고리즘과 한국 유저 정
 
 [수익화] 본문엔 외부 링크 절대 금지. 링크/제품을 주면 본문은 링크 없이, '고정 댓글 멘트'를 따로 만든다.
 
+[지역 말투(사투리)] 사용자가 부산/경상·충청·전라·제주·강원 등 사투리를 요청하면 그 말투로 본문을 다시 쓴다. 단 '양념' 수준 — 핵심 어미·감탄사만 사투리로 하고 문장 구조는 비사투리권도 읽기 쉽게. 과한 방언 남발 금지. 특히 제주어는 대표 표현만 가볍게(100% 제주어 금지, 아무도 못 읽음). 표준어가 기본.
+
 [이미지 프롬프트(확정 시)] 컨셉(한국어 한 줄)+영문 프롬프트 3개. 영문은 폰카 사실감 위주: photorealistic, shot on iPhone, natural light, candid, amateur snapshot, slight grain. 본문 무드와 색감 매칭. 얼굴 가급적 안 보이게. 끝에 --ar 4:5.
 
 [톤] 군더더기 없이 결과물 위주. 서론 길게 늘어놓지 마라. 한국어로.`;
@@ -207,7 +209,7 @@ function renderChat(){
       ${S.sending?`<div class="msg bot"><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`:''}
     </div>
     ${hasMsg?`<div class="chips" id="chips">
-      ${['A 더 짧게','B 더 웃기게','C 더 솔직하게','숫자 더 구체적으로','A로 확정'].map(c=>`<div class="chip" data-c="${c}">${c}</div>`).join('')}
+      ${['A 더 짧게','B 더 웃기게','C 더 솔직하게','부산 사투리로','충청도 말투로','제주 느낌으로','A로 확정'].map(c=>`<div class="chip" data-c="${c}">${c}</div>`).join('')}
     </div>`:''}
     <div class="composer">
       <div class="composer-row">
