@@ -145,8 +145,8 @@ const COUPANG_DISCLOSURE='이 포스팅은 쿠팡 파트너스 활동의 일환�
 function buildPinned(comment,r){
   if(!comment)return'';
   if(r&&r._monetize){
-    const label=(r._linkType||'쿠팡 파트너스');
-    return comment+'\n('+label+' 링크 붙여넣기)\n'+COUPANG_DISCLOSURE;
+    const link=(r._linkType||'[링크]');
+    return comment+'\n'+link+'\n'+COUPANG_DISCLOSURE;
   }
   return comment;
 }
@@ -416,17 +416,17 @@ function renderResult(a){
   </div>`:''}
 
   ${(r.image_concepts&&r.image_concepts.length)?`<div class="card">
-    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🖼️</span><span class="title">추천 첨부 이미지 + 생성 프롬프트</span></div><span class="badge">${r.image_concepts.length}컷</span></div>
+    <div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🎬</span><span class="title">기획·스토리보드</span></div><span class="badge">${r.image_concepts.length}컷</span></div>
     ${r.image_concepts.map((c,i)=>{
       const obj=c&&typeof c==='object';
       const concept=obj?(c.concept||''):c;
       const prompt=obj?(c.prompt||''):'';
       return`<div class="img-block">
         <div class="img-block-hdr"><span class="n">${i+1}</span><span class="img-concept">${esc(concept)}</span></div>
-        ${prompt?`<div class="img-prompt"><div class="img-prompt-txt" id="imgp-${i}">${esc(prompt)}</div><button class="btn-amber imgCopy" data-i="${i}">📋 프롬프트 복사</button></div>`:''}
+        ${prompt?`<div class="img-prompt"><div style="font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--cyan);margin-bottom:6px">🛠️ 제작 방법</div><div class="img-prompt-txt" id="imgp-${i}">${esc(prompt)}</div><button class="btn-amber imgCopy" data-i="${i}">📋 제작방법 복사</button></div>`:''}
       </div>`;
     }).join('')}
-    <p style="font-size:11px;color:var(--t3);margin-top:6px">💡 프롬프트는 나노바나나·Grok·Midjourney 등에 그대로 붙여넣으세요 · 폰카 사실감 위주로 작성됨</p>
+    <p style="font-size:11px;color:var(--t3);margin-top:6px">💡 각 컷의 '제작 방법'(이미지 생성 프롬프트)을 나노바나나·Grok·Midjourney 등에 붙여넣으면 그 장면이 만들어집니다 · 폰카 사실감 위주</p>
   </div>`:''}
 
   <button class="btn-primary" id="regenBtn" style="margin-top:4px"><span style="position:relative;z-index:1">🔄 같은 키워드로 다시 생성</span><div class="shimmer"></div></button>`;
