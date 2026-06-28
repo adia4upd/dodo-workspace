@@ -35,6 +35,7 @@
 .char-count{font-size:10px;font-family:var(--mono);color:var(--t3);padding:0 16px 10px}
 .hook-note{margin:0 14px 14px;padding:9px 12px;border-radius:8px;background:var(--purple-d);border:1px solid rgba(192,132,252,.18);font-size:11.5px;line-height:1.5;color:var(--purple)}
 .pin-box{background:linear-gradient(135deg,rgba(74,222,128,.06),rgba(34,211,238,.05));border:1px solid rgba(74,222,128,.18);border-radius:12px;padding:16px;margin-bottom:12px}
+.pin-inline{margin:0 14px 14px;padding:11px 13px;border-radius:9px;background:linear-gradient(135deg,rgba(74,222,128,.06),rgba(34,211,238,.05));border:1px solid rgba(74,222,128,.18)}
 .img-block{background:var(--inner);border:1px solid var(--bdr-in);border-radius:10px;padding:12px;margin-bottom:8px}
 .img-block-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px}
 .img-concept{font-size:13px;font-weight:600;color:var(--t1);line-height:1.5}
@@ -198,15 +199,15 @@ function buildPrompt(){
     gangwon:'강원도 사투리 말투. 투박한 어미("~드래요","~노라","~잼","~까불지마")를 가볍게.',
   };
   const monetizeLine=S.monetize
-    ? `\n- 사용자가 수익화를 원한다. 본문에는 링크를 절대 넣지 말고, "pinned_comment"에 ${S.linkType||'외부 링크'}를 자연스럽게 붙일 1줄 멘트를 만들어라. 광고 티 안 나게.\n- 수익화 타깃 카테고리: '${effCategory()}'. 본문은 여전히 자연스러운 일상글이되 그 카테고리 구매층의 정서·상황에 은근히 닿게 하고(직접 제품 언급은 자제), pinned_comment의 추천 멘트를 그 카테고리 제품에 맞춰라.`
-    : `\n- "pinned_comment"에는 댓글 대화를 이어갈 자연스러운 1줄(링크 없이)을 넣어라.`;
+    ? `\n- 사용자가 수익화를 원한다. 본문에는 링크를 절대 넣지 말고, 각 버전마다 그 버전 본문 톤·맥락에 딱 맞는 "pinned_comment"(${S.linkType||'외부 링크'}를 자연스럽게 붙일 1줄)를 따로따로 만들어라. 3개 댓글은 서로 다르게. 광고 티 안 나게.\n- 수익화 타깃 카테고리: '${effCategory()}'. 본문은 여전히 자연스러운 일상글이되 그 카테고리 구매층의 정서·상황에 은근히 닿게 하고(직접 제품 언급은 자제), 각 pinned_comment의 추천 멘트를 그 카테고리 제품에 맞춰라.`
+    : `\n- 각 버전마다 그 본문에 이어 댓글 대화를 열 자연스러운 "pinned_comment"(1줄, 링크 없이)를 따로 넣어라. 버전 톤에 맞춰 다르게.`;
   const hasProductImg=S.monetize&&S.image;
   const productLine=hasProductImg
     ? `\n\n[제품 사진 분석 — 사용자가 실제 제품 사진을 첨부함]
 - 먼저 첨부 사진을 분석해라(무슨 제품인지·핵심 특징·색감·어떤 사람이 살지). 그 분석을 글·고정댓글·이미지프롬프트에 반영한다.
 - ⚠️ 절대 규칙: 본문(body)은 카탈로그·광고·리뷰가 되면 안 된다. 여전히 100% 자연스러운 일상글이어야 한다. 본문에 제품명·브랜드·가격·링크를 넣지 마라.
 - 본문은 그 제품을 '쓰는 상황·기분·맥락'에만 은근히 닿게 한다(예: 핸드크림이면 "요즘 손 너무 갈라져서 스트레스" 같은 진짜 생활 장면). 제품 자체를 묘사·추천하지 마라.
-- pinned_comment: 이 제품을 자연스럽게 추천하는 1줄. 분석한 제품의 진짜 강점 1가지를 사람 말투로(광고 티·과장 금지). 링크는 ${S.linkType||'외부 링크'} 자리만 표시.
+- 각 버전의 pinned_comment: 그 버전 본문에 이어 이 제품을 자연스럽게 추천하는 1줄(버전 톤에 맞춰 3개 다르게). 분석한 제품의 진짜 강점 1가지를 사람 말투로(광고 티·과장 금지). 링크는 ${S.linkType||'외부 링크'} 자리만 표시.
 - image_concepts: 최소 2컷은 '이 실제 제품'이 일상 속에 툭 놓인 폰카 컷(손에 들거나 세면대·책상·식탁에 자연스럽게). prompt에 사진 속 제품의 색·형태를 영어로 구체 반영. 나머지 컷은 본문 무드에 맞춘 사물/뒷모습 컷.`
     : '';
   return `너는 스레드(Threads) 알고리즘과 한국 유저 정서를 깊이 이해한 카피라이터다. 조회수 부스팅과 '신뢰 유지'를 동시에 고려한다. 어그로만 끄는 글은 거절한다.
@@ -231,7 +232,7 @@ function buildPrompt(){
   · 끝에 세로 비율 추가: --ar 4:5 (스레드 권장). 30~60단어.
 
 [출력] 아래 JSON만 출력. 백틱·설명 금지. 본문 줄바꿈은 \\n 사용:
-{"versions":[{"type":"감정 후킹형","body":"본문(\\n 포함)","hook_reason":"왜 이 첫 줄이 멈추게 하는지 한 줄"},{"type":"호기심/정보형","body":"","hook_reason":""},{"type":"공감/위로형","body":"","hook_reason":""}],"image_concepts":[{"concept":"한국어 한 줄 컨셉","prompt":"ready-to-use English image prompt ... --ar 4:5"},{"concept":"","prompt":""},{"concept":"","prompt":""},{"concept":"","prompt":""},{"concept":"","prompt":""}],"pinned_comment":"고정 댓글용 1줄"}
+{"versions":[{"type":"감정 후킹형","body":"본문(\\n 포함)","hook_reason":"왜 이 첫 줄이 멈추게 하는지 한 줄","pinned_comment":"이 버전 본문에 딱 맞는 고정 댓글 1줄"},{"type":"호기심/정보형","body":"","hook_reason":"","pinned_comment":""},{"type":"공감/위로형","body":"","hook_reason":"","pinned_comment":""}],"image_concepts":[{"concept":"한국어 한 줄 컨셉","prompt":"ready-to-use English image prompt ... --ar 4:5"},{"concept":"","prompt":""},{"concept":"","prompt":""},{"concept":"","prompt":""},{"concept":"","prompt":""}]}
 
 [오늘의 일상 키워드]: ${S.keyword}`;
 }
@@ -370,6 +371,7 @@ function renderLoading(a){
 function renderResult(a){
   const r=S.result;
   const colors=['var(--orange)','var(--cyan)','var(--green)'];
+  const hasPerVersionPin=(r.versions||[]).some(v=>v&&v.pinned_comment);
   a.innerHTML=`
   <div style="padding:24px 0 12px;display:flex;justify-content:space-between;align-items:center">
     <div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">🧵</span><h1 style="font-size:20px;font-weight:900;color:var(--orange);margin:0">완성된 일상글</h1></div>
@@ -384,9 +386,14 @@ function renderResult(a){
       <div class="post-body" id="body-${i}">${esc(v.body)}</div>
       <div class="char-count">${krLen(v.body)}자 · ${(v.body||'').split('\n').length}줄</div>
       ${v.hook_reason?`<div class="hook-note">🎯 ${esc(v.hook_reason)}</div>`:''}
+      ${v.pinned_comment?`<div class="pin-inline">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:11.5px;font-weight:700;color:var(--green)">📌 이 버전용 고정 댓글</span><button class="btn-amber pinCopyV" data-i="${i}">📋 복사</button></div>
+        <div style="font-size:13.5px;line-height:1.55;color:var(--t1);white-space:pre-wrap">${esc(v.pinned_comment)}</div>
+      </div>`:''}
     </div>`).join('')}
+  ${hasPerVersionPin?`<p style="text-align:center;font-size:11px;color:var(--t3);margin:-2px 0 14px">⚠️ 외부 링크는 본문이 아니라 각 '고정 댓글'에 다세요 (도달률 보호)</p>`:''}
 
-  ${r.pinned_comment?`<div class="pin-box">
+  ${(!hasPerVersionPin&&r.pinned_comment)?`<div class="pin-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--green)">📌 고정 댓글용 멘트</div><button class="btn-amber" id="pinCopy">📋 복사</button></div>
     <div style="font-size:14px;line-height:1.6;color:var(--t1);white-space:pre-wrap" id="pinBody">${esc(r.pinned_comment)}</div>
     <p style="font-size:11px;color:var(--t3);margin-top:8px">⚠️ 외부 링크는 본문이 아니라 이 고정 댓글에 다세요 (도달률 보호)</p>
@@ -412,6 +419,7 @@ function renderResult(a){
     $('#backBtn')?.addEventListener('click',()=>{S.step='input';render()});
     $('#regenBtn')?.addEventListener('click',()=>generate());
     $$('.copyBtn').forEach(b=>b.addEventListener('click',()=>copyText(r.versions[+b.dataset.i].body,b)));
+    $$('.pinCopyV').forEach(b=>b.addEventListener('click',()=>copyText(r.versions[+b.dataset.i].pinned_comment,b)));
     $('#pinCopy')?.addEventListener('click',()=>copyText(r.pinned_comment,$('#pinCopy')));
     $$('.imgCopy').forEach(b=>b.addEventListener('click',()=>{const c=r.image_concepts[+b.dataset.i];copyText(typeof c==='object'?c.prompt:c,b)}));
   },0);
