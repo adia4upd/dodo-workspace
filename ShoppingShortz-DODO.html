@@ -178,7 +178,7 @@ async function callAPI(sys,msgs,tools,timeout=120000){
 
 /* ═══════════ PROMPTS ═══════════ */
 const EXTRACT_P=`상품 정보 추출. JSON만: {"product_name":"","price":"","description":"200자이상","target_audience":""}`;
-const ANALYSIS_P=`상품 분석. JSON만: {"product_analysis":{"product_name":"","product_name_zh":"중국어 공식 제품명(타오바오/1688 검색용)","category":"","target_audience":"","usp":["","",""],"pain_points":["",""],"emotional_triggers":["",""],"color_mood":"","platform_notes":{"youtube_shorts":"","instagram_reels":"","tiktok":""}},"thumbnail_ideas":[{"concept":"","main_text":"","sub_text":"","visual_style":"","image_prompt_en":""}],"hashtags":["","","","","","","",""]}`;
+const ANALYSIS_P=`상품 분석. JSON만: {"product_analysis":{"product_name":"","product_name_zh":"중국어 공식 제품명(타오바오/1688 검색용)","category":"","target_audience":"","usp":["","",""],"pain_points":["",""],"emotional_triggers":["",""],"color_mood":"","platform_notes":{"youtube_shorts":"","instagram_reels":"","tiktok":""}}}`;
 
 function scriptP(toneNames){
   return `당신은 쇼핑 숏폼 영상 전문 카피라이터입니다.
@@ -966,7 +966,7 @@ async function doGenerate(){
   const selNames=S.selectedTones.map(id=>TONES.find(t=>t.id===id)?.name).filter(Boolean);
   const pairs=[];for(let i=0;i<selNames.length;i+=2)pairs.push(selNames.slice(i,i+2));
   S.error=null;S.cancelled=false;
-  S.loadSteps=[{id:'a',label:'📊 상품 분석 + 썸네일 + 해시태그',status:'waiting',time:0}];
+  S.loadSteps=[{id:'a',label:'📊 상품 분석',status:'waiting',time:0}];
   pairs.forEach((p,i)=>S.loadSteps.push({id:'s'+i,label:'⭕ '+p.join(' + '),status:'waiting',time:0}));
   S.partialResult={scripts:[]};S.step='loading';render();
 
@@ -1070,8 +1070,7 @@ function renderResult(a){
     const fcp=(sc.scenes||[]).map(s=>`[씬${s.scene_number}] ${s.harmon_stage||HARMON[s.scene_number-1]||''}\n나레이션: ${(s.script||{}).narration}\n자막: ${(s.script||{}).screen_text}\n이미지: ${(s.image_prompt||{}).prompt_en}\n영상: ${(s.video_prompt||{}).prompt_en}`).join('\n\n');
     h+=`<button class="btn-amber copy-btn" data-copy="${encodeURIComponent('['+sc.style+']\nHOOK: '+sc.hook+'\n\n'+fcp)}">전체 복사</button></div></div>`;});
   h+=`</div>`;
-  if(thumbs.length){h+=`<div class="card"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">🖼️</span><span class="title">썸네일</span></div></div>`;thumbs.forEach((t,i)=>{h+=`<div class="inner-box mb-10"><span class="tag" style="color:var(--orange);background:var(--orange-d)">컨셉 ${i+1}</span><p style="color:var(--white);font-size:14px;font-weight:700;margin:6px 0 3px">${t.main_text||''}</p><p style="color:var(--t2);font-size:11px;margin-bottom:6px">${t.sub_text||''}</p>`;if(t.image_prompt_en)h+=`<div class="prompt-block" style="border:1px solid rgba(34,211,238,.1)"><div class="prompt-block-hdr" style="background:rgba(34,211,238,.04)"><div class="label"><span style="color:var(--cyan)">THUMB</span><span class="lang">EN</span></div><button class="prompt-copy copy-btn" data-copy="${encodeURIComponent(t.image_prompt_en)}">복사</button></div><div class="prompt-block-body">${t.image_prompt_en}</div></div>`;h+=`</div>`});h+=`</div>`}
-  if(tags.length){h+=`<div class="card" style="margin-bottom:40px"><div class="card-hdr"><div class="card-hdr-left"><span class="emoji">#️⃣</span><span class="title">해시태그</span></div><button class="btn-amber sm copy-btn" data-copy="${encodeURIComponent(tags.map(t=>'#'+t).join(' '))}">전체</button></div><div class="inner-box" style="display:flex;flex-wrap:wrap;gap:6px">${tags.map(t=>`<span class="hashtag" data-tag="${t}">#${t}</span>`).join('')}</div></div>`}
+  h+=`<div style="height:40px"></div>`;
   h+=`</div>`;a.innerHTML=h;
   setTimeout(()=>{
     $('#resetBtn')?.addEventListener('click',()=>{S.step='input';S.result=null;S.viewingHistory=null;render()});
