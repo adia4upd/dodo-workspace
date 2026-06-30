@@ -279,8 +279,17 @@
       <div id="modeRate" style="display:none;">
         <div class="row" style="align-items:end;">
           <div><label>매달 원금의 몇 %씩 갚기</label><input type="number" id="d_ratepct" placeholder="10" step="1" min="1" max="100" oninput="setRatePct()"></div>
+          <div><label>빠른 선택</label>
+            <div class="toggle-group" id="ratePresets">
+              <button data-p="5" onclick="setRatePctQuick(5)">5%</button>
+              <button data-p="10" onclick="setRatePctQuick(10)">10%</button>
+              <button data-p="15" onclick="setRatePctQuick(15)">15%</button>
+              <button data-p="20" onclick="setRatePctQuick(20)">20%</button>
+              <button data-p="25" onclick="setRatePctQuick(25)">25%</button>
+            </div>
+          </div>
         </div>
-        <div class="hint">예) 10% → 원금을 10개월에 나눠 상환. 매달 <b>고정 원금 + 남은 잔액의 이자</b>를 내며, 잔액이 줄수록 월 납입액이 점점 줄어듭니다(원금균등 방식).</div>
+        <div class="hint">예) 10% → 원금을 10개월에 / 20% → 5개월에 나눠 상환. 매달 <b>고정 원금 + 남은 잔액의 이자</b>를 내며, 잔액이 줄수록 월 납입액이 점점 줄어듭니다(원금균등 방식).</div>
       </div>
       <div id="payoffResult"></div>
       <div class="strat-box" id="stratCompare"></div>
@@ -369,7 +378,9 @@ function setMode(m){ state.payoff.mode=m;
   document.getElementById('md_rate').classList.toggle('on',m==='rate');
   document.getElementById('modeFixed').style.display = m==='fixed'?'block':'none';
   document.getElementById('modeRate').style.display = m==='rate'?'block':'none'; renderPayoff(); flag(); }
-function setRatePct(){ state.payoff.ratePct=+v('d_ratepct')||0; renderPayoff(); flag(); }
+function setRatePct(){ state.payoff.ratePct=+v('d_ratepct')||0; markRatePreset(); renderPayoff(); flag(); }
+function setRatePctQuick(p){ document.getElementById('d_ratepct').value=p; state.payoff.ratePct=p; markRatePreset(); renderPayoff(); flag(); }
+function markRatePreset(){ document.querySelectorAll('#ratePresets button').forEach(b=>b.classList.toggle('on', +b.dataset.p===state.payoff.ratePct)); }
 function renderDebts(){ const tb=document.querySelector('#debtTable tbody');
   if(!state.debts.length){ tb.innerHTML='<tr><td colspan="5" class="empty">아직 등록된 부채가 없습니다.</td></tr>'; }
   else { tb.innerHTML=state.debts.map((r,i)=>`<tr><td>${r.name}</td>
@@ -565,6 +576,7 @@ function renderAll(){
   document.getElementById('d_ratepct').value=state.payoff.ratePct||'';
   setStrategy(state.payoff.strategy||'avalanche');
   setMode(state.payoff.mode||'fixed');
+  markRatePreset();
   renderIncomes(); renderExpenses(); renderFixed(); renderDebts(); renderDash(); }
 
 // 초기화
