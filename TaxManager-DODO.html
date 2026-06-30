@@ -88,6 +88,11 @@
   .stat .k { font-size: 12px; color: var(--muted); } .stat .v { font-size: 20px; font-weight: 700; margin-top: 4px; }
   .stat .v.pos { color: var(--moss); } .stat .v.neg { color: var(--seal); } .stat .v.gold { color: var(--gold); }
   .stat .s { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .corp-bar { margin-top: 7px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .corp-bar .lbl { font-size: 11.5px; color: #7fae9a; }
+  .corp-bar select { background: #243a34; color: var(--paper); border: 1px solid #41544d; border-radius: 6px; padding: 4px 9px; font-size: 12.5px; font-family: inherit; }
+  .corp-bar button { background: transparent; color: #9aa9a2; border: 1px solid #41544d; border-radius: 6px; padding: 4px 9px; font-size: 11.5px; cursor: pointer; font-family: inherit; }
+  .corp-bar button:hover { background: #243a34; color: var(--paper); }
   .backup-reminder { background: var(--warn-bg); border: 1px solid #e3b6a8; color: var(--warn-ink);
     border-radius: 10px; padding: 13px 16px; margin-bottom: 18px; display: flex; align-items: center;
     gap: 12px; flex-wrap: wrap; font-size: 13.5px; line-height: 1.5; }
@@ -115,7 +120,13 @@
   <div>
     <h1>법인 세무관리 <span style="font-size:12px;color:#7fae9a;">v2</span></h1>
     <p>증빙 · 인건비 · 체크리스트 · 신고일정 · 세금예상 · 절세 — 이 브라우저에 자동 저장됩니다 (파일 백업도 가능)</p>
-    <p style="font-size:11.5px;color:#7fae9a;margin-top:2px;">📄 현재 데이터: <b id="fileTag">—</b></p>
+    <div class="corp-bar">
+      <span class="lbl">🏢 법인</span>
+      <select id="corpSelect" onchange="switchCorp(this.value)"></select>
+      <button onclick="addCorp()">＋ 추가</button>
+      <button onclick="renameCorp()">이름변경</button>
+      <button onclick="deleteCorp()">삭제</button>
+    </div>
   </div>
   <div class="data-actions">
     <span class="save-state" id="saveState"></span>
@@ -182,7 +193,17 @@
     <div class="panel-head"><h2>대시보드</h2><div class="sub">법인 세무 현황을 한눈에 봅니다. 입력한 증빙·인건비·자금거래 기준 추정치입니다.</div></div>
     <div class="card" style="padding:12px 18px;">
       <label style="display:inline-block;margin-right:8px;">기준 연도</label>
-      <select id="td_year" onchange="renderTaxDash()" style="max-width:140px;display:inline-block;width:auto;"></select>
+      <select id="td_year" onchange="renderTaxDash()" style="max-width:130px;display:inline-block;width:auto;margin-right:10px;"></select>
+      <label style="display:inline-block;margin-right:8px;">기간</label>
+      <select id="td_quarter" onchange="renderTaxDash()" style="max-width:180px;display:inline-block;width:auto;">
+        <option value="all">연간 전체</option>
+        <option value="1">1분기 (1~3월)</option>
+        <option value="2">2분기 (4~6월)</option>
+        <option value="3">3분기 (7~9월)</option>
+        <option value="4">4분기 (10~12월)</option>
+        <option value="h1">상반기 (1~6월)</option>
+        <option value="h2">하반기 (7~12월)</option>
+      </select>
     </div>
     <div id="tdWarn"></div>
     <h3 class="dash-sec">부가가치세</h3>
@@ -543,8 +564,12 @@ function toggleSaving(k){ state.savings=state.savings||{}; state.savings[k]=!sta
 function v(id){ return document.getElementById(id).value; }
 function won(n){ return (Math.round(n)||0).toLocaleString('ko-KR')+'원'; }
 /* 대시보드 */
-function rSumY(yr,type,field){ return state.receipts.filter(r=>r.type===type && (r.date||'').slice(0,4)===yr).reduce((a,r)=>a+(r[field]||0),0); }
-function pSumY(yr,field){ return state.pays.filter(p=>((p.date||p.month||'')).slice(0,4)===yr).reduce((a,p)=>a+(p[field]||0),0); }
+function inPeriod(dateStr, yr, q){ if((dateStr||'').slice(0,4)!==yr) return false; if(!q||q==='all') return true;
+  const m=parseInt((dateStr||'').slice(5,7),10); if(!m) return false;
+  if(q==='h1') return m>=1&&m<=6; if(q==='h2') return m>=7&&m<=12;
+  const s=(+q-1)*3+1; return m>=s && m<=s+2; }
+function rSumP(type,field,yr,q){ return state.receipts.filter(r=>r.type===type && inPeriod(r.date,yr,q)).reduce((a,r)=>a+(r[field]||0),0); }
+function pSumP(field,yr,q){ return state.pays.filter(p=>inPeriod(p.date||p.month,yr,q)).reduce((a,p)=>a+(p[field]||0),0); }
 function fillTaxYears(){ const ys=new Set();
   state.receipts.forEach(r=>{ if(r.date) ys.add(r.date.slice(0,4)); });
   state.pays.forEach(p=>{ const d=p.date||p.month; if(d) ys.add(d.slice(0,4)); });
@@ -553,10 +578,10 @@ function fillTaxYears(){ const ys=new Set();
   const sel=document.getElementById('td_year'); const cur=sel.value;
   sel.innerHTML=arr.map(y=>`<option value="${y}">${y}년</option>`).join('');
   if(cur && arr.includes(cur)) sel.value=cur; }
-function renderTaxDash(){ const yr=v('td_year')||String(new Date().getFullYear());
-  const sales=rSumY(yr,'매출','supply'), buy=rSumY(yr,'매입','supply'), expense=rSumY(yr,'경비','supply');
-  const outV=rSumY(yr,'매출','vat'), inV=rSumY(yr,'매입','vat')+rSumY(yr,'경비','vat'), vat=outV-inV;
-  const payGross=pSumY(yr,'gross'), wht=pSumY(yr,'tax');
+function renderTaxDash(){ const yr=v('td_year')||String(new Date().getFullYear()); const q=v('td_quarter')||'all';
+  const sales=rSumP('매출','supply',yr,q), buy=rSumP('매입','supply',yr,q), expense=rSumP('경비','supply',yr,q);
+  const outV=rSumP('매출','vat',yr,q), inV=rSumP('매입','vat',yr,q)+rSumP('경비','vat',yr,q), vat=outV-inV;
+  const payGross=pSumP('gross',yr,q), wht=pSumP('tax',yr,q);
   const cost=buy+expense+payGross, profit=sales-cost;
   const gj=state.funds.filter(f=>f.type==='가지급금').reduce((a,f)=>a+(f.amount||0),0);
   const gjInt=state.funds.filter(f=>f.type==='가지급금').reduce((a,f)=>a+fundDeemed(f),0);
@@ -585,21 +610,48 @@ function renderTaxDash(){ const yr=v('td_year')||String(new Date().getFullYear()
   document.getElementById('tdWarn').innerHTML = gj>0
     ? `<div class="warn">⚠ <b>가지급금 ${won(gj)}</b> 있음 — 연 인정이자 약 ${won(gjInt)}가 법인세에 가산되고 세무조사 핵심 항목입니다. '자금 거래' 탭에서 확인·정리하세요.</div>` : ''; }
 function profileId(){ try{ return decodeURIComponent(location.pathname); }catch(e){ return location.pathname; } }
-function profileName(){ const p=(profileId().split('/').pop()||'세무관리').replace(/\.html?$/i,''); return p||'세무관리'; }
-const LS_KEY='taxManager_v2::'+profileId();
+const BASE_KEY='taxManager_v2::'+profileId();
+const CORPS_KEY=BASE_KEY+'::corps';
+let CORPS=['기본 법인'], CURRENT_CORP='기본 법인', LS_KEY=BASE_KEY+'::corp::기본 법인';
+function getCorps(){ try{ const a=JSON.parse(localStorage.getItem(CORPS_KEY)); if(Array.isArray(a)&&a.length) return a; }catch(e){} return null; }
+function saveCorps(){ try{ localStorage.setItem(CORPS_KEY, JSON.stringify(CORPS)); }catch(e){} }
+function corpFromUrl(){ const m=location.search.match(/[?&]corp=([^&]*)/); return m?decodeURIComponent(m[1].replace(/\+/g,' ')):null; }
+function initCorps(){ const saved=getCorps();
+  if(saved){ CORPS=saved; }
+  else { CORPS=['기본 법인']; const legacy=localStorage.getItem(BASE_KEY); // 단일 법인 시절 데이터 이전
+    if(legacy && !localStorage.getItem(BASE_KEY+'::corp::기본 법인')) localStorage.setItem(BASE_KEY+'::corp::기본 법인', legacy);
+    saveCorps(); }
+  const want=corpFromUrl();
+  CURRENT_CORP = (want && CORPS.includes(want)) ? want : CORPS[0];
+  LS_KEY = BASE_KEY+'::corp::'+CURRENT_CORP; }
+function renderCorpUI(){ const sel=document.getElementById('corpSelect');
+  sel.innerHTML=CORPS.map(c=>`<option ${c===CURRENT_CORP?'selected':''}>${c}</option>`).join(''); }
+function gotoCorp(name){ location.search='?corp='+encodeURIComponent(name); }
+function switchCorp(name){ if(name!==CURRENT_CORP) gotoCorp(name); }
+function addCorp(){ const n=(prompt('추가할 법인 이름을 입력하세요')||'').trim();
+  if(!n) return; if(CORPS.includes(n)){ alert('이미 있는 법인입니다.'); return; }
+  CORPS.push(n); saveCorps(); gotoCorp(n); }
+function renameCorp(){ const n=(prompt('새 법인 이름', CURRENT_CORP)||'').trim();
+  if(!n || n===CURRENT_CORP) return; if(CORPS.includes(n)){ alert('이미 있는 이름입니다.'); return; }
+  const data=localStorage.getItem(LS_KEY); if(data!=null) localStorage.setItem(BASE_KEY+'::corp::'+n, data);
+  localStorage.removeItem(LS_KEY);
+  CORPS=CORPS.map(c=>c===CURRENT_CORP?n:c); saveCorps(); gotoCorp(n); }
+function deleteCorp(){ if(CORPS.length<=1){ alert('마지막 법인은 삭제할 수 없습니다.'); return; }
+  if(!confirm(`'${CURRENT_CORP}' 법인의 모든 데이터를 삭제합니다. 되돌릴 수 없습니다. 계속할까요?`)) return;
+  localStorage.removeItem(LS_KEY);
+  CORPS=CORPS.filter(c=>c!==CURRENT_CORP); saveCorps(); gotoCorp(CORPS[0]); }
 function normalizeState(){ state.receipts=state.receipts||[]; state.pays=state.pays||[];
   state.funds=state.funds||[]; state.checks=state.checks||{}; state.wtMode=state.wtMode||'monthly'; }
 function autoSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state));
     const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'); const mm=String(t.getMinutes()).padStart(2,'0');
     document.getElementById('saveState').textContent=`자동 저장됨 ✓ ${hh}:${mm}`; }
   catch(e){ document.getElementById('saveState').textContent='⚠ 자동저장 실패(저장공간 확인)'; } }
-function loadLocal(){ try{ let raw=localStorage.getItem(LS_KEY);
-    if(!raw){ const legacy=localStorage.getItem('taxManager_v2'); if(legacy){ raw=legacy; localStorage.setItem(LS_KEY,legacy); } }
+function loadLocal(){ try{ const raw=localStorage.getItem(LS_KEY);
     if(raw){ state=JSON.parse(raw); normalizeState(); return true; } }catch(e){} return false; }
 function flag(){ autoSave(); }
 function saveFile(){ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`세무관리_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  a.download=`세무관리_${CURRENT_CORP}_${new Date().toISOString().slice(0,10)}.json`; a.click();
   state.lastBackup=new Date().toISOString(); state.backupSnoozeUntil=null;
   autoSave(); checkBackupReminder();
   document.getElementById('saveState').textContent='파일 백업됨 ✓'; }
@@ -695,8 +747,9 @@ document.getElementById('r_date').valueAsDate=new Date();
 document.getElementById('p_date').valueAsDate=new Date();
 document.getElementById('fd_date').valueAsDate=new Date();
 onFundTypeChange();
+initCorps();
+renderCorpUI();
 const hadSaved=loadLocal();
-document.getElementById('fileTag').textContent=profileName();
 renderAll();
 checkBackupReminder();
 if(hadSaved) document.getElementById('saveState').textContent='저장된 데이터 불러옴 ✓';
