@@ -143,6 +143,7 @@
   <button onclick="tab('expense',this)">지출</button>
   <button onclick="tab('fixed',this)">고정비</button>
   <button onclick="tab('debt',this)">빚 갚기</button>
+  <button onclick="tab('lend',this)">받을 돈</button>
 </nav>
 
 <main>
@@ -309,6 +310,44 @@
       <div class="disclaimer">이자는 매월 복리로 단순 계산한 추정치입니다. 실제 상환은 대출 상품의 상환방식(원리금균등·원금균등 등)·중도상환수수료·금리변동에 따라 달라집니다. <b>고금리 우선</b>은 총이자를 가장 적게 내는 수학적 최적, <b>눈덩이</b>는 작은 빚부터 없애 심리적 동력을 주는 방식입니다.</div>
     </div>
   </section>
+
+  <!-- ───── 받을 돈 ───── -->
+  <section class="panel" id="lend">
+    <div class="panel-head"><h2>받을 돈</h2>
+      <div class="sub">빌려준 돈·받을 돈을 기록하고, 실제로 받으면 기록해 남은 금액을 줄이세요.</div></div>
+    <div class="card">
+      <h3><span class="dot"></span>받을 돈 추가</h3>
+      <div class="row">
+        <div><label>상대방</label><input id="l_name" placeholder="예: 김○○"></div>
+        <div><label>받을 금액 (원)</label><input type="number" id="l_amount" placeholder="0"></div>
+        <div><label>발생일</label><input type="date" id="l_date"></div>
+        <div><label>메모</label><input id="l_memo" placeholder="선택"></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn" onclick="addLend()">받을 돈 추가</button></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>받을 돈 목록</h3>
+      <div style="overflow-x:auto;"><table id="lendTable"><thead><tr>
+        <th>상대방</th><th class="num">남은 받을 금액</th><th class="num">최초 금액</th><th>받은 금액</th>
+        <th>발생일</th><th>메모</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>수금 기록 (실제 받음)</h3>
+      <div class="row" style="align-items:end;">
+        <div><label>대상 선택</label><select id="cl_lend"></select></div>
+        <div><label>받은 날짜</label><input type="date" id="cl_date"></div>
+        <div><label>받은 금액 (원)</label><input type="number" id="cl_amount" placeholder="0"></div>
+        <div><button class="btn" onclick="addCollect()">수금 기록</button></div>
+      </div>
+      <div class="hint">실제로 받은 금액을 기록하면 위 '남은 받을 금액'이 줄어듭니다.</div>
+      <div style="overflow-x:auto;margin-top:14px;"><table id="collectTable"><thead><tr>
+        <th>받은 날짜</th><th>대상</th><th class="num">받은 금액</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>요약</h3>
+      <div id="lendSummary"></div>
+    </div>
+  </section>
 </main>
 
 <script>
@@ -329,7 +368,7 @@ const EXPENSE_CATS = [
 ];
 const METHODS = ["현금","체크카드","신용카드","계좌이체"];
 
-let state = { incomes:[], expenses:[], fixed:[], debts:[], payoff:{ monthly:0, strategy:'avalanche' } };
+let state = { incomes:[], expenses:[], fixed:[], debts:[], lends:[], payoff:{ monthly:0, strategy:'avalanche' } };
 
 function tab(id, el){ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
@@ -493,6 +532,46 @@ function renderPayoff(){ const box=document.getElementById('payoffResult'); cons
     } else cmp.innerHTML='';
   } else cmp.innerHTML=''; }
 
+/* ── 받을 돈 ── */
+function addLend(){ const amt=+v('l_amount')||0;
+  const r={ name:v('l_name'), balance:amt, original:amt, date:v('l_date'), memo:v('l_memo'), collects:[] };
+  if(!r.name){alert('상대방을 입력하세요.');return;} if(!amt){alert('받을 금액을 입력하세요.');return;}
+  state.lends.push(r);
+  ['l_name','l_amount','l_memo'].forEach(id=>document.getElementById(id).value=''); renderLends(); flag(); }
+function delLend(i){ state.lends.splice(i,1); renderLends(); flag(); }
+function renderLends(){ const tb=document.querySelector('#lendTable tbody');
+  if(!state.lends.length){ tb.innerHTML='<tr><td colspan="7" class="empty">아직 등록된 받을 돈이 없습니다.</td></tr>'; }
+  else { tb.innerHTML=state.lends.map((d,i)=>{ const orig=d.original||d.balance||0;
+    const got=Math.max(0,orig-(d.balance||0)); const pct=orig>0?Math.round(got/orig*100):0;
+    return `<tr><td>${d.name}</td>
+    <td class="num">${won(d.balance||0)}</td><td class="num">${won(orig)}</td>
+    <td>${won(got)}<div style="background:var(--line);border-radius:4px;height:7px;width:90px;overflow:hidden;margin-top:3px;"><div style="background:var(--moss);height:100%;width:${pct}%"></div></div><span style="font-size:11px;color:var(--muted);">${pct}%</span></td>
+    <td>${d.date||'-'}</td><td>${d.memo||'-'}</td>
+    <td><button class="del" onclick="delLend(${i})">삭제</button></td></tr>`; }).join(''); }
+  renderCollects();
+  const remain=state.lends.reduce((a,d)=>a+(d.balance||0),0);
+  const got=state.lends.reduce((a,d)=>a+Math.max(0,(d.original||d.balance||0)-(d.balance||0)),0);
+  document.getElementById('lendSummary').innerHTML=`<div class="calc-result">
+    <div class="line"><span>아직 받을 금액</span><span class="v">${won(remain)}</span></div>
+    <div class="line total"><span>지금까지 받은 금액</span><span class="v">${won(got)}</span></div></div>`; }
+function addCollect(){ const di=parseInt(v('cl_lend'),10); const date=v('cl_date'); const amt=+v('cl_amount')||0;
+  if(isNaN(di)||!state.lends[di]){alert('대상을 선택하세요.');return;}
+  if(!date){alert('받은 날짜를 입력하세요.');return;} if(!amt){alert('받은 금액을 입력하세요.');return;}
+  const d=state.lends[di]; d.collects=d.collects||[]; d.collects.push({date,amount:amt});
+  d.balance=Math.max(0,(d.balance||0)-amt);
+  document.getElementById('cl_amount').value=''; renderLends(); flag(); }
+function delCollect(di,ci){ const d=state.lends[di]; if(!d||!d.collects||!d.collects[ci])return;
+  d.balance=(d.balance||0)+(d.collects[ci].amount||0); d.collects.splice(ci,1); renderLends(); flag(); }
+function renderCollects(){ const sel=document.getElementById('cl_lend'); const cur=sel.value;
+  sel.innerHTML=state.lends.map((d,i)=>`<option value="${i}">${d.name}</option>`).join('');
+  if(cur!=='' && state.lends[+cur]) sel.value=cur;
+  const rows=[]; state.lends.forEach((d,di)=>(d.collects||[]).forEach((p,ci)=>rows.push({date:p.date,amount:p.amount,dname:d.name,di,ci})));
+  rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const tb=document.querySelector('#collectTable tbody');
+  tb.innerHTML = rows.length ? rows.map(r=>`<tr><td>${r.date}</td><td>${r.dname}</td>
+    <td class="num">${won(r.amount)}</td><td><button class="del" onclick="delCollect(${r.di},${r.ci})">삭제</button></td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty">아직 수금 기록이 없습니다.</td></tr>'; }
+
 /* ── 대시보드 ── */
 function ymOf(dateStr){ return (dateStr||'').slice(0,7); }
 function renderDash(){ const ym=v('dashMonth'); if(!ym) return;
@@ -551,9 +630,13 @@ function exportExcel(){
   state.debts.forEach(d=>{ const orig=d.original||d.balance||0; debtRows.push([d.name||'',d.balance||0,orig,Math.max(0,orig-(d.balance||0)),d.rate||0,d.minPay||0]); });
   const repayRows=[['상환일','부채','상환액']];
   state.debts.forEach(d=>(d.payments||[]).forEach(p=>repayRows.push([p.date||'',d.name||'',p.amount||0])));
+  const lendRows=[['상대방','남은 받을 금액','최초 금액','받은 금액','발생일','메모']];
+  state.lends.forEach(d=>{ const orig=d.original||d.balance||0; lendRows.push([d.name||'',d.balance||0,orig,Math.max(0,orig-(d.balance||0)),d.date||'',d.memo||'']); });
+  const collectRows=[['받은 날짜','대상','받은 금액']];
+  state.lends.forEach(d=>(d.collects||[]).forEach(p=>collectRows.push([p.date||'',d.name||'',p.amount||0])));
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n`
     +`<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">`
-    +xSheet('수입',incRows)+xSheet('지출',expRows)+xSheet('고정비',fixRows)+xSheet('부채',debtRows)+xSheet('상환내역',repayRows)+`</Workbook>`;
+    +xSheet('수입',incRows)+xSheet('지출',expRows)+xSheet('고정비',fixRows)+xSheet('부채',debtRows)+xSheet('상환내역',repayRows)+xSheet('받을돈',lendRows)+xSheet('수금내역',collectRows)+`</Workbook>`;
   const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`머니플랜_엑셀_${new Date().toISOString().slice(0,10)}.xls`; a.click();
@@ -564,7 +647,8 @@ function profileId(){ try{ return decodeURIComponent(location.pathname); }catch(
 function profileName(){ const p=(profileId().split('/').pop()||'머니플랜').replace(/\.html?$/i,''); return p||'머니플랜'; }
 const LS_KEY='moneyPlan_v1::'+profileId();
 function normalizeState(){ state.incomes=state.incomes||[]; state.expenses=state.expenses||[];
-  state.fixed=state.fixed||[]; state.debts=state.debts||[]; state.payoff=state.payoff||{monthly:0,strategy:'avalanche'};
+  state.fixed=state.fixed||[]; state.debts=state.debts||[]; state.lends=state.lends||[]; state.payoff=state.payoff||{monthly:0,strategy:'avalanche'};
+  state.lends.forEach(d=>{ d.collects=d.collects||[]; if(d.original==null) d.original=(+d.balance||0)+d.collects.reduce((a,p)=>a+(p.amount||0),0); });
   state.payoff.monthly=state.payoff.monthly||0; state.payoff.strategy=state.payoff.strategy||'avalanche';
   state.payoff.mode=state.payoff.mode||'fixed'; state.payoff.ratePct=state.payoff.ratePct||10;
   state.debts.forEach(d=>{ d.payments=d.payments||[];
@@ -616,7 +700,7 @@ function renderAll(){
   setStrategy(state.payoff.strategy||'avalanche');
   setMode(state.payoff.mode||'fixed');
   markRatePreset();
-  renderIncomes(); renderExpenses(); renderFixed(); renderDebts(); renderDash(); }
+  renderIncomes(); renderExpenses(); renderFixed(); renderDebts(); renderLends(); renderDash(); }
 
 // 초기화
 fillSelect('i_cat', INCOME_CATS);
@@ -626,6 +710,8 @@ fillSelect('f_cat', [...EXPENSE_CATS, ...INCOME_CATS]);
 document.getElementById('i_date').valueAsDate=new Date();
 document.getElementById('e_date').valueAsDate=new Date();
 document.getElementById('rp_date').valueAsDate=new Date();
+document.getElementById('l_date').valueAsDate=new Date();
+document.getElementById('cl_date').valueAsDate=new Date();
 document.getElementById('dashMonth').value=new Date().toISOString().slice(0,7);
 const hadSaved=loadLocal();
 document.getElementById('fileTag').textContent=profileName();
