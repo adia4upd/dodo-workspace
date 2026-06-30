@@ -254,7 +254,20 @@
     <div class="card">
       <h3><span class="dot"></span>부채 목록</h3>
       <div style="overflow-x:auto;"><table id="debtTable"><thead><tr>
-        <th>이름</th><th class="num">잔액</th><th class="num">연이자율</th><th class="num">월 최소상환</th><th></th></tr></thead><tbody></tbody></table></div>
+        <th>이름</th><th class="num">남은 잔액</th><th class="num">원금</th><th>갚은 금액</th>
+        <th class="num">연이자율</th><th class="num">월 최소상환</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>상환 기록 (실제 납부)</h3>
+      <div class="row" style="align-items:end;">
+        <div><label>부채 선택</label><select id="rp_debt"></select></div>
+        <div><label>상환일</label><input type="date" id="rp_date"></div>
+        <div><label>상환액 (원금 기준, 원)</label><input type="number" id="rp_amount" placeholder="0"></div>
+        <div><button class="btn" onclick="addRepayment()">상환 기록</button></div>
+      </div>
+      <div class="hint">실제로 갚은 금액을 기록하면 위 '남은 잔액'이 실제로 줄어듭니다. (원금 기준으로 입력하세요. 이자는 별도)</div>
+      <div style="overflow-x:auto;margin-top:14px;"><table id="repayTable"><thead><tr>
+        <th>상환일</th><th>부채</th><th class="num">상환액</th><th></th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card">
       <h3><span class="dot"></span>상환 시뮬레이션</h3>
@@ -364,7 +377,8 @@ function renderFixed(){ const tb=document.querySelector('#fixedTable tbody');
   document.getElementById('fixedSummary').textContent=`매월 고정지출 ${won(ex)} · 고정수입 ${won(inc)} (모든 달에 자동 반영)`; }
 
 /* ── 빚 갚기 ── */
-function addDebt(){ const r={ name:v('d_name'), balance:+v('d_balance')||0, rate:+v('d_rate')||0, minPay:+v('d_min')||0 };
+function addDebt(){ const bal=+v('d_balance')||0;
+  const r={ name:v('d_name'), balance:bal, original:bal, rate:+v('d_rate')||0, minPay:+v('d_min')||0, payments:[] };
   if(!r.name){alert('이름을 입력하세요.');return;} if(!r.balance){alert('잔액을 입력하세요.');return;}
   state.debts.push(r);
   ['d_name','d_balance','d_rate','d_min'].forEach(id=>document.getElementById(id).value=''); renderDebts(); flag(); }
@@ -382,11 +396,32 @@ function setRatePct(){ state.payoff.ratePct=+v('d_ratepct')||0; markRatePreset()
 function setRatePctQuick(p){ document.getElementById('d_ratepct').value=p; state.payoff.ratePct=p; markRatePreset(); renderPayoff(); flag(); }
 function markRatePreset(){ document.querySelectorAll('#ratePresets button').forEach(b=>b.classList.toggle('on', +b.dataset.p===state.payoff.ratePct)); }
 function renderDebts(){ const tb=document.querySelector('#debtTable tbody');
-  if(!state.debts.length){ tb.innerHTML='<tr><td colspan="5" class="empty">아직 등록된 부채가 없습니다.</td></tr>'; }
-  else { tb.innerHTML=state.debts.map((r,i)=>`<tr><td>${r.name}</td>
-    <td class="num">${won(r.balance)}</td><td class="num">${r.rate}%</td><td class="num">${won(r.minPay)}</td>
-    <td><button class="del" onclick="delDebt(${i})">삭제</button></td></tr>`).join(''); }
-  renderPayoff(); }
+  if(!state.debts.length){ tb.innerHTML='<tr><td colspan="7" class="empty">아직 등록된 부채가 없습니다.</td></tr>'; }
+  else { tb.innerHTML=state.debts.map((d,i)=>{ const orig=d.original||d.balance||0;
+    const paid=Math.max(0,orig-(d.balance||0)); const pct=orig>0?Math.round(paid/orig*100):0;
+    return `<tr><td>${d.name}</td>
+    <td class="num">${won(d.balance||0)}</td><td class="num">${won(orig)}</td>
+    <td>${won(paid)}<div style="background:var(--line);border-radius:4px;height:7px;width:90px;overflow:hidden;margin-top:3px;"><div style="background:var(--moss);height:100%;width:${pct}%"></div></div><span style="font-size:11px;color:var(--muted);">${pct}%</span></td>
+    <td class="num">${d.rate}%</td><td class="num">${won(d.minPay||0)}</td>
+    <td><button class="del" onclick="delDebt(${i})">삭제</button></td></tr>`; }).join(''); }
+  renderRepayments(); renderPayoff(); }
+function addRepayment(){ const di=parseInt(v('rp_debt'),10); const date=v('rp_date'); const amt=+v('rp_amount')||0;
+  if(isNaN(di)||!state.debts[di]){alert('부채를 선택하세요.');return;}
+  if(!date){alert('상환일을 입력하세요.');return;} if(!amt){alert('상환액을 입력하세요.');return;}
+  const d=state.debts[di]; d.payments=d.payments||[]; d.payments.push({date,amount:amt});
+  d.balance=Math.max(0,(d.balance||0)-amt);
+  document.getElementById('rp_amount').value=''; renderDebts(); flag(); }
+function delRepayment(di,pi){ const d=state.debts[di]; if(!d||!d.payments||!d.payments[pi])return;
+  d.balance=(d.balance||0)+(d.payments[pi].amount||0); d.payments.splice(pi,1); renderDebts(); flag(); }
+function renderRepayments(){ const sel=document.getElementById('rp_debt'); const cur=sel.value;
+  sel.innerHTML=state.debts.map((d,i)=>`<option value="${i}">${d.name}</option>`).join('');
+  if(cur!=='' && state.debts[+cur]) sel.value=cur;
+  const rows=[]; state.debts.forEach((d,di)=>(d.payments||[]).forEach((p,pi)=>rows.push({date:p.date,amount:p.amount,dname:d.name,di,pi})));
+  rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const tb=document.querySelector('#repayTable tbody');
+  tb.innerHTML = rows.length ? rows.map(r=>`<tr><td>${r.date}</td><td>${r.dname}</td>
+    <td class="num">${won(r.amount)}</td><td><button class="del" onclick="delRepayment(${r.di},${r.pi})">삭제</button></td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty">아직 상환 기록이 없습니다.</td></tr>'; }
 
 function simulatePayoff(debts, monthly, strategy){
   let ds=debts.map(d=>({bal:+d.balance||0, rate:(+d.rate||0)/100/12, min:+d.minPay||0})).filter(d=>d.bal>0);
@@ -512,11 +547,13 @@ function exportExcel(){
   state.expenses.forEach(r=>expRows.push([r.date||'',r.cat||'',r.method||'',r.amount||0,r.memo||'']));
   const fixRows=[['이름','유형','카테고리','월 금액','결제일']];
   state.fixed.forEach(f=>fixRows.push([f.name||'',f.type||'',f.cat||'',f.amount||0,f.day||'']));
-  const debtRows=[['이름','잔액','연이자율(%)','월 최소상환']];
-  state.debts.forEach(d=>debtRows.push([d.name||'',d.balance||0,d.rate||0,d.minPay||0]));
+  const debtRows=[['이름','남은 잔액','원금','갚은 금액','연이자율(%)','월 최소상환']];
+  state.debts.forEach(d=>{ const orig=d.original||d.balance||0; debtRows.push([d.name||'',d.balance||0,orig,Math.max(0,orig-(d.balance||0)),d.rate||0,d.minPay||0]); });
+  const repayRows=[['상환일','부채','상환액']];
+  state.debts.forEach(d=>(d.payments||[]).forEach(p=>repayRows.push([p.date||'',d.name||'',p.amount||0])));
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n`
     +`<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">`
-    +xSheet('수입',incRows)+xSheet('지출',expRows)+xSheet('고정비',fixRows)+xSheet('부채',debtRows)+`</Workbook>`;
+    +xSheet('수입',incRows)+xSheet('지출',expRows)+xSheet('고정비',fixRows)+xSheet('부채',debtRows)+xSheet('상환내역',repayRows)+`</Workbook>`;
   const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`머니플랜_엑셀_${new Date().toISOString().slice(0,10)}.xls`; a.click();
@@ -529,7 +566,9 @@ const LS_KEY='moneyPlan_v1::'+profileId();
 function normalizeState(){ state.incomes=state.incomes||[]; state.expenses=state.expenses||[];
   state.fixed=state.fixed||[]; state.debts=state.debts||[]; state.payoff=state.payoff||{monthly:0,strategy:'avalanche'};
   state.payoff.monthly=state.payoff.monthly||0; state.payoff.strategy=state.payoff.strategy||'avalanche';
-  state.payoff.mode=state.payoff.mode||'fixed'; state.payoff.ratePct=state.payoff.ratePct||10; }
+  state.payoff.mode=state.payoff.mode||'fixed'; state.payoff.ratePct=state.payoff.ratePct||10;
+  state.debts.forEach(d=>{ d.payments=d.payments||[];
+    if(d.original==null) d.original=(+d.balance||0)+d.payments.reduce((a,p)=>a+(p.amount||0),0); }); }
 function autoSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state));
     const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'); const mm=String(t.getMinutes()).padStart(2,'0');
     document.getElementById('saveState').textContent=`자동 저장됨 ✓ ${hh}:${mm}`; }
@@ -586,6 +625,7 @@ fillSelect('e_method', METHODS);
 fillSelect('f_cat', [...EXPENSE_CATS, ...INCOME_CATS]);
 document.getElementById('i_date').valueAsDate=new Date();
 document.getElementById('e_date').valueAsDate=new Date();
+document.getElementById('rp_date').valueAsDate=new Date();
 document.getElementById('dashMonth').value=new Date().toISOString().slice(0,7);
 const hadSaved=loadLocal();
 document.getElementById('fileTag').textContent=profileName();
