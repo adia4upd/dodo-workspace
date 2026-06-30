@@ -258,14 +258,29 @@
     </div>
     <div class="card">
       <h3><span class="dot"></span>상환 시뮬레이션</h3>
-      <div class="row" style="align-items:end;">
-        <div><label>매달 갚을 수 있는 총액 (원)</label><input type="number" id="d_monthly" placeholder="0" oninput="setMonthly()"></div>
-        <div><label>상환 전략</label>
-          <div class="toggle-group">
-            <button id="st_av" class="on" onclick="setStrategy('avalanche')">고금리 우선</button>
-            <button id="st_sn" onclick="setStrategy('snowball')">눈덩이(작은 빚)</button>
+      <div style="margin-bottom:14px;">
+        <label>상환 방식</label>
+        <div class="toggle-group">
+          <button id="md_fixed" class="on" onclick="setMode('fixed')">정액 (매달 같은 금액)</button>
+          <button id="md_rate" onclick="setMode('rate')">정률 (원금의 %씩)</button>
+        </div>
+      </div>
+      <div id="modeFixed">
+        <div class="row" style="align-items:end;">
+          <div><label>매달 갚을 수 있는 총액 (원)</label><input type="number" id="d_monthly" placeholder="0" oninput="setMonthly()"></div>
+          <div><label>상환 전략</label>
+            <div class="toggle-group">
+              <button id="st_av" class="on" onclick="setStrategy('avalanche')">고금리 우선</button>
+              <button id="st_sn" onclick="setStrategy('snowball')">눈덩이(작은 빚)</button>
+            </div>
           </div>
         </div>
+      </div>
+      <div id="modeRate" style="display:none;">
+        <div class="row" style="align-items:end;">
+          <div><label>매달 원금의 몇 %씩 갚기</label><input type="number" id="d_ratepct" placeholder="10" step="1" min="1" max="100" oninput="setRatePct()"></div>
+        </div>
+        <div class="hint">예) 10% → 원금을 10개월에 나눠 상환. 매달 <b>고정 원금 + 남은 잔액의 이자</b>를 내며, 잔액이 줄수록 월 납입액이 점점 줄어듭니다(원금균등 방식).</div>
       </div>
       <div id="payoffResult"></div>
       <div class="strat-box" id="stratCompare"></div>
@@ -349,6 +364,12 @@ function setMonthly(){ state.payoff.monthly=+v('d_monthly')||0; renderPayoff(); 
 function setStrategy(s){ state.payoff.strategy=s;
   document.getElementById('st_av').classList.toggle('on',s==='avalanche');
   document.getElementById('st_sn').classList.toggle('on',s==='snowball'); renderPayoff(); flag(); }
+function setMode(m){ state.payoff.mode=m;
+  document.getElementById('md_fixed').classList.toggle('on',m==='fixed');
+  document.getElementById('md_rate').classList.toggle('on',m==='rate');
+  document.getElementById('modeFixed').style.display = m==='fixed'?'block':'none';
+  document.getElementById('modeRate').style.display = m==='rate'?'block':'none'; renderPayoff(); flag(); }
+function setRatePct(){ state.payoff.ratePct=+v('d_ratepct')||0; renderPayoff(); flag(); }
 function renderDebts(){ const tb=document.querySelector('#debtTable tbody');
   if(!state.debts.length){ tb.innerHTML='<tr><td colspan="5" class="empty">아직 등록된 부채가 없습니다.</td></tr>'; }
   else { tb.innerHTML=state.debts.map((r,i)=>`<tr><td>${r.name}</td>
@@ -373,10 +394,31 @@ function simulatePayoff(debts, monthly, strategy){
 }
 function payoffDateText(months){ const d=new Date(); d.setMonth(d.getMonth()+months);
   return `${d.getFullYear()}년 ${d.getMonth()+1}월`; }
+function simulateRate(debts, pct){ // 원금균등: 매달 (최초)원금의 pct%씩 + 남은 잔액 이자
+  if(pct<=0) return null; const sched={}; let totalInterest=0, maxN=0;
+  debts.forEach(d=>{ let rem=+d.balance||0; if(rem<=0) return;
+    const rate=(+d.rate||0)/100/12; const prin=rem*pct/100; const n=Math.ceil(rem/prin);
+    if(n>maxN) maxN=n;
+    for(let m=1;m<=n;m++){ const interest=rem*rate; const pp=Math.min(prin,rem);
+      sched[m]=(sched[m]||0)+pp+interest; totalInterest+=interest; rem-=pp; } });
+  return { sched, totalInterest:Math.round(totalInterest), months:maxN }; }
+function renderRatePayoff(total){ const box=document.getElementById('payoffResult'); const pct=state.payoff.ratePct||0;
+  if(pct<=0){ box.innerHTML='<div class="calc-result"><div class="line"><span>총 부채</span><span class="v">'+won(total)+'</span></div><div class="hint" style="color:#a9b3ad;margin-top:10px;">위에 매달 갚을 원금 비율(%)을 입력하면 계산됩니다.</div></div>'; return; }
+  const r=simulateRate(state.debts, pct);
+  const first=Math.round(r.sched[1]||0), last=Math.round(r.sched[r.months]||0);
+  box.innerHTML=`<div class="calc-result">
+    <div class="line"><span>총 부채</span><span class="v">${won(total)}</span></div>
+    <div class="line"><span>방식</span><span class="sub-v">매달 원금의 ${pct}%씩 (원금균등)</span></div>
+    <div class="line"><span>첫 달 납입액</span><span class="v">${won(first)}</span></div>
+    <div class="line"><span>마지막 달 납입액</span><span class="sub-v">약 ${won(last)} · 매달 점점 감소</span></div>
+    <div class="line"><span>예상 총 이자</span><span class="v">${won(r.totalInterest)}</span></div>
+    <div class="line total"><span>완전 청산까지</span><span class="v">${r.months}개월 · ${payoffDateText(r.months)}</span></div></div>
+    <div class="hint">매달 '고정 원금 + 남은 잔액의 이자'를 냅니다. 잔액이 줄수록 이자가 줄어 월 납입액이 매달 조금씩 감소합니다. (초반 부담↑·총이자↓)</div>`; }
 function renderPayoff(){ const box=document.getElementById('payoffResult'); const cmp=document.getElementById('stratCompare');
   const total=state.debts.reduce((a,d)=>a+(+d.balance||0),0);
   const totalMin=state.debts.reduce((a,d)=>a+(+d.minPay||0),0);
   if(!state.debts.length){ box.innerHTML='<div class="hint" style="margin-top:12px;">부채를 추가하면 청산 시뮬레이션이 표시됩니다.</div>'; cmp.innerHTML=''; return; }
+  if(state.payoff.mode==='rate'){ cmp.innerHTML=''; renderRatePayoff(total); return; }
   const monthly=state.payoff.monthly||0;
   let warn='';
   if(monthly>0 && monthly<totalMin) warn=`<div class="warn">⚠ 매달 갚을 총액(${won(monthly)})이 최소상환 합계(${won(totalMin)})보다 적습니다. 최소상환부터 맞춰야 빚이 줄어듭니다.</div>`;
@@ -436,10 +478,13 @@ function renderDash(){ const ym=v('dashMonth'); if(!ym) return;
   const monthly=state.payoff.monthly||0;
   let dd='';
   if(!state.debts.length){ dd='<div class="empty">등록된 부채가 없습니다. 🎉</div>'; }
-  else { const r=simulatePayoff(state.debts, monthly, state.payoff.strategy);
-    dd=`<div class="bar-row"><span class="lbl">총 부채</span><span class="track"></span><span class="amt">${won(total)}</span></div>`;
-    if(monthly>0 && r.feasible) dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:8px;">현재 상환 계획대로면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.interest)})</div>`;
-    else dd+=`<div class="hint" style="margin-top:8px;">빚 갚기 탭에서 월 상환액을 입력하면 청산 예정일이 표시됩니다.</div>`; }
+  else { dd=`<div class="bar-row"><span class="lbl">총 부채</span><span class="track"></span><span class="amt">${won(total)}</span></div>`;
+    if(state.payoff.mode==='rate'){ const pct=state.payoff.ratePct||0;
+      if(pct>0){ const r=simulateRate(state.debts, pct); dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:8px;">매달 원금의 ${pct}%씩 갚으면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.totalInterest)})</div>`; }
+      else dd+=`<div class="hint" style="margin-top:8px;">빚 갚기 탭에서 상환 비율(%)을 입력하면 청산 예정일이 표시됩니다.</div>`; }
+    else { const r=simulatePayoff(state.debts, monthly, state.payoff.strategy);
+      if(monthly>0 && r.feasible) dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:8px;">현재 상환 계획대로면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.interest)})</div>`;
+      else dd+=`<div class="hint" style="margin-top:8px;">빚 갚기 탭에서 월 상환액을 입력하면 청산 예정일이 표시됩니다.</div>`; } }
   document.getElementById('dashDebt').innerHTML=dd; }
 
 /* ── 엑셀 ── */
@@ -472,7 +517,8 @@ function profileName(){ const p=(profileId().split('/').pop()||'머니플랜').r
 const LS_KEY='moneyPlan_v1::'+profileId();
 function normalizeState(){ state.incomes=state.incomes||[]; state.expenses=state.expenses||[];
   state.fixed=state.fixed||[]; state.debts=state.debts||[]; state.payoff=state.payoff||{monthly:0,strategy:'avalanche'};
-  state.payoff.monthly=state.payoff.monthly||0; state.payoff.strategy=state.payoff.strategy||'avalanche'; }
+  state.payoff.monthly=state.payoff.monthly||0; state.payoff.strategy=state.payoff.strategy||'avalanche';
+  state.payoff.mode=state.payoff.mode||'fixed'; state.payoff.ratePct=state.payoff.ratePct||10; }
 function autoSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state));
     const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'); const mm=String(t.getMinutes()).padStart(2,'0');
     document.getElementById('saveState').textContent=`자동 저장됨 ✓ ${hh}:${mm}`; }
@@ -516,7 +562,9 @@ function fillSelect(id, items){ const grouped=Array.isArray(items[0]);
 
 function renderAll(){
   document.getElementById('d_monthly').value=state.payoff.monthly||'';
+  document.getElementById('d_ratepct').value=state.payoff.ratePct||'';
   setStrategy(state.payoff.strategy||'avalanche');
+  setMode(state.payoff.mode||'fixed');
   renderIncomes(); renderExpenses(); renderFixed(); renderDebts(); renderDash(); }
 
 // 초기화
