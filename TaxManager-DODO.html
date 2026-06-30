@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>법인 세무관리 v2</title>
+<style>
+  :root {
+    --ink: #1a2e29; --paper: #f3f0e7; --card: #fbfaf5; --line: #d9d3c4;
+    --seal: #b5462f; --seal-soft: #e8d4cd; --moss: #4a6b52; --gold: #9c7c38; --muted: #6f6a5d;
+    --warn-bg: #f6e6df; --warn-ink: #9c3b27;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  header { background: var(--ink); color: var(--paper); padding: 22px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .seal { width: 46px; height: 46px; border: 2px solid var(--seal); border-radius: 6px; display: grid; place-items: center;
+    color: var(--seal-soft); font-weight: 700; font-size: 20px; background: rgba(181,70,47,.18); flex-shrink: 0; }
+  header h1 { font-size: 19px; font-weight: 700; letter-spacing: -.3px; }
+  header p { font-size: 12.5px; color: #a9b3ad; margin-top: 2px; }
+  .data-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .data-actions button { background: transparent; color: var(--paper); border: 1px solid #41544d; border-radius: 7px;
+    padding: 8px 13px; font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .data-actions button:hover { background: #243a34; }
+  .save-state { font-size: 11.5px; color: #8aa097; }
+  nav { display: flex; gap: 2px; background: var(--ink); padding: 0 16px; overflow-x: auto; }
+  nav button { background: transparent; border: none; color: #9aa9a2; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 13px 16px; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+  nav button.active { color: var(--paper); border-bottom-color: var(--seal); }
+  main { max-width: 1000px; margin: 0 auto; padding: 26px 20px 80px; }
+  .panel { display: none; } .panel.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .panel-head { margin-bottom: 18px; }
+  .panel-head h2 { font-size: 21px; letter-spacing: -.4px; }
+  .panel-head .sub { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .card h3 { font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h3 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--seal); }
+  label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+  input, select, textarea { width: 100%; font-family: inherit; font-size: 14px; padding: 9px 11px; border: 1px solid var(--line);
+    border-radius: 8px; background: #fff; color: var(--ink); }
+  input:focus, select:focus { outline: 2px solid var(--seal-soft); border-color: var(--seal); }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .btn { background: var(--seal); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13.5px;
+    font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: #9c3b27; }
+  .btn-ghost { background: transparent; color: var(--seal); border: 1px solid var(--seal); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-size: 11.5px; letter-spacing: .4px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .del { color: var(--seal); cursor: pointer; font-size: 12px; border: none; background: none; }
+  .empty { color: var(--muted); text-align: center; padding: 26px; font-size: 13.5px; }
+  .month-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 16px; }
+  .month-tabs button { border: 1px solid var(--line); background: #fff; color: var(--muted); border-radius: 7px;
+    padding: 6px 11px; font-size: 12.5px; cursor: pointer; font-family: inherit; }
+  .month-tabs button.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .check-item { display: flex; align-items: center; gap: 11px; padding: 11px 4px; border-bottom: 1px solid var(--line); }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type=checkbox] { width: 19px; height: 19px; accent-color: var(--moss); cursor: pointer; flex-shrink: 0; }
+  .check-item label { margin: 0; font-size: 14px; color: var(--ink); font-weight: 500; cursor: pointer; }
+  .check-item .tag { font-size: 10.5px; padding: 2px 7px; border-radius: 10px; background: var(--seal-soft); color: var(--seal); font-weight: 700; }
+  .check-item.done label { color: var(--muted); text-decoration: line-through; }
+  .progress-bar { height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .progress-bar > div { height: 100%; background: var(--moss); transition: width .3s; }
+  .sched-item { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .sched-date { text-align: center; flex-shrink: 0; width: 62px; border-right: 2px solid var(--gold); padding-right: 12px; }
+  .sched-date .m { font-size: 11px; color: var(--muted); } .sched-date .d { font-size: 21px; font-weight: 700; }
+  .sched-body { flex: 1; } .sched-body .name { font-weight: 600; font-size: 14.5px; }
+  .sched-body .desc { font-size: 12.5px; color: var(--muted); }
+  .dday { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+  .dday.soon { background: var(--seal-soft); color: var(--seal); } .dday.ok { background: #e0e8e1; color: var(--moss); }
+  .dday.past { background: #eceae3; color: var(--muted); }
+  .calc-result { background: var(--ink); color: var(--paper); border-radius: 12px; padding: 22px; margin-top: 8px; }
+  .calc-result .line { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; border-bottom: 1px solid #2f463f; }
+  .calc-result .line:last-child { border-bottom: none; }
+  .calc-result .total { font-size: 17px; font-weight: 700; margin-top: 8px; padding-top: 14px; border-top: 2px solid var(--seal); }
+  .calc-result .total .v { color: #f0c9bd; }
+  .calc-result .sub-v { color: #a9b3ad; font-size: 12.5px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .disclaimer { font-size: 11.5px; color: var(--muted); background: #efece2; border-radius: 8px; padding: 11px 13px; margin-top: 14px; line-height: 1.5; }
+  .warn { background: var(--warn-bg); border: 1px solid #e3b6a8; color: var(--warn-ink); border-radius: 8px;
+    padding: 11px 13px; font-size: 12.5px; margin-top: 12px; line-height: 1.5; }
+  .warn b { font-weight: 700; }
+  .backup-reminder { background: var(--warn-bg); border: 1px solid #e3b6a8; color: var(--warn-ink);
+    border-radius: 10px; padding: 13px 16px; margin-bottom: 18px; display: flex; align-items: center;
+    gap: 12px; flex-wrap: wrap; font-size: 13.5px; line-height: 1.5; }
+  .backup-reminder .br-actions { margin-left: auto; display: flex; gap: 8px; }
+  .backup-reminder .btn, .backup-reminder .btn-ghost { padding: 7px 14px; font-size: 12.5px; }
+  .help-box { max-width: 1000px; margin: 0 auto; background: #efece2; border: 1px solid var(--line);
+    border-top: none; border-radius: 0 0 12px 12px; padding: 15px 20px; font-size: 13px; color: var(--ink); line-height: 1.75; }
+  .help-box h4 { font-size: 13.5px; margin-bottom: 7px; display: flex; align-items: center; gap: 7px; }
+  .help-box ol { margin: 0 0 6px 18px; } .help-box li { margin-bottom: 3px; }
+  .help-box .warn-line { color: var(--warn-ink); font-weight: 600; }
+  .help-box code { background: #e3ddd0; padding: 1px 6px; border-radius: 5px; font-size: 12px; }
+  .toggle-group { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .toggle-group button { background: #fff; border: none; padding: 7px 14px; font-size: 12.5px; cursor: pointer; font-family: inherit; color: var(--muted); }
+  .toggle-group button.on { background: var(--ink); color: var(--paper); }
+  .ref-table th, .ref-table td { font-size: 12.5px; padding: 8px 9px; }
+  .ref-table tr td:first-child { font-weight: 600; }
+  .checkbox-line { display: flex; align-items: center; gap: 9px; margin: 8px 0; font-size: 13.5px; }
+  .checkbox-line input { width: 18px; height: 18px; accent-color: var(--moss); }
+  @media (max-width: 560px) { .data-actions { width: 100%; margin-left: 0; } header h1 { font-size: 17px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="seal">稅</div>
+  <div>
+    <h1>법인 세무관리 <span style="font-size:12px;color:#7fae9a;">v2</span></h1>
+    <p>증빙 · 인건비 · 체크리스트 · 신고일정 · 세금예상 · 절세 — 이 브라우저에 자동 저장됩니다 (파일 백업도 가능)</p>
+    <p style="font-size:11.5px;color:#7fae9a;margin-top:2px;">📄 현재 데이터: <b id="fileTag">—</b></p>
+  </div>
+  <div class="data-actions">
+    <span class="save-state" id="saveState"></span>
+    <button onclick="toggleHelp()">ⓘ 사용법</button>
+    <button onclick="exportExcel()">엑셀로 정리</button>
+    <button onclick="saveFile()">백업·복원용 저장</button>
+    <button onclick="document.getElementById('loadInput').click()">복원용 불러오기</button>
+    <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadFile(event)">
+  </div>
+</header>
+
+<div class="help-box" id="helpBox" style="display:none;">
+  <p style="background:#e0e8e1;border:1px solid #bcd0c1;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+    💻 <b>이 프로그램은 컴퓨터의 크롬(Chrome) 브라우저에서 사용하세요.</b><br>
+    시크릿 모드나 휴대폰에서 열면 자동 저장이 되지 않아 입력 내용이 사라집니다.</p>
+  <h4>📌 저장 방식 안내</h4>
+  <ol>
+    <li>입력한 내용은 <b>이 브라우저에 자동 저장</b>됩니다. 탭을 닫았다 다시 열어도 그대로 남아 있어요.</li>
+    <li>다른 컴퓨터·다른 브라우저로 옮기려면 <b>[백업·복원용 저장]</b>으로 받은 JSON 파일을 옮긴 뒤 <b>[복원용 불러오기]</b> 하세요. (HTML 파일만 보내면 데이터는 따라가지 않습니다.)</li>
+    <li>한 달에 한 번, 만일을 대비해 <b>[백업·복원용 저장]</b>으로 백업해 두세요. (자동 알림이 떠요.)</li>
+  </ol>
+  <h4>💾 저장 버튼 3가지, 언제 무엇을 쓰나</h4>
+  <ul style="margin:0 0 6px 18px; list-style:none; padding:0;">
+    <li style="margin-bottom:8px;">📊 <b>엑셀로 정리</b> (<code>.xls</code>) — 증빙·인건비·요약 3개 시트로 정리된 엑셀.
+      <br><span style="color:var(--muted);">· <b>세무사에게 전달</b>할 자료 (대부분 엑셀로 받길 원함)
+      <br>· <b>내 장부·기록</b> 보관, 신고 전 <b>숫자 검산</b>
+      <br>· 엑셀/구글시트에서 합계·필터 바로 가능</span>
+      <br><span class="warn-line">⚠️ 홈택스에 그대로 올리는 증빙용은 아닙니다. (세금계산서·카드는 국세청이 이미 자동수집, 일괄업로드는 공식 서식만 허용)</span></li>
+    <li style="margin-bottom:8px;">💾 <b>백업·복원용 저장</b> (<code>.json</code>) — 이 프로그램의 <b>백업/복원용</b> 파일.
+      <br><span style="color:var(--muted);">· 다른 컴퓨터로 옮길 때, 만일을 대비한 백업
+      <br>· 이 파일은 프로그램이 읽는 용도라 엑셀처럼 보기엔 부적합</span></li>
+    <li style="margin-bottom:8px;">📂 <b>복원용 불러오기</b> — 백업해 둔 <code>.json</code> 파일을 다시 올려 <b>복원</b>.
+      <br><span style="color:var(--muted);">· 다른 기기에서 이어 작업하거나, 데이터가 사라졌을 때 되살리기</span></li>
+  </ul>
+  <h4>🗂️ 용도별로 나눠 쓰기 (여러 법인 등)</h4>
+  <ol>
+    <li>이 파일을 복사해 <b>이름을 다르게</b> 하면 데이터가 따로 저장됩니다. 예: <code>세무관리_B법인.html</code></li>
+    <li>지금 어떤 파일을 보고 있는지는 위 <b>📄 현재 데이터</b> 표시로 확인하세요.</li>
+    <li class="warn-line">⚠️ 데이터를 입력한 뒤에는 파일 이름을 바꾸지 마세요. 이름을 바꾸면 데이터가 안 보입니다. (원래 이름으로 되돌리면 다시 나타나며, 삭제된 것은 아닙니다.)</li>
+  </ol>
+</div>
+
+<nav>
+  <button class="active" onclick="tab('receipt',this)">증빙</button>
+  <button onclick="tab('payroll',this)">인건비</button>
+  <button onclick="tab('check',this)">월별 체크</button>
+  <button onclick="tab('schedule',this)">신고 일정</button>
+  <button onclick="tab('calc',this)">세금 예상</button>
+  <button onclick="tab('saving',this)">절세 체크</button>
+</nav>
+
+<main>
+  <div class="backup-reminder" id="backupReminder" style="display:none;">
+    <span>🗂️ 마지막 백업 후 <b id="backupDays">30</b>일이 지났어요. 데이터가 사라지지 않도록 백업 파일을 받아두세요.</span>
+    <div class="br-actions">
+      <button class="btn" onclick="saveFile()">지금 백업</button>
+      <button class="btn-ghost" onclick="snoozeBackup()">3일 뒤 다시</button>
+    </div>
+  </div>
+  <!-- ───── 증빙 ───── -->
+  <section class="panel active" id="receipt">
+    <div class="panel-head"><h2>증빙 입력 · 정리</h2>
+      <div class="sub">지출/매출 증빙을 기록하면 월별 합계와 세금 예상에 자동 반영됩니다.</div></div>
+    <div class="card">
+      <h3><span class="dot"></span>새 증빙 추가</h3>
+      <div class="row">
+        <div><label>날짜</label><input type="date" id="r_date"></div>
+        <div><label>구분</label><select id="r_type">
+          <option value="매출">매출</option><option value="매입">매입</option>
+          <option value="경비">경비</option></select></div>
+        <div><label>경비 세부</label><select id="r_cat">
+          <option>일반</option><option>광고비</option><option>외주비</option>
+          <option>장비/비품</option><option>통신비</option><option>임차료</option><option>교육훈련비</option></select></div>
+        <div><label>증빙종류</label><select id="r_doc">
+          <option>세금계산서</option><option>카드</option><option>현금영수증</option>
+          <option>거래명세서</option><option>통장</option></select></div>
+        <div><label>거래처</label><input id="r_vendor" placeholder="예: ○○상사"></div>
+        <div><label>공급가액 (원)</label><input type="number" id="r_supply" placeholder="0"></div>
+        <div><label>부가세 (원)</label><input type="number" id="r_vat" placeholder="0"></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn" onclick="addReceipt()">증빙 추가</button></div>
+      <div class="warn">⚠ <b>가공(허위) 세금계산서 주의</b> — 실제 거래 없는 세금계산서는 2026년부터 가산세율이 공급가액의 4%로 인상됐고, 사후에 취소해도 가산세가 사라지지 않습니다. 반드시 실물거래 증빙을 남기세요.</div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>증빙 목록</h3>
+      <div style="overflow-x:auto;"><table id="receiptTable"><thead><tr>
+        <th>날짜</th><th>구분</th><th>세부</th><th>종류</th><th>거래처</th>
+        <th class="num">공급가액</th><th class="num">부가세</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ───── 인건비 ───── -->
+  <section class="panel" id="payroll">
+    <div class="panel-head"><h2>인건비 관리</h2>
+      <div class="sub">급여·프리랜서비·일용직 지급을 기록하면 원천세와 신고 항목에 연동됩니다.</div></div>
+    <div class="card">
+      <h3><span class="dot"></span>인건비 지급 추가</h3>
+      <div class="row">
+        <div><label>지급일</label><input type="date" id="p_date"></div>
+        <div><label>유형</label><select id="p_type" onchange="onPayTypeChange()">
+          <option value="대표급여">대표 급여</option><option value="정규직">정규직 급여</option>
+          <option value="프리랜서">프리랜서(3.3%)</option><option value="일용직">일용직</option></select></div>
+        <div><label>성명</label><input id="p_name" placeholder="예: 홍길동"></div>
+        <div><label>지급액 (세전, 원)</label><input type="number" id="p_gross" placeholder="0" oninput="autoWithhold()"></div>
+        <div><label>원천징수액 (원)</label><input type="number" id="p_tax" placeholder="0" oninput="autoWithhold()"></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn" onclick="addPay()">인건비 추가</button>
+        <span class="hint" id="p_hint" style="margin-left:10px;"></span></div>
+      <div class="warn" id="p_warn" style="display:none;">⚠ <b>프리랜서 외주 주의</b> — 실질이 근로자(지속적·지휘감독)인데 사업소득(3.3%)으로 신고하면 4대보험이 최대 3년분 소급될 수 있습니다. 지급 전 계약서로 독립사업자임을 증빙해 두세요.</div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>인건비 목록</h3>
+      <div style="overflow-x:auto;"><table id="payTable"><thead><tr>
+        <th>지급일</th><th>유형</th><th>성명</th><th class="num">지급액(세전)</th>
+        <th class="num">원천징수</th><th class="num">실지급액</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>소득 종류별 신고 기한</h3>
+      <table class="ref-table"><thead><tr><th>유형</th><th>원천세</th><th>간이지급명세서</th></tr></thead>
+      <tbody>
+        <tr><td>정규직(근로소득)</td><td>매월 10일</td><td>반기별(현행). 매월 제출은 2027.1.1 시행 예정</td></tr>
+        <tr><td>프리랜서(사업소득)</td><td>매월 10일</td><td>매월 말일</td></tr>
+        <tr><td>일용직</td><td>매월 10일</td><td>매월 말일</td></tr>
+      </tbody></table>
+      <div class="hint">원천세 반기납부 승인 사업자는 1월·7월 10일로 납부기한이 다릅니다. 4대보험 자격취득·상실 신고는 공단에 별도 제출(사유 발생일 다음 달 15일 기준).</div>
+    </div>
+  </section>
+
+  <!-- ───── 월별 체크 ───── -->
+  <section class="panel" id="check">
+    <div class="panel-head"><h2>월별 체크리스트</h2>
+      <div class="sub">매월 반복 점검 항목입니다. 월을 선택해 체크하세요.</div></div>
+    <div class="month-tabs" id="monthTabs"></div>
+    <div class="card"><div id="checkList"></div>
+      <div class="progress-bar"><div id="checkProgress" style="width:0%"></div></div>
+      <div class="hint" id="checkSummary"></div></div>
+  </section>
+
+  <!-- ───── 신고 일정 ───── -->
+  <section class="panel" id="schedule">
+    <div class="panel-head"><h2>신고 일정</h2>
+      <div class="sub">주말·공휴일이면 다음 영업일로 자동 보정한 기한입니다. 기한을 놓치면 가산세가 발생할 수 있습니다.</div></div>
+    <div class="card">
+      <div style="margin-bottom:14px;">
+        <label>원천세 납부 방식</label>
+        <div class="toggle-group">
+          <button id="wt_monthly" class="on" onclick="setWtMode('monthly')">매월 납부</button>
+          <button id="wt_half" onclick="setWtMode('half')">반기 납부</button>
+        </div>
+      </div>
+      <h3><span class="dot"></span>다가오는 신고 (가까운 순)</h3>
+      <div id="scheduleList"></div>
+    </div>
+    <div class="disclaimer">신고 기한은 일반 법인(12월 결산) 기준이며 회계연도·업종·휴일·예정고지 여부에 따라 달라질 수 있습니다. 직전기 공급가액 1.5억 미만 소규모 법인은 부가세 예정신고 대신 예정고지(4·10월)로 납부합니다. 정확한 기한은 홈택스 또는 담당 세무사로 확인하세요.</div>
+  </section>
+
+  <!-- ───── 세금 예상 ───── -->
+  <section class="panel" id="calc">
+    <div class="panel-head"><h2>세금 예상액</h2>
+      <div class="sub">증빙·인건비 기반 추정입니다. 지방소득세 10% 포함, 귀속연도 세율 자동 적용. 참고용입니다.</div></div>
+    <div class="card">
+      <h3><span class="dot"></span>부가가치세 (증빙 자동 집계)</h3>
+      <div id="vatCalc"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>원천세 (인건비 자동 집계)</h3>
+      <div id="whtCalc"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>법인세 + 지방소득세 추정</h3>
+      <div class="row">
+        <div><label>귀속 사업연도</label><select id="c_year" onchange="calcTax()">
+          <option value="2025">2025년 귀속 (2026년 3월 신고)</option>
+          <option value="2026">2026년 귀속 (2027년 3월 신고)</option></select></div>
+        <div><label>연 매출 (원)</label><input type="number" id="c_revenue" placeholder="자동/직접" oninput="calcTax()"></div>
+        <div><label>연 비용 (원)</label><input type="number" id="c_cost" placeholder="자동/직접" oninput="calcTax()"></div>
+      </div>
+      <div class="checkbox-line"><input type="checkbox" id="c_small" onchange="calcTax()">
+        <label for="c_small" style="margin:0;">성실신고 대상 소규모 법인 (가족지분 50%↑ · 부동산임대 등 주사업 · 상시근로 5인 미만)</label></div>
+      <div class="calc-result" id="corpResult"></div>
+      <div class="disclaimer">2025년 귀속: 2억↓ 9% / 2억~200억 19%. 2026년 귀속: 1%p 인상되어 10% / 20%. 지방소득세는 법인세의 10%를 더합니다. 소규모 법인 체크 시 2억↓ 구간도 19%(2026년 20%)가 적용됩니다. 세무조정·공제·감면·이월결손금 미반영 단순 추정이므로 실제와 차이가 큽니다. 신고 전 세무사 검토 필수.</div>
+    </div>
+  </section>
+
+  <!-- ───── 절세 체크 ───── -->
+  <section class="panel" id="saving">
+    <div class="panel-head"><h2>절세 체크</h2>
+      <div class="sub">놓치기 쉬운 절세 항목입니다. 마케팅·유튜브 운영에 맞춘 항목도 포함했습니다.</div></div>
+    <div class="card">
+      <h3><span class="dot"></span>경비 누락 점검</h3>
+      <div id="savingGeneral"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>마케팅·콘텐츠 사업 특화</h3>
+      <div id="savingBiz"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>구조적 절세 검토</h3>
+      <div id="savingStruct"></div>
+    </div>
+    <div class="disclaimer">합법적 경비 누락 방지, 이월결손금(신설법인은 영업개시 후 5년 내 손실만 이월) 차감, 벤처·신생·지역 감면 대상 확인이 핵심입니다. 과도한 경비·허위 영수증은 세무조사 대상이 되므로 반드시 세무사 상담 아래 진행하세요.</div>
+  </section>
+</main>
+
+<script>
+const CHECK_ITEMS = [
+  { t: "세금계산서 누락 확인" }, { t: "카드 매입 확인" }, { t: "통장 거래 확인" },
+  { t: "직원 급여 지급" }, { t: "원천세 신고·납부 (10일)", tag: "인건비" },
+  { t: "간이지급명세서 제출 — 프리랜서·일용직 (말일)", tag: "인건비" },
+  { t: "4대보험 입·퇴사 신고 (해당 시)", tag: "인건비" },
+  { t: "매출 집계" }, { t: "비용 정리" }, { t: "세무사 자료 전달" }
+];
+const SAVING = {
+  general: ["임차료·관리비 누락 없이 비용 처리", "통신비(업무용 휴대폰·인터넷)", "교육훈련비·도서구입비",
+    "복리후생비 기준 내 처리", "차량 업무사용분 관리(운행기록부)", "감가상각 자산 등록·계상"],
+  biz: ["광고비(SNS·유튜브 광고 집행분)", "외주비(편집·디자인·촬영) 증빙·계약서 보관",
+    "장비(카메라·PC·마이크 등) 감가상각", "소프트웨어·구독료(편집툴·클라우드)",
+    "촬영 관련 출장·교통비", "콘텐츠 제작비 세액공제 대상 여부 검토"],
+  struct: ["대표자 급여 적정 수준 설정", "이월결손금 차감 가능 여부(5년 내)",
+    "벤처·창업중소기업 세액감면 대상 확인", "R&D·통합고용 세액공제 검토",
+    "노란우산공제·퇴직연금 활용 여부", "지역 감면(지방 소재 시) 확인"]
+};
+const HOLIDAYS = ["01-01","03-01","05-05","06-06","08-15","10-03","10-09","12-25"]; // 고정 공휴일(근사)
+
+let state = { receipts: [], pays: [], checks: {}, wtMode: 'monthly' };
+
+function tab(id, el){ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); el.classList.add('active');
+  if(id==='calc') autoFillCalc(); }
+
+/* 증빙 */
+function addReceipt(){ const r={ date:v('r_date'), type:v('r_type'), cat:v('r_cat'), doc:v('r_doc'),
+    vendor:v('r_vendor'), supply:+v('r_supply')||0, vat:+v('r_vat')||0 };
+  if(!r.date){alert('날짜를 입력하세요.');return;}
+  state.receipts.push(r); state.receipts.sort((a,b)=>a.date.localeCompare(b.date));
+  ['r_vendor','r_supply','r_vat'].forEach(id=>document.getElementById(id).value=''); renderReceipts(); flag(); }
+function delReceipt(i){ state.receipts.splice(i,1); renderReceipts(); flag(); }
+function renderReceipts(){ const tb=document.querySelector('#receiptTable tbody');
+  if(!state.receipts.length){ tb.innerHTML='<tr><td colspan="8" class="empty">아직 입력된 증빙이 없습니다.</td></tr>'; return; }
+  tb.innerHTML=state.receipts.map((r,i)=>`<tr><td>${r.date}</td><td>${r.type}</td><td>${r.cat||'-'}</td>
+    <td>${r.doc}</td><td>${r.vendor||'-'}</td><td class="num">${r.supply.toLocaleString()}</td>
+    <td class="num">${r.vat.toLocaleString()}</td><td><button class="del" onclick="delReceipt(${i})">삭제</button></td></tr>`).join(''); }
+
+/* 인건비 */
+function onPayTypeChange(){ const t=v('p_type');
+  document.getElementById('p_warn').style.display = (t==='프리랜서')?'block':'none';
+  document.getElementById('p_hint').textContent = (t==='프리랜서')?'지급액 입력 시 3.3% 자동 계산됩니다.':'';
+  autoWithhold(); }
+function autoWithhold(){ const g=+v('p_gross')||0;
+  if(v('p_type')==='프리랜서'){ const tax=Math.round(g*0.033);
+    document.getElementById('p_tax').value = tax;
+    document.getElementById('p_hint').textContent = g>0 ? `3.3% 공제 ${tax.toLocaleString()}원 → 실지급 ${(g-tax).toLocaleString()}원` : '지급액 입력 시 3.3% 자동 계산됩니다.'; }
+  else { const tax=+v('p_tax')||0;
+    document.getElementById('p_hint').textContent = g>0 ? `실지급 예상 ${(g-tax).toLocaleString()}원` : ''; } }
+function addPay(){ const p={ date:v('p_date'), type:v('p_type'), name:v('p_name'),
+    gross:+v('p_gross')||0, tax:+v('p_tax')||0 };
+  if(!p.date){alert('지급일을 선택하세요.');return;}
+  state.pays.push(p); state.pays.sort((a,b)=>a.date.localeCompare(b.date));
+  ['p_name','p_gross','p_tax'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p_hint').textContent=''; renderPays(); flag(); }
+function delPay(i){ state.pays.splice(i,1); renderPays(); flag(); }
+function renderPays(){ const tb=document.querySelector('#payTable tbody');
+  if(!state.pays.length){ tb.innerHTML='<tr><td colspan="7" class="empty">아직 입력된 인건비가 없습니다.</td></tr>'; return; }
+  tb.innerHTML=state.pays.map((p,i)=>{ const net=(p.gross||0)-(p.tax||0); const day=p.date||p.month||'-';
+    return `<tr><td>${day}</td><td>${p.type}</td><td>${p.name||'-'}</td>
+    <td class="num">${p.gross.toLocaleString()}</td><td class="num">${p.tax.toLocaleString()}</td>
+    <td class="num">${net.toLocaleString()}</td>
+    <td><button class="del" onclick="delPay(${i})">삭제</button></td></tr>`; }).join(''); }
+
+/* 체크 */
+let curMonth=new Date().getMonth()+1;
+function renderMonthTabs(){ const w=document.getElementById('monthTabs'); w.innerHTML='';
+  for(let m=1;m<=12;m++){ const b=document.createElement('button'); b.textContent=m+'월';
+    if(m===curMonth)b.classList.add('active');
+    b.onclick=()=>{curMonth=m;renderMonthTabs();renderChecks();}; w.appendChild(b); } }
+function renderChecks(){ const key='m'+curMonth; if(!state.checks[key])state.checks[key]={};
+  const list=document.getElementById('checkList');
+  list.innerHTML=CHECK_ITEMS.map((item,i)=>{ const done=state.checks[key][i];
+    const tag=item.tag?`<span class="tag">${item.tag}</span>`:'';
+    return `<div class="check-item ${done?'done':''}"><input type="checkbox" id="ck${i}" ${done?'checked':''} onchange="toggleCheck(${i})">
+      <label for="ck${i}">${item.t}</label>${tag}</div>`; }).join('');
+  const done=CHECK_ITEMS.filter((_,i)=>state.checks[key][i]).length;
+  const pct=Math.round(done/CHECK_ITEMS.length*100);
+  document.getElementById('checkProgress').style.width=pct+'%';
+  document.getElementById('checkSummary').textContent=`${curMonth}월 진행: ${done} / ${CHECK_ITEMS.length} 완료 (${pct}%)`; }
+function toggleCheck(i){ const key='m'+curMonth; state.checks[key][i]=!state.checks[key][i]; renderChecks(); flag(); }
+
+/* 신고 일정 — 휴일 보정 */
+function setWtMode(m){ state.wtMode=m;
+  document.getElementById('wt_monthly').classList.toggle('on',m==='monthly');
+  document.getElementById('wt_half').classList.toggle('on',m==='half'); renderSchedule(); flag(); }
+function adjustBizDay(dt){ // 주말·고정공휴일이면 다음 영업일로
+  let d=new Date(dt);
+  for(let i=0;i<10;i++){ const dow=d.getDay();
+    const mmdd=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(dow===0||dow===6||HOLIDAYS.includes(mmdd)){ d.setDate(d.getDate()+1); } else break; }
+  return d; }
+function renderSchedule(){ const today=new Date(); today.setHours(0,0,0,0);
+  const y=today.getFullYear(); const items=[];
+  const fixed=[ {m:1,d:25,name:"부가가치세 확정신고 (2기)",desc:"전년 7~12월분"},
+    {m:1,d:31,name:"지급명세서 제출",desc:"근로·사업·기타소득"},
+    {m:3,d:31,name:"법인세 신고·납부",desc:"12월 결산법인"},
+    {m:4,d:25,name:"부가가치세 예정신고/고지 (1기)",desc:"1~3월분 (소규모는 예정고지)"},
+    {m:7,d:25,name:"부가가치세 확정신고 (1기)",desc:"4~6월분"},
+    {m:8,d:31,name:"법인세 중간예납",desc:"12월 결산법인"},
+    {m:10,d:25,name:"부가가치세 예정신고/고지 (2기)",desc:"7~9월분 (소규모는 예정고지)"} ];
+  fixed.forEach(s=>{ let dt=new Date(y,s.m-1,s.d); if(dt<today)dt=new Date(y+1,s.m-1,s.d);
+    items.push({...s,dt:adjustBizDay(dt)}); });
+  // 원천세 + 간이지급명세서
+  if(state.wtMode==='monthly'){ for(let off=0;off<3;off++){
+    const dt=adjustBizDay(new Date(y,today.getMonth()+off,10));
+    items.push({name:"원천세 신고·납부 (매월)",desc:"전월 원천징수분",dt}); } }
+  else { [0,6].forEach(mo=>{ let dt=new Date(y,mo,10); if(dt<today)dt=new Date(y+1,mo,10);
+    items.push({name:"원천세 반기 납부",desc:(mo===0?"하반기분":"상반기분"),dt:adjustBizDay(dt)}); }); }
+  for(let off=0;off<3;off++){ const dt=adjustBizDay(new Date(y,today.getMonth()+off+1,0)); // 말일
+    items.push({name:"간이지급명세서 제출",desc:"프리랜서·일용직 (매월)",dt}); }
+  items.sort((a,b)=>a.dt-b.dt);
+  document.getElementById('scheduleList').innerHTML=items.slice(0,12).map(s=>{
+    const diff=Math.round((s.dt-today)/86400000); let cls='ok',txt='D-'+diff;
+    if(diff<0){cls='past';txt='지남';} else if(diff===0){cls='soon';txt='D-DAY';} else if(diff<=14)cls='soon';
+    return `<div class="sched-item"><div class="sched-date"><div class="m">${s.dt.getMonth()+1}월</div>
+      <div class="d">${s.dt.getDate()}</div></div><div class="sched-body"><div class="name">${s.name}</div>
+      <div class="desc">${s.desc}</div></div><div class="dday ${cls}">${txt}</div></div>`; }).join(''); }
+
+/* 세금 예상 */
+function autoFillCalc(){ const sales=sumR('매출','supply');
+  const cost=sumR('매입','supply')+sumR('경비','supply')+sumPayGross();
+  if(!v('c_revenue')&&sales)document.getElementById('c_revenue').value=sales;
+  if(!v('c_cost')&&cost)document.getElementById('c_cost').value=cost;
+  renderVat(); renderWht(); calcTax(); }
+function sumR(type,f){ return state.receipts.filter(r=>r.type===type).reduce((a,r)=>a+(r[f]||0),0); }
+function sumPayGross(){ return state.pays.reduce((a,p)=>a+(p.gross||0),0); }
+function renderVat(){ const out=sumR('매출','vat'), inp=sumR('매입','vat')+sumR('경비','vat'), pay=out-inp;
+  document.getElementById('vatCalc').innerHTML=`<div class="calc-result">
+    <div class="line"><span>매출세액 (받은 부가세)</span><span class="v">${won(out)}</span></div>
+    <div class="line"><span>매입세액 (낸 부가세)</span><span class="v">${won(inp)}</span></div>
+    <div class="line total"><span>납부예상 부가세</span><span class="v">${won(pay)}</span></div></div>
+    <div class="hint">${pay>=0?'납부할 금액입니다.':'환급 예상입니다.'} 증빙의 부가세 항목 합산값입니다.</div>`; }
+function renderWht(){ const tax=state.pays.reduce((a,p)=>a+(p.tax||0),0);
+  const fr=state.pays.filter(p=>p.type==='프리랜서').reduce((a,p)=>a+(p.tax||0),0);
+  document.getElementById('whtCalc').innerHTML=`<div class="calc-result">
+    <div class="line"><span>인건비 원천징수 합계</span><span class="v">${won(tax)}</span></div>
+    <div class="line"><span class="sub-v">└ 프리랜서(3.3%) 분</span><span class="sub-v">${won(fr)}</span></div>
+    </div><div class="hint">입력한 인건비의 원천징수액 합계입니다. 매월 10일 신고·납부 대상입니다.</div>`; }
+function calcTax(){ const yr=v('c_year'), small=document.getElementById('c_small').checked;
+  const rev=+v('c_revenue')||0, cost=+v('c_cost')||0, base=Math.max(0,rev-cost);
+  const lowRate = yr==='2026' ? 0.10 : 0.09;
+  const midRate = yr==='2026' ? 0.20 : 0.19;
+  let corp=0, rateNote='';
+  if(small){ corp=base*midRate; rateNote=`소규모 법인 ${(midRate*100)}% 단일적용`; }
+  else if(base<=200000000){ corp=base*lowRate; rateNote=`2억↓ ${(lowRate*100)}%`; }
+  else { corp=200000000*lowRate+(base-200000000)*midRate; rateNote=`2억↓ ${(lowRate*100)}% + 초과분 ${(midRate*100)}%`; }
+  const local=corp*0.10, totalT=corp+local;
+  document.getElementById('corpResult').innerHTML=`
+    <div class="line"><span>과세표준 (매출 − 비용)</span><span class="v">${won(base)}</span></div>
+    <div class="line"><span>법인세 추정 <span class="sub-v">(${rateNote})</span></span><span class="v">${won(Math.round(corp))}</span></div>
+    <div class="line"><span>지방소득세 (법인세 10%)</span><span class="v">${won(Math.round(local))}</span></div>
+    <div class="line total"><span>실부담 합계</span><span class="v">${won(Math.round(totalT))}</span></div>`; }
+
+/* 절세 */
+function renderSaving(){ state.savings=state.savings||{};
+  const mk=(arr,box,grp)=>{ document.getElementById(box).innerHTML=arr.map((t,i)=>{ const k=grp+i; const done=state.savings[k];
+    return `<div class="checkbox-line"><input type="checkbox" ${done?'checked':''} onchange="toggleSaving('${k}')"><label style="margin:0;">${t}</label></div>`; }).join(''); };
+  mk(SAVING.general,'savingGeneral','g'); mk(SAVING.biz,'savingBiz','b'); mk(SAVING.struct,'savingStruct','s'); }
+function toggleSaving(k){ state.savings=state.savings||{}; state.savings[k]=!state.savings[k]; flag(); }
+
+/* 공통 */
+function v(id){ return document.getElementById(id).value; }
+function won(n){ return n.toLocaleString('ko-KR')+'원'; }
+function profileId(){ try{ return decodeURIComponent(location.pathname); }catch(e){ return location.pathname; } }
+function profileName(){ const p=(profileId().split('/').pop()||'세무관리').replace(/\.html?$/i,''); return p||'세무관리'; }
+const LS_KEY='taxManager_v2::'+profileId();
+function normalizeState(){ state.receipts=state.receipts||[]; state.pays=state.pays||[];
+  state.checks=state.checks||{}; state.wtMode=state.wtMode||'monthly'; }
+function autoSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state));
+    const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'); const mm=String(t.getMinutes()).padStart(2,'0');
+    document.getElementById('saveState').textContent=`자동 저장됨 ✓ ${hh}:${mm}`; }
+  catch(e){ document.getElementById('saveState').textContent='⚠ 자동저장 실패(저장공간 확인)'; } }
+function loadLocal(){ try{ let raw=localStorage.getItem(LS_KEY);
+    if(!raw){ const legacy=localStorage.getItem('taxManager_v2'); if(legacy){ raw=legacy; localStorage.setItem(LS_KEY,legacy); } }
+    if(raw){ state=JSON.parse(raw); normalizeState(); return true; } }catch(e){} return false; }
+function flag(){ autoSave(); }
+function saveFile(){ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`세무관리_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  state.lastBackup=new Date().toISOString(); state.backupSnoozeUntil=null;
+  autoSave(); checkBackupReminder();
+  document.getElementById('saveState').textContent='파일 백업됨 ✓'; }
+
+/* 엑셀(.xls) 내보내기 — 세무사 전달·자체 장부용 */
+function xmlEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function xCell(val){ return (typeof val==='number')
+  ? `<Cell><Data ss:Type="Number">${val}</Data></Cell>`
+  : `<Cell><Data ss:Type="String">${xmlEsc(val)}</Data></Cell>`; }
+function xRow(arr){ return '<Row>'+arr.map(xCell).join('')+'</Row>'; }
+function xSheet(name,rows){ return `<Worksheet ss:Name="${xmlEsc(name)}"><Table>${rows.map(xRow).join('')}</Table></Worksheet>`; }
+function exportExcel(){
+  const recRows=[['날짜','구분','경비세부','증빙종류','거래처','공급가액','부가세','합계']];
+  state.receipts.forEach(r=>recRows.push([r.date||'',r.type||'',r.cat||'',r.doc||'',r.vendor||'',r.supply||0,r.vat||0,(r.supply||0)+(r.vat||0)]));
+  const payRows=[['지급일','유형','성명','지급액(세전)','원천징수','실지급액']];
+  state.pays.forEach(p=>payRows.push([p.date||'',p.type||'',p.name||'',p.gross||0,p.tax||0,(p.gross||0)-(p.tax||0)]));
+  const out=sumR('매출','vat'), inp=sumR('매입','vat')+sumR('경비','vat');
+  const wht=state.pays.reduce((a,p)=>a+(p.tax||0),0);
+  const sumRows=[['항목','금액(원)'],
+    ['매출 공급가액', sumR('매출','supply')],
+    ['매입 공급가액', sumR('매입','supply')],
+    ['경비 공급가액', sumR('경비','supply')],
+    ['매출세액(받은 부가세)', out],
+    ['매입세액(낸 부가세)', inp],
+    ['납부예상 부가세', out-inp],
+    ['인건비 지급총액(세전)', sumPayGross()],
+    ['원천징수 합계', wht]];
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n`
+    +`<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">`
+    +xSheet('증빙',recRows)+xSheet('인건비',payRows)+xSheet('요약',sumRows)+`</Workbook>`;
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`세무관리_엑셀_${new Date().toISOString().slice(0,10)}.xls`; a.click();
+  document.getElementById('saveState').textContent='엑셀 내보냄 ✓'; }
+function loadFile(e){ const f=e.target.files[0]; if(!f)return; const rd=new FileReader();
+  rd.onload=ev=>{ try{ state=JSON.parse(ev.target.result);
+    normalizeState(); autoSave(); renderAll();
+    document.getElementById('saveState').textContent='불러옴 ✓ (자동 저장됨)'; }
+    catch{ alert('파일을 읽을 수 없습니다.'); } }; rd.readAsText(f); }
+
+/* 월 1회 백업 알림 */
+const BACKUP_INTERVAL_DAYS=30;
+function checkBackupReminder(){ const el=document.getElementById('backupReminder'); const now=new Date();
+  if(!state.lastBackup){ state.lastBackup=now.toISOString(); autoSave(); el.style.display='none'; return; }
+  const snoozed = state.backupSnoozeUntil && new Date(state.backupSnoozeUntil) > now;
+  const days = Math.floor((now - new Date(state.lastBackup))/86400000);
+  if(days >= BACKUP_INTERVAL_DAYS && !snoozed){
+    document.getElementById('backupDays').textContent = days; el.style.display='flex'; }
+  else { el.style.display='none'; } }
+function snoozeBackup(){ const d=new Date(); d.setDate(d.getDate()+3);
+  state.backupSnoozeUntil=d.toISOString(); autoSave();
+  document.getElementById('backupReminder').style.display='none'; }
+function toggleHelp(){ const b=document.getElementById('helpBox');
+  b.style.display = (b.style.display==='none'||!b.style.display) ? 'block' : 'none'; }
+
+function renderAll(){ renderReceipts(); renderPays(); renderMonthTabs(); renderChecks();
+  setWtMode(state.wtMode); renderSaving(); }
+document.getElementById('r_date').valueAsDate=new Date();
+document.getElementById('p_date').valueAsDate=new Date();
+const hadSaved=loadLocal();
+document.getElementById('fileTag').textContent=profileName();
+renderAll();
+checkBackupReminder();
+if(hadSaved) document.getElementById('saveState').textContent='저장된 데이터 불러옴 ✓';
+</script>
+</body>
+</html>
