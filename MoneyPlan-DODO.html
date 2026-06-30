@@ -60,6 +60,7 @@
   .toggle-group button { background: #fff; border: none; padding: 7px 14px; font-size: 12.5px; cursor: pointer; font-family: inherit; color: var(--muted); }
   .toggle-group button.on { background: var(--ink); color: var(--paper); }
   /* 대시보드 */
+  .dash-sec { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .3px; margin: 18px 2px 10px; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
   .stat .k { font-size: 12px; color: var(--muted); } .stat .v { font-size: 22px; font-weight: 700; margin-top: 4px; }
@@ -157,21 +158,22 @@
 
   <!-- ───── 대시보드 ───── -->
   <section class="panel active" id="dash">
-    <div class="panel-head"><h2>이번 달 한눈에</h2>
-      <div class="sub">수입에서 지출·고정비를 뺀 여유자금이 빚 갚기와 저축의 재원입니다.</div></div>
-    <div class="card">
-      <label>기준 월</label>
-      <input type="month" id="dashMonth" onchange="renderDash()" style="max-width:200px;">
+    <div class="panel-head"><h2>한눈에 보기</h2>
+      <div class="sub">이번 달 현금흐름과 빚·받을 돈 현황을 한 화면에 모았습니다.</div></div>
+    <div class="card" style="padding:12px 18px;">
+      <label style="display:inline-block;margin-right:8px;">기준 월</label>
+      <input type="month" id="dashMonth" onchange="renderDash()" style="max-width:200px;display:inline-block;width:auto;">
     </div>
+    <h3 class="dash-sec">이번 달 현금흐름</h3>
     <div class="stats" id="dashStats"></div>
-    <div class="card">
-      <h3><span class="dot"></span>이번 달 지출 많은 곳</h3>
-      <div id="dashBars"></div>
-    </div>
-    <div class="card">
-      <h3><span class="dot"></span>빚 청산 현황</h3>
-      <div id="dashDebt"></div>
-    </div>
+    <div class="card"><h3><span class="dot"></span>이번 달 vs 지난 달</h3><div id="dashCompare"></div></div>
+    <h3 class="dash-sec">자산·부채 현황</h3>
+    <div class="stats" id="dashBalance"></div>
+    <div class="card"><h3><span class="dot"></span>빚 청산 현황</h3><div id="dashDebt"></div></div>
+    <div class="card"><h3><span class="dot"></span>받을 돈 현황</h3><div id="dashLend"></div></div>
+    <h3 class="dash-sec">구성 분석 (이번 달)</h3>
+    <div class="card"><h3><span class="dot"></span>수입 구성</h3><div id="dashIncomeBars"></div></div>
+    <div class="card"><h3><span class="dot"></span>지출 많은 곳</h3><div id="dashBars"></div></div>
   </section>
 
   <!-- ───── 수입 ───── -->
@@ -574,43 +576,77 @@ function renderCollects(){ const sel=document.getElementById('cl_lend'); const c
 
 /* ── 대시보드 ── */
 function ymOf(dateStr){ return (dateStr||'').slice(0,7); }
-function renderDash(){ const ym=v('dashMonth'); if(!ym) return;
+function prevYm(ym){ const p=ym.split('-').map(Number); const d=new Date(p[0],p[1]-2,1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function monthInc(ym){ return state.incomes.filter(r=>ymOf(r.date)===ym).reduce((a,r)=>a+(r.amount||0),0)
+  + state.fixed.filter(f=>f.type==='수입').reduce((a,f)=>a+(f.amount||0),0); }
+function monthExp(ym){ return state.expenses.filter(r=>ymOf(r.date)===ym).reduce((a,r)=>a+(r.amount||0),0)
+  + state.fixed.filter(f=>f.type==='지출').reduce((a,f)=>a+(f.amount||0),0); }
+function barsHTML(map, emptyMsg){ const cats=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max=cats.length?cats[0][1]:1;
+  return cats.length ? cats.map(([c,amt])=>`<div class="bar-row"><span class="lbl">${c}</span>
+    <span class="track"><span class="fill" style="width:${Math.round(amt/max*100)}%"></span></span>
+    <span class="amt">${won(amt)}</span></div>`).join('') : `<div class="empty">${emptyMsg}</div>`; }
+function progLine(done,total,label){ const pct=total>0?Math.round(done/total*100):0;
+  return `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span>${label}</span><span>${won(done)} / ${won(total)} · ${pct}%</span></div>
+    <div style="background:var(--line);border-radius:5px;height:11px;overflow:hidden;"><div style="background:var(--moss);height:100%;width:${pct}%"></div></div>`; }
+function deltaArrow(n,goodUp){ if(!n) return '<span style="color:var(--muted)">― 동일</span>';
+  const up=n>0; const good=goodUp?up:!up; const col=good?'var(--moss)':'var(--seal)';
+  return `<span style="color:${col};font-weight:600">${up?'▲':'▼'} ${won(Math.abs(n))}</span>`; }
+function renderDash(){ const ym=v('dashMonth'); if(!ym) return; const pym=prevYm(ym);
   const incList=state.incomes.filter(r=>ymOf(r.date)===ym);
   const expList=state.expenses.filter(r=>ymOf(r.date)===ym);
   const fixIn=state.fixed.filter(f=>f.type==='수입').reduce((a,f)=>a+f.amount,0);
   const fixEx=state.fixed.filter(f=>f.type==='지출').reduce((a,f)=>a+f.amount,0);
-  const inc=incList.reduce((a,r)=>a+r.amount,0)+fixIn;
-  const exp=expList.reduce((a,r)=>a+r.amount,0)+fixEx;
-  const free=inc-exp; const rate=inc>0?Math.round(free/inc*100):0;
+  const inc=monthInc(ym), exp=monthExp(ym); const free=inc-exp; const rate=inc>0?Math.round(free/inc*100):0;
+  const fixRatio=inc>0?Math.round(fixEx/inc*100):0;
+  // 이번 달 현금흐름
   document.getElementById('dashStats').innerHTML=`
     <div class="stat"><div class="k">이번 달 수입</div><div class="v pos">${won(inc)}</div><div class="s">변동 + 고정수입</div></div>
     <div class="stat"><div class="k">이번 달 지출</div><div class="v neg">${won(exp)}</div><div class="s">변동 ${won(expList.reduce((a,r)=>a+r.amount,0))} + 고정 ${won(fixEx)}</div></div>
     <div class="stat"><div class="k">여유자금</div><div class="v ${free>=0?'pos':'neg'}">${won(free)}</div><div class="s">수입 − 지출</div></div>
-    <div class="stat"><div class="k">저축률</div><div class="v gold">${rate}%</div><div class="s">여유자금 ÷ 수입</div></div>`;
-  // 카테고리 막대 (고정지출 포함)
-  const catMap={};
-  expList.forEach(r=>catMap[r.cat]=(catMap[r.cat]||0)+r.amount);
-  state.fixed.filter(f=>f.type==='지출').forEach(f=>catMap[f.cat]=(catMap[f.cat]||0)+f.amount);
-  const cats=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const max=cats.length?cats[0][1]:1;
-  document.getElementById('dashBars').innerHTML = cats.length
-    ? cats.map(([c,amt])=>`<div class="bar-row"><span class="lbl">${c}</span>
-        <span class="track"><span class="fill" style="width:${Math.round(amt/max*100)}%"></span></span>
-        <span class="amt">${won(amt)}</span></div>`).join('')
-    : '<div class="empty">이 달의 지출 기록이 없습니다.</div>';
-  // 빚 현황
-  const total=state.debts.reduce((a,d)=>a+(+d.balance||0),0);
-  const monthly=state.payoff.monthly||0;
-  let dd='';
+    <div class="stat"><div class="k">저축률</div><div class="v gold">${rate}%</div><div class="s">고정비 비중 ${fixRatio}%</div></div>`;
+  // 이번 달 vs 지난 달
+  const pInc=monthInc(pym), pExp=monthExp(pym);
+  document.getElementById('dashCompare').innerHTML=`<div class="calc-result">
+    <div class="line"><span>수입</span><span class="v">${won(inc)} <span class="sub-v">(지난달 ${won(pInc)}, ${deltaArrow(inc-pInc,true)})</span></span></div>
+    <div class="line"><span>지출</span><span class="v">${won(exp)} <span class="sub-v">(지난달 ${won(pExp)}, ${deltaArrow(exp-pExp,false)})</span></span></div>
+    <div class="line"><span>여유자금</span><span class="v">${won(free)} <span class="sub-v">(지난달 ${won(pInc-pExp)})</span></span></div></div>`;
+  // 자산·부채 현황
+  const debtBal=state.debts.reduce((a,d)=>a+(+d.balance||0),0);
+  const debtOrig=state.debts.reduce((a,d)=>a+(d.original||d.balance||0),0);
+  const debtPaid=Math.max(0,debtOrig-debtBal); const debtPct=debtOrig>0?Math.round(debtPaid/debtOrig*100):0;
+  const lendBal=state.lends.reduce((a,d)=>a+(+d.balance||0),0);
+  const lendOrig=state.lends.reduce((a,d)=>a+(d.original||d.balance||0),0);
+  const lendGot=Math.max(0,lendOrig-lendBal); const lendPct=lendOrig>0?Math.round(lendGot/lendOrig*100):0;
+  const net=lendBal-debtBal;
+  document.getElementById('dashBalance').innerHTML=`
+    <div class="stat"><div class="k">총 부채 (남은)</div><div class="v neg">${won(debtBal)}</div><div class="s">갚음 ${debtPct}% · 원금 ${won(debtOrig)}</div></div>
+    <div class="stat"><div class="k">받을 돈 (남은)</div><div class="v pos">${won(lendBal)}</div><div class="s">받음 ${lendPct}%</div></div>
+    <div class="stat"><div class="k">순포지션</div><div class="v ${net>=0?'pos':'neg'}">${won(net)}</div><div class="s">받을 돈 − 빚</div></div>`;
+  // 빚 청산 현황
+  const monthly=state.payoff.monthly||0; let dd='';
   if(!state.debts.length){ dd='<div class="empty">등록된 부채가 없습니다. 🎉</div>'; }
-  else { dd=`<div class="bar-row"><span class="lbl">총 부채</span><span class="track"></span><span class="amt">${won(total)}</span></div>`;
+  else { dd=progLine(debtPaid,debtOrig,'갚은 진행률');
     if(state.payoff.mode==='rate'){ const pct=state.payoff.ratePct||0;
-      if(pct>0){ const r=simulateRate(state.debts, pct); dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:8px;">매달 원금의 ${pct}%씩 갚으면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.totalInterest)})</div>`; }
-      else dd+=`<div class="hint" style="margin-top:8px;">빚 갚기 탭에서 상환 비율(%)을 입력하면 청산 예정일이 표시됩니다.</div>`; }
+      if(pct>0){ const r=simulateRate(state.debts, pct); dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:10px;">매달 원금의 ${pct}%씩 갚으면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.totalInterest)})</div>`; }
+      else dd+=`<div class="hint" style="margin-top:10px;">빚 갚기 탭에서 상환 비율(%)을 입력하면 청산 예정일이 표시됩니다.</div>`; }
     else { const r=simulatePayoff(state.debts, monthly, state.payoff.strategy);
-      if(monthly>0 && r.feasible) dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:8px;">현재 상환 계획대로면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.interest)})</div>`;
-      else dd+=`<div class="hint" style="margin-top:8px;">빚 갚기 탭에서 월 상환액을 입력하면 청산 예정일이 표시됩니다.</div>`; } }
-  document.getElementById('dashDebt').innerHTML=dd; }
+      if(monthly>0 && r.feasible) dd+=`<div class="hint" style="font-size:13px;color:var(--ink);margin-top:10px;">현재 상환 계획대로면 <b>${payoffDateText(r.months)}</b>에 완전 청산 (${r.months}개월, 총이자 ${won(r.interest)})</div>`;
+      else dd+=`<div class="hint" style="margin-top:10px;">빚 갚기 탭에서 월 상환액을 입력하면 청산 예정일이 표시됩니다.</div>`; } }
+  document.getElementById('dashDebt').innerHTML=dd;
+  // 받을 돈 현황
+  document.getElementById('dashLend').innerHTML = state.lends.length
+    ? progLine(lendGot,lendOrig,'받은 진행률')+`<div class="hint" style="margin-top:10px;">아직 받을 금액 ${won(lendBal)} · 지금까지 받음 ${won(lendGot)}</div>`
+    : '<div class="empty">등록된 받을 돈이 없습니다.</div>';
+  // 수입 구성
+  const incMap={}; incList.forEach(r=>incMap[r.cat]=(incMap[r.cat]||0)+r.amount);
+  state.fixed.filter(f=>f.type==='수입').forEach(f=>incMap[f.cat]=(incMap[f.cat]||0)+f.amount);
+  document.getElementById('dashIncomeBars').innerHTML=barsHTML(incMap,'이 달의 수입 기록이 없습니다.');
+  // 지출 구성
+  const expMap={}; expList.forEach(r=>expMap[r.cat]=(expMap[r.cat]||0)+r.amount);
+  state.fixed.filter(f=>f.type==='지출').forEach(f=>expMap[f.cat]=(expMap[f.cat]||0)+f.amount);
+  document.getElementById('dashBars').innerHTML=barsHTML(expMap,'이 달의 지출 기록이 없습니다.'); }
 
 /* ── 엑셀 ── */
 function xmlEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

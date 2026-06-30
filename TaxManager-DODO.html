@@ -82,6 +82,12 @@
   .warn { background: var(--warn-bg); border: 1px solid #e3b6a8; color: var(--warn-ink); border-radius: 8px;
     padding: 11px 13px; font-size: 12.5px; margin-top: 12px; line-height: 1.5; }
   .warn b { font-weight: 700; }
+  .dash-sec { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .3px; margin: 18px 2px 10px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .stat .k { font-size: 12px; color: var(--muted); } .stat .v { font-size: 20px; font-weight: 700; margin-top: 4px; }
+  .stat .v.pos { color: var(--moss); } .stat .v.neg { color: var(--seal); } .stat .v.gold { color: var(--gold); }
+  .stat .s { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
   .backup-reminder { background: var(--warn-bg); border: 1px solid #e3b6a8; color: var(--warn-ink);
     border-radius: 10px; padding: 13px 16px; margin-bottom: 18px; display: flex; align-items: center;
     gap: 12px; flex-wrap: wrap; font-size: 13.5px; line-height: 1.5; }
@@ -153,7 +159,8 @@
 </div>
 
 <nav>
-  <button class="active" onclick="tab('receipt',this)">증빙</button>
+  <button class="active" onclick="tab('home',this)">대시보드</button>
+  <button onclick="tab('receipt',this)">증빙</button>
   <button onclick="tab('payroll',this)">인건비</button>
   <button onclick="tab('fund',this)">자금 거래</button>
   <button onclick="tab('check',this)">월별 체크</button>
@@ -170,8 +177,26 @@
       <button class="btn-ghost" onclick="snoozeBackup()">3일 뒤 다시</button>
     </div>
   </div>
+  <!-- ───── 대시보드 ───── -->
+  <section class="panel active" id="home">
+    <div class="panel-head"><h2>대시보드</h2><div class="sub">법인 세무 현황을 한눈에 봅니다. 입력한 증빙·인건비·자금거래 기준 추정치입니다.</div></div>
+    <div class="card" style="padding:12px 18px;">
+      <label style="display:inline-block;margin-right:8px;">기준 연도</label>
+      <select id="td_year" onchange="renderTaxDash()" style="max-width:140px;display:inline-block;width:auto;"></select>
+    </div>
+    <div id="tdWarn"></div>
+    <h3 class="dash-sec">부가가치세</h3>
+    <div class="stats" id="tdVat"></div>
+    <h3 class="dash-sec">손익 (추정)</h3>
+    <div class="stats" id="tdPnl"></div>
+    <h3 class="dash-sec">인건비 · 자금</h3>
+    <div class="stats" id="tdFund"></div>
+    <div class="card"><h3><span class="dot"></span>다가오는 신고</h3><div id="tdSchedule"></div></div>
+    <div class="card"><h3><span class="dot"></span>이번 달 체크 진행</h3><div id="tdCheck"></div></div>
+  </section>
+
   <!-- ───── 증빙 ───── -->
-  <section class="panel active" id="receipt">
+  <section class="panel" id="receipt">
     <div class="panel-head"><h2>증빙 입력 · 정리</h2>
       <div class="sub">지출/매출 증빙을 기록하면 월별 합계와 세금 예상에 자동 반영됩니다.</div></div>
     <div class="card">
@@ -375,7 +400,7 @@ let state = { receipts: [], pays: [], funds: [], checks: {}, wtMode: 'monthly' }
 function tab(id, el){ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active'); el.classList.add('active');
-  if(id==='calc') autoFillCalc(); }
+  if(id==='calc') autoFillCalc(); if(id==='home') renderTaxDash(); }
 
 /* 증빙 */
 function addReceipt(){ const r={ date:v('r_date'), type:v('r_type'), cat:v('r_cat'), doc:v('r_doc'),
@@ -444,7 +469,7 @@ function adjustBizDay(dt){ // 주말·고정공휴일이면 다음 영업일로
     const mmdd=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     if(dow===0||dow===6||HOLIDAYS.includes(mmdd)){ d.setDate(d.getDate()+1); } else break; }
   return d; }
-function renderSchedule(){ const today=new Date(); today.setHours(0,0,0,0);
+function getScheduleItems(){ const today=new Date(); today.setHours(0,0,0,0);
   const y=today.getFullYear(); const items=[];
   const fixed=[ {m:1,d:25,name:"부가가치세 확정신고 (2기)",desc:"전년 7~12월분"},
     {m:1,d:31,name:"지급명세서 제출",desc:"근로·사업·기타소득"},
@@ -463,8 +488,9 @@ function renderSchedule(){ const today=new Date(); today.setHours(0,0,0,0);
     items.push({name:"원천세 반기 납부",desc:(mo===0?"하반기분":"상반기분"),dt:adjustBizDay(dt)}); }); }
   for(let off=0;off<3;off++){ const dt=adjustBizDay(new Date(y,today.getMonth()+off+1,0)); // 말일
     items.push({name:"간이지급명세서 제출",desc:"프리랜서·일용직 (매월)",dt}); }
-  items.sort((a,b)=>a.dt-b.dt);
-  document.getElementById('scheduleList').innerHTML=items.slice(0,12).map(s=>{
+  items.sort((a,b)=>a.dt-b.dt); return items; }
+function renderSchedule(){ const today=new Date(); today.setHours(0,0,0,0);
+  document.getElementById('scheduleList').innerHTML=getScheduleItems().slice(0,12).map(s=>{
     const diff=Math.round((s.dt-today)/86400000); let cls='ok',txt='D-'+diff;
     if(diff<0){cls='past';txt='지남';} else if(diff===0){cls='soon';txt='D-DAY';} else if(diff<=14)cls='soon';
     return `<div class="sched-item"><div class="sched-date"><div class="m">${s.dt.getMonth()+1}월</div>
@@ -515,7 +541,49 @@ function toggleSaving(k){ state.savings=state.savings||{}; state.savings[k]=!sta
 
 /* 공통 */
 function v(id){ return document.getElementById(id).value; }
-function won(n){ return n.toLocaleString('ko-KR')+'원'; }
+function won(n){ return (Math.round(n)||0).toLocaleString('ko-KR')+'원'; }
+/* 대시보드 */
+function rSumY(yr,type,field){ return state.receipts.filter(r=>r.type===type && (r.date||'').slice(0,4)===yr).reduce((a,r)=>a+(r[field]||0),0); }
+function pSumY(yr,field){ return state.pays.filter(p=>((p.date||p.month||'')).slice(0,4)===yr).reduce((a,p)=>a+(p[field]||0),0); }
+function fillTaxYears(){ const ys=new Set();
+  state.receipts.forEach(r=>{ if(r.date) ys.add(r.date.slice(0,4)); });
+  state.pays.forEach(p=>{ const d=p.date||p.month; if(d) ys.add(d.slice(0,4)); });
+  ys.add(String(new Date().getFullYear()));
+  const arr=[...ys].sort((a,b)=>b.localeCompare(a));
+  const sel=document.getElementById('td_year'); const cur=sel.value;
+  sel.innerHTML=arr.map(y=>`<option value="${y}">${y}년</option>`).join('');
+  if(cur && arr.includes(cur)) sel.value=cur; }
+function renderTaxDash(){ const yr=v('td_year')||String(new Date().getFullYear());
+  const sales=rSumY(yr,'매출','supply'), buy=rSumY(yr,'매입','supply'), expense=rSumY(yr,'경비','supply');
+  const outV=rSumY(yr,'매출','vat'), inV=rSumY(yr,'매입','vat')+rSumY(yr,'경비','vat'), vat=outV-inV;
+  const payGross=pSumY(yr,'gross'), wht=pSumY(yr,'tax');
+  const cost=buy+expense+payGross, profit=sales-cost;
+  const gj=state.funds.filter(f=>f.type==='가지급금').reduce((a,f)=>a+(f.amount||0),0);
+  const gjInt=state.funds.filter(f=>f.type==='가지급금').reduce((a,f)=>a+fundDeemed(f),0);
+  document.getElementById('tdVat').innerHTML=`
+    <div class="stat"><div class="k">매출세액 (받은 부가세)</div><div class="v">${won(outV)}</div></div>
+    <div class="stat"><div class="k">매입세액 (낸 부가세)</div><div class="v">${won(inV)}</div></div>
+    <div class="stat"><div class="k">납부예상 부가세</div><div class="v ${vat>=0?'neg':'pos'}">${won(vat)}</div><div class="s">${vat>=0?'납부':'환급'} 예상</div></div>`;
+  document.getElementById('tdPnl').innerHTML=`
+    <div class="stat"><div class="k">매출 (공급가액)</div><div class="v pos">${won(sales)}</div></div>
+    <div class="stat"><div class="k">비용 (매입·경비·인건비)</div><div class="v neg">${won(cost)}</div></div>
+    <div class="stat"><div class="k">추정 이익</div><div class="v ${profit>=0?'pos':'neg'}">${won(profit)}</div><div class="s">매출 − 비용</div></div>`;
+  document.getElementById('tdFund').innerHTML=`
+    <div class="stat"><div class="k">인건비 지급총액</div><div class="v">${won(payGross)}</div></div>
+    <div class="stat"><div class="k">원천징수 합계</div><div class="v">${won(wht)}</div></div>
+    <div class="stat"><div class="k">가지급금</div><div class="v ${gj>0?'neg':''}">${won(gj)}</div><div class="s">연 인정이자 ${won(gjInt)}</div></div>`;
+  const today=new Date(); today.setHours(0,0,0,0);
+  document.getElementById('tdSchedule').innerHTML=getScheduleItems().slice(0,4).map(s=>{
+    const diff=Math.round((s.dt-today)/86400000); let cls='ok',txt='D-'+diff;
+    if(diff<0){cls='past';txt='지남';} else if(diff===0){cls='soon';txt='D-DAY';} else if(diff<=14)cls='soon';
+    return `<div class="sched-item"><div class="sched-date"><div class="m">${s.dt.getMonth()+1}월</div>
+      <div class="d">${s.dt.getDate()}</div></div><div class="sched-body"><div class="name">${s.name}</div>
+      <div class="desc">${s.desc}</div></div><div class="dday ${cls}">${txt}</div></div>`; }).join('');
+  const cm=new Date().getMonth()+1; const ck=state.checks['m'+cm]||{};
+  const done=CHECK_ITEMS.filter((_,i)=>ck[i]).length; const pct=Math.round(done/CHECK_ITEMS.length*100);
+  document.getElementById('tdCheck').innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px;"><span>${cm}월 체크리스트</span><span>${done} / ${CHECK_ITEMS.length} 완료 (${pct}%)</span></div><div class="progress-bar"><div style="width:${pct}%"></div></div>`;
+  document.getElementById('tdWarn').innerHTML = gj>0
+    ? `<div class="warn">⚠ <b>가지급금 ${won(gj)}</b> 있음 — 연 인정이자 약 ${won(gjInt)}가 법인세에 가산되고 세무조사 핵심 항목입니다. '자금 거래' 탭에서 확인·정리하세요.</div>` : ''; }
 function profileId(){ try{ return decodeURIComponent(location.pathname); }catch(e){ return location.pathname; } }
 function profileName(){ const p=(profileId().split('/').pop()||'세무관리').replace(/\.html?$/i,''); return p||'세무관리'; }
 const LS_KEY='taxManager_v2::'+profileId();
@@ -622,7 +690,7 @@ function toggleHelp(){ const b=document.getElementById('helpBox');
   b.style.display = (b.style.display==='none'||!b.style.display) ? 'block' : 'none'; }
 
 function renderAll(){ renderReceipts(); renderPays(); renderFunds(); renderMonthTabs(); renderChecks();
-  setWtMode(state.wtMode); renderSaving(); }
+  setWtMode(state.wtMode); renderSaving(); fillTaxYears(); renderTaxDash(); }
 document.getElementById('r_date').valueAsDate=new Date();
 document.getElementById('p_date').valueAsDate=new Date();
 document.getElementById('fd_date').valueAsDate=new Date();
