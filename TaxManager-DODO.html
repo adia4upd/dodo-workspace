@@ -155,6 +155,7 @@
 <nav>
   <button class="active" onclick="tab('receipt',this)">증빙</button>
   <button onclick="tab('payroll',this)">인건비</button>
+  <button onclick="tab('fund',this)">자금 거래</button>
   <button onclick="tab('check',this)">월별 체크</button>
   <button onclick="tab('schedule',this)">신고 일정</button>
   <button onclick="tab('calc',this)">세금 예상</button>
@@ -235,6 +236,41 @@
         <tr><td>일용직</td><td>매월 10일</td><td>매월 말일</td></tr>
       </tbody></table>
       <div class="hint">원천세 반기납부 승인 사업자는 1월·7월 10일로 납부기한이 다릅니다. 4대보험 자격취득·상실 신고는 공단에 별도 제출(사유 발생일 다음 달 15일 기준).</div>
+    </div>
+  </section>
+
+  <!-- ───── 자금 거래 ───── -->
+  <section class="panel" id="fund">
+    <div class="panel-head"><h2>자금 거래 (가지급금·가수금·대여·차입)</h2>
+      <div class="sub">대표·법인 간 자금 이동과 법인 대출을 기록합니다. 가지급금은 세무조사 핵심 항목이라 별도 관리가 필요합니다.</div></div>
+    <div class="card">
+      <h3><span class="dot"></span>자금 거래 추가</h3>
+      <div class="row">
+        <div><label>구분</label><select id="fd_type" onchange="onFundTypeChange()">
+          <option value="가지급금">가지급금 (회사→대표)</option>
+          <option value="가수금">가수금 (대표→회사)</option>
+          <option value="대여금">대여금 (회사가 빌려줌)</option>
+          <option value="차입금">차입금 (법인 대출·빌림)</option></select></div>
+        <div><label>상대방</label><input id="fd_party" placeholder="예: 대표이사 / ○○은행"></div>
+        <div><label>발생일</label><input type="date" id="fd_date"></div>
+        <div><label>금액 (원)</label><input type="number" id="fd_amount" placeholder="0"></div>
+        <div><label>연 이자율 (%)</label><input type="number" id="fd_rate" step="0.1" placeholder="비우면 4.6"></div>
+        <div><label>메모</label><input id="fd_memo" placeholder="선택"></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn" onclick="addFund()">자금 거래 추가</button></div>
+      <div class="warn" id="fd_warn" style="display:none;"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>자금 거래 목록</h3>
+      <div style="overflow-x:auto;"><table id="fundTable"><thead><tr>
+        <th>발생일</th><th>구분</th><th>상대방</th><th class="num">금액</th><th class="num">이자율</th>
+        <th class="num">연 인정/이자</th><th>메모</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>요약</h3>
+      <div id="fundSummary"></div>
+      <div class="warn"><b>⚠ 가지급금 주의</b> — 업무무관 가지급금은 연 4.6%(당좌대출이자율) 인정이자를 회사 수익(익금)으로 잡아 법인세가 늘고, 회사 차입금이 있으면 그 이자도 일부 비용 인정이 안 됩니다(지급이자 손금불산입). 세무조사 1순위이며, 대표가 갚지 않으면 상여로 처분돼 소득세가 부과됩니다. 가급적 상환·정리하세요.</div>
+      <div class="disclaimer">가수금(대표→회사)은 세무 위험이 작지만 자금 출처 소명이 필요할 수 있고 보통 무이자로 처리합니다(대표가 이자를 받으면 비영업대금 이익으로 과세). 인정이자는 실제로는 일수(일할)로 계산되며, 여기 표시는 '금액 × 이자율'의 연 환산 추정치입니다. 정확한 계산·신고는 세무사와 확인하세요.</div>
     </div>
   </section>
 
@@ -334,7 +370,7 @@ const SAVING = {
 };
 const HOLIDAYS = ["01-01","03-01","05-05","06-06","08-15","10-03","10-09","12-25"]; // 고정 공휴일(근사)
 
-let state = { receipts: [], pays: [], checks: {}, wtMode: 'monthly' };
+let state = { receipts: [], pays: [], funds: [], checks: {}, wtMode: 'monthly' };
 
 function tab(id, el){ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
@@ -484,7 +520,7 @@ function profileId(){ try{ return decodeURIComponent(location.pathname); }catch(
 function profileName(){ const p=(profileId().split('/').pop()||'세무관리').replace(/\.html?$/i,''); return p||'세무관리'; }
 const LS_KEY='taxManager_v2::'+profileId();
 function normalizeState(){ state.receipts=state.receipts||[]; state.pays=state.pays||[];
-  state.checks=state.checks||{}; state.wtMode=state.wtMode||'monthly'; }
+  state.funds=state.funds||[]; state.checks=state.checks||{}; state.wtMode=state.wtMode||'monthly'; }
 function autoSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state));
     const t=new Date(); const hh=String(t.getHours()).padStart(2,'0'); const mm=String(t.getMinutes()).padStart(2,'0');
     document.getElementById('saveState').textContent=`자동 저장됨 ✓ ${hh}:${mm}`; }
@@ -507,6 +543,38 @@ function xCell(val){ return (typeof val==='number')
   : `<Cell><Data ss:Type="String">${xmlEsc(val)}</Data></Cell>`; }
 function xRow(arr){ return '<Row>'+arr.map(xCell).join('')+'</Row>'; }
 function xSheet(name,rows){ return `<Worksheet ss:Name="${xmlEsc(name)}"><Table>${rows.map(xRow).join('')}</Table></Worksheet>`; }
+/* 자금 거래 (가지급금·가수금·대여·차입) */
+const FUND_BENCHMARK=4.6; // 당좌대출이자율(인정이자 기준)
+function fundRate(f){ return (f.rate!=null && f.rate!=='') ? +f.rate : ((f.type==='가지급금'||f.type==='대여금')?FUND_BENCHMARK:0); }
+function fundDeemed(f){ return Math.round((f.amount||0)*fundRate(f)/100); }
+function onFundTypeChange(){ const t=v('fd_type'); const w=document.getElementById('fd_warn');
+  if(t==='가지급금'){ w.style.display='block'; w.innerHTML='⚠ <b>가지급금</b>은 인정이자(연 4.6%)가 회사 수익으로 잡혀 법인세가 늘고, 세무조사 핵심 항목입니다. 이자율을 비우면 4.6%로 계산합니다.'; }
+  else if(t==='대여금'){ w.style.display='block'; w.innerHTML='특수관계자 대여금도 인정이자(연 4.6%) 대상입니다. 이자율을 비우면 4.6%로 계산합니다.'; }
+  else if(t==='차입금'){ w.style.display='block'; w.innerHTML='차입금 이자는 비용(손금) 처리되지만, 가지급금이 있으면 그만큼 지급이자 손금불산입이 적용됩니다.'; }
+  else { w.style.display='none'; } }
+function addFund(){ const f={ type:v('fd_type'), party:v('fd_party'), date:v('fd_date'),
+    amount:+v('fd_amount')||0, rate:v('fd_rate'), memo:v('fd_memo') };
+  if(!f.date){alert('발생일을 입력하세요.');return;} if(!f.amount){alert('금액을 입력하세요.');return;}
+  state.funds.push(f); state.funds.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  ['fd_party','fd_amount','fd_rate','fd_memo'].forEach(id=>document.getElementById(id).value=''); renderFunds(); flag(); }
+function delFund(i){ state.funds.splice(i,1); renderFunds(); flag(); }
+function renderFunds(){ const tb=document.querySelector('#fundTable tbody');
+  if(!state.funds.length){ tb.innerHTML='<tr><td colspan="8" class="empty">아직 입력된 자금 거래가 없습니다.</td></tr>'; }
+  else { tb.innerHTML=state.funds.map((f,i)=>{ const r=fundRate(f);
+    return `<tr><td>${f.date}</td><td>${f.type}</td><td>${f.party||'-'}</td>
+    <td class="num">${(f.amount||0).toLocaleString()}</td><td class="num">${r?r+'%':'-'}</td>
+    <td class="num">${fundDeemed(f).toLocaleString()}</td><td>${f.memo||'-'}</td>
+    <td><button class="del" onclick="delFund(${i})">삭제</button></td></tr>`; }).join(''); }
+  const sum=t=>state.funds.filter(f=>f.type===t).reduce((a,f)=>a+(f.amount||0),0);
+  const gj=sum('가지급금'), gs=sum('가수금'), dy=sum('대여금'), ci=sum('차입금');
+  const deemedGj=state.funds.filter(f=>f.type==='가지급금').reduce((a,f)=>a+fundDeemed(f),0);
+  document.getElementById('fundSummary').innerHTML=`<div class="calc-result">
+    <div class="line"><span>가지급금 (회사→대표) 합계</span><span class="v">${won(gj)}</span></div>
+    <div class="line"><span class="sub-v">└ 연 인정이자(4.6%) 추정</span><span class="sub-v">${won(deemedGj)}</span></div>
+    <div class="line"><span>가수금 (대표→회사) 합계</span><span class="v">${won(gs)}</span></div>
+    <div class="line"><span>대여금 (회사가 빌려줌) 합계</span><span class="v">${won(dy)}</span></div>
+    <div class="line total"><span>차입금 (법인 대출) 합계</span><span class="v">${won(ci)}</span></div></div>`; }
+
 function exportExcel(){
   const recRows=[['날짜','구분','경비세부','증빙종류','거래처','공급가액','부가세','합계']];
   state.receipts.forEach(r=>recRows.push([r.date||'',r.type||'',r.cat||'',r.doc||'',r.vendor||'',r.supply||0,r.vat||0,(r.supply||0)+(r.vat||0)]));
@@ -514,6 +582,8 @@ function exportExcel(){
   state.pays.forEach(p=>payRows.push([p.date||'',p.type||'',p.name||'',p.gross||0,p.tax||0,(p.gross||0)-(p.tax||0)]));
   const out=sumR('매출','vat'), inp=sumR('매입','vat')+sumR('경비','vat');
   const wht=state.pays.reduce((a,p)=>a+(p.tax||0),0);
+  const fundRows=[['발생일','구분','상대방','금액','이자율(%)','연 인정/이자']];
+  state.funds.forEach(f=>fundRows.push([f.date||'',f.type||'',f.party||'',f.amount||0,fundRate(f),fundDeemed(f)]));
   const sumRows=[['항목','금액(원)'],
     ['매출 공급가액', sumR('매출','supply')],
     ['매입 공급가액', sumR('매입','supply')],
@@ -525,7 +595,7 @@ function exportExcel(){
     ['원천징수 합계', wht]];
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n`
     +`<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">`
-    +xSheet('증빙',recRows)+xSheet('인건비',payRows)+xSheet('요약',sumRows)+`</Workbook>`;
+    +xSheet('증빙',recRows)+xSheet('인건비',payRows)+xSheet('자금거래',fundRows)+xSheet('요약',sumRows)+`</Workbook>`;
   const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`세무관리_엑셀_${new Date().toISOString().slice(0,10)}.xls`; a.click();
@@ -551,10 +621,12 @@ function snoozeBackup(){ const d=new Date(); d.setDate(d.getDate()+3);
 function toggleHelp(){ const b=document.getElementById('helpBox');
   b.style.display = (b.style.display==='none'||!b.style.display) ? 'block' : 'none'; }
 
-function renderAll(){ renderReceipts(); renderPays(); renderMonthTabs(); renderChecks();
+function renderAll(){ renderReceipts(); renderPays(); renderFunds(); renderMonthTabs(); renderChecks();
   setWtMode(state.wtMode); renderSaving(); }
 document.getElementById('r_date').valueAsDate=new Date();
 document.getElementById('p_date').valueAsDate=new Date();
+document.getElementById('fd_date').valueAsDate=new Date();
+onFundTypeChange();
 const hadSaved=loadLocal();
 document.getElementById('fileTag').textContent=profileName();
 renderAll();
