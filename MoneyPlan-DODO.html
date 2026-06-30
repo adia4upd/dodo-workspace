@@ -275,8 +275,21 @@
 </main>
 
 <script>
-const INCOME_CATS = ["급여","사업/부업","이자/배당","용돈","기타"];
-const EXPENSE_CATS = ["식비","카페/간식","교통","주거/관리","통신","마트/생필품","쇼핑","의료/건강","문화/여가","교육","경조사","기타"];
+const INCOME_CATS = [
+  ["근로·사업", ["급여","상여·보너스","사업소득","프리랜서·외주"]],
+  ["크리에이터 수익", ["광고수익(애드센스·유튜브)","협찬·브랜디드","제휴마케팅(쿠팡파트너스 등)","후원·멤버십·슈퍼챗","강의·전자책·디지털상품","공구·라이브커머스"]],
+  ["투자·자산", ["이자","배당","투자수익(매도차익)","임대수익"]],
+  ["기타 수입", ["정부지원·보조금","세금환급","중고판매","용돈·선물받음","기타"]],
+];
+const EXPENSE_CATS = [
+  ["식·생활", ["식비(외식)","카페·간식","식료품·마트","생필품"]],
+  ["주거·통신", ["월세·관리비","공과금(전기·가스·수도)","통신비","구독서비스(OTT·SW)"]],
+  ["교통·차량", ["대중교통","택시","주유·충전","차량관리·보험"]],
+  ["건강·뷰티", ["의료·약","운동·헬스","미용·뷰티"]],
+  ["문화·여가·쇼핑", ["문화·취미","여행·숙박","술·유흥","의류·패션"]],
+  ["금융·교육·기타", ["보험료","세금·수수료","교육·자기계발","경조사","후원·기부","기타"]],
+  ["사업·콘텐츠", ["장비·소프트웨어","외주·편집","광고·마케팅","사업 기타"]],
+];
 const METHODS = ["현금","체크카드","신용카드","계좌이체"];
 
 let state = { incomes:[], expenses:[], fixed:[], debts:[], payoff:{ monthly:0, strategy:'avalanche' } };
@@ -496,7 +509,10 @@ function toggleHelp(){ const b=document.getElementById('helpBox');
 /* ── 공통 ── */
 function v(id){ return document.getElementById(id).value; }
 function won(n){ return (Math.round(n)||0).toLocaleString('ko-KR')+'원'; }
-function fillSelect(id, arr){ document.getElementById(id).innerHTML=arr.map(o=>`<option>${o}</option>`).join(''); }
+function fillSelect(id, items){ const grouped=Array.isArray(items[0]);
+  document.getElementById(id).innerHTML = grouped
+    ? items.map(([g,opts])=>`<optgroup label="${g}">${opts.map(o=>`<option>${o}</option>`).join('')}</optgroup>`).join('')
+    : items.map(o=>`<option>${o}</option>`).join(''); }
 
 function renderAll(){
   document.getElementById('d_monthly').value=state.payoff.monthly||'';
