@@ -1885,7 +1885,7 @@ function renderCards() {
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </button>${guideBtn}
-          <button class="card-btn card-btn-open" title="새 탭에서 열기" data-file="${tool.file}">
+          <button class="card-btn card-btn-open" title="새 탭에서 열기" data-file="${tool.file}?v=${encodeURIComponent(tool.version||'1')}">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M7 17L17 7M17 7H7M17 7V17"/>
             </svg>
@@ -1910,7 +1910,7 @@ function renderCards() {
     card.addEventListener('click', (e) => {
       if (isEditMode) return;
       if (e.target.closest('.card-btn')) return;
-      window.open(tool.file, '_blank', 'noopener,noreferrer');
+      window.open(tool.file + '?v=' + encodeURIComponent(tool.version||'1'), '_blank', 'noopener,noreferrer');
     });
 
     // Drag events
