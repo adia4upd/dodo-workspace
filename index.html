@@ -1778,6 +1778,13 @@ const CHANGELOG = [
 ];
 // =========================================================
 
+// 도구 열기 — 모바일은 같은 탭(뒤로가기로 복귀), PC는 새 탭
+function openTool(url){
+  const mobile = /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent) || window.matchMedia('(max-width: 820px)').matches;
+  if(mobile){ window.location.href = url; }
+  else { window.open(url, '_blank', 'noopener,noreferrer'); }
+}
+
 // --- Render Changelog ---
 function renderUpdates() {
   const sec = document.getElementById('updatesSection');
@@ -1926,7 +1933,7 @@ function renderCards() {
     card.addEventListener('click', (e) => {
       if (isEditMode) return;
       if (e.target.closest('.card-btn')) return;
-      window.open(tool.file + '?v=' + encodeURIComponent(tool.version||'1'), '_blank', 'noopener,noreferrer');
+      openTool(tool.file + '?v=' + encodeURIComponent(tool.version||'1'));
     });
 
     // Drag events
@@ -1945,7 +1952,7 @@ function renderCards() {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (isEditMode) return;
-      window.open(btn.dataset.file, '_blank', 'noopener,noreferrer');
+      openTool(btn.dataset.file);
     });
   });
 
