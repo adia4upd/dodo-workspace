@@ -93,12 +93,7 @@
   .help-box ol, .help-box ul { margin: 0 0 8px 18px; } .help-box li { margin-bottom: 4px; }
   .help-box .warn-line { color: var(--warn-ink); font-weight: 600; }
   .help-box code { background: #e3ddd0; padding: 1px 6px; border-radius: 5px; font-size: 12px; }
-  @media (max-width: 560px) { .data-actions { width: 100%; margin-left: 0; } header h1 { font-size: 17px; } .strat-box { grid-template-columns: 1fr; } }
-  .home-fab { display: none; }
-  @media (max-width: 820px) { .home-fab { display: inline-flex; align-items: center; gap: 6px; position: fixed;
-    left: 12px; bottom: 12px; z-index: 50; background: var(--ink); color: var(--paper); border-radius: 22px;
-    padding: 11px 17px; font-size: 13.5px; font-weight: 600; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.3); } }
-</style>
+  @media (max-width: 560px) { .data-actions { width: 100%; margin-left: 0; } header h1 { font-size: 17px; } .strat-box { grid-template-columns: 1fr; } }</style>
 </head>
 <body>
 <header>
@@ -759,6 +754,5 @@ renderAll();
 checkBackupReminder();
 if(hadSaved) document.getElementById('saveState').textContent='저장된 데이터 불러옴 ✓';
 </script>
-<a href="index.html" class="home-fab">← 워크스페이스</a>
 </body>
 </html>
