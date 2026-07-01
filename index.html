@@ -1793,18 +1793,19 @@ function renderUpdates() {
   const sec = document.getElementById('updatesSection');
 
   let html = `
-    <div class="updates-header">
+    <div class="updates-header" onclick="toggleUpdates()" style="cursor:pointer;user-select:none;">
       <div class="updates-title">
         🕐 최근 업데이트 이력
-        <span>변경 사항을 확인하세요</span>
+        <span id="updatesHint">클릭해서 펼치기</span>
       </div>
+      <div id="updatesToggle" style="margin-left:auto;font-size:13px;color:var(--text-dim);">▼</div>
     </div>
   `;
 
   if (!CHANGELOG.length) {
-    html += '<div class="cl-empty">아직 변경 이력이 없습니다.</div>';
+    html += '<div class="cl-empty" id="updatesBody" style="display:none;">아직 변경 이력이 없습니다.</div>';
   } else {
-    html += '<div class="changelog-timeline">';
+    html += '<div class="changelog-timeline" id="updatesBody" style="display:none;">';
     CHANGELOG.forEach((c, i) => {
       html += `
         <div class="cl-item">
@@ -1823,6 +1824,16 @@ function renderUpdates() {
   }
 
   sec.innerHTML = html;
+}
+function toggleUpdates() {
+  const b = document.getElementById('updatesBody');
+  const t = document.getElementById('updatesToggle');
+  const hint = document.getElementById('updatesHint');
+  if (!b) return;
+  const open = b.style.display !== 'none';
+  b.style.display = open ? 'none' : 'block';
+  if (t) t.textContent = open ? '▼' : '▲';
+  if (hint) hint.textContent = open ? '클릭해서 펼치기' : '클릭해서 접기';
 }
 
 const STORAGE_KEY = 'dodo-tools-order';
